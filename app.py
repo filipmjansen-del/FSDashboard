@@ -821,4 +821,5 @@ else:
         st.session_state.selected_industry,
         st.session_state.selected_kpi,
     )
+    
 
