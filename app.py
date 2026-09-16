@@ -5,7 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from data_loader import load_raw_data
-from kpis.registry import get_kpis_by_industry
+from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
 
 # -----------------------------------------------------------------------------
 # Thursday brand palette
