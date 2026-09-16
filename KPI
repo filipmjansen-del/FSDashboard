@@ -1,1 +1,154 @@
 
+"""Industry-specific KPI modules."""
+
+from __future__ import annotations
+
+from kpis.common import calculate_ratio_kpi
+
+KPI = {
+    "name": "Indtjening pr. omkostningskrone",
+    "industry": "Bank",
+    "format": "multiple",
+    "direction": "higher_is_better",
+    "formula_label": "(Res_RGTot_RY + Res_Kreg_RY + Res_Xdi_RY + Res_Rat_RY) / (Res_UPa_RY + Res_ImMa_RY + Res_Xdu_RY + Res_UGn_RY)",
+    "numerator": [
+        "Res_RGTot_RY",
+        "Res_Kreg_RY",
+        "Res_Xdi_RY",
+        "Res_Rat_RY",
+    ],
+    "denominator": [
+        "Res_UPa_RY",
+        "Res_ImMa_RY",
+        "Res_Xdu_RY",
+        "Res_UGn_RY",
+    ],
+}
+
+
+def calculate(raw):
+    return calculate_ratio_kpi(raw, KPI)
+
+"""KPI package for Financial Services Intelligence."""
+
+from __future__ import annotations
+
+import pandas as pd
+
+
+def calculate_ratio_kpi(raw: pd.DataFrame, definition: dict) -> pd.DataFrame:
+    """Calculate a ratio KPI only when every required input exists.
+
+    Missing source attributes are never interpreted as zero. A zero denominator
+    returns a missing KPI value.
+    """
+    numerator_attrs = definition["numerator"]
+    denominator_attrs = definition["denominator"]
+    required = numerator_attrs + denominator_attrs
+
+    df = raw.loc[
+        (raw["Branche"] == definition["industry"]) & raw["Attribute"].isin(required),
+        ["Branche", "ÅR", "regnr", "navn", "Attribute", "Value"],
+    ].copy()
+
+    wide = (
+        df.pivot_table(
+            index=["Branche", "ÅR", "regnr", "navn"],
+            columns="Attribute",
+            values="Value",
+            aggfunc="first",
+        )
+        .reset_index()
+    )
+
+    for attr in required:
+        if attr not in wide.columns:
+            wide[attr] = pd.NA
+
+    complete_mask = wide[required].notna().all(axis=1)
+    numerator = wide[numerator_attrs].sum(axis=1, min_count=len(numerator_attrs))
+    denominator = wide[denominator_attrs].sum(axis=1, min_count=len(denominator_attrs))
+
+    kpi_value = numerator / denominator
+    kpi_value = kpi_value.where(complete_mask & denominator.ne(0))
+
+    result = wide[["Branche", "ÅR", "regnr", "navn"]].copy()
+    result["KPI"] = definition["name"]
+    result["KPI_Value"] = kpi_value
+    result["CompleteInputs"] = complete_mask
+    result["Numerator"] = numerator.where(complete_mask)
+    result["Denominator"] = denominator.where(complete_mask)
+
+    return result.sort_values(["ÅR", "navn"]).reset_index(drop=True)
+
+"""Industry-specific KPI modules."""
+
+"""Industry-specific KPI modules."""
+
+"""Industry-specific KPI modules."""
+
+from __future__ import annotations
+
+import importlib
+import pkgutil
+from collections import OrderedDict
+
+INDUSTRY_PACKAGES = OrderedDict(
+    [
+        ("Bank", "kpis.bank"),
+        ("Realkredit", "kpis.realkredit"),
+        ("Forsikring", "kpis.forsikring"),
+        ("Pension", "kpis.pension"),
+        ("Tværgående pensionskasser", "kpis.tvaergaaende_pensionskasser"),
+    ]
+)
+
+
+def _discover_kpis():
+    registry = {}
+    catalog = {industry: [] for industry in INDUSTRY_PACKAGES}
+
+    for industry, package_name in INDUSTRY_PACKAGES.items():
+        package = importlib.import_module(package_name)
+
+        for module_info in pkgutil.iter_modules(package.__path__):
+            if module_info.name.startswith("_"):
+                continue
+
+            module = importlib.import_module(f"{package_name}.{module_info.name}")
+            if not hasattr(module, "KPI") or not hasattr(module, "calculate"):
+                continue
+
+            definition = dict(module.KPI)
+            name = definition.get("name")
+            module_industry = definition.get("industry")
+
+            if not name:
+                raise ValueError(f"{module.__name__} is missing KPI['name']")
+            if module_industry != industry:
+                raise ValueError(
+                    f"{module.__name__} declares industry '{module_industry}' "
+                    f"but is stored under '{industry}'."
+                )
+            if name in registry:
+                raise ValueError(f"Duplicate KPI name: {name}")
+
+            definition["calculate"] = module.calculate
+            registry[name] = definition
+            catalog[industry].append(name)
+
+    for names in catalog.values():
+        names.sort()
+
+    return registry, catalog
+
+
+KPI_REGISTRY, INDUSTRY_KPI_CATALOG = _discover_kpis()
+
+
+def calculate_kpi(raw, kpi_name: str):
+    if kpi_name not in KPI_REGISTRY:
+        raise KeyError(f"Unknown KPI: {kpi_name}")
+    return KPI_REGISTRY[kpi_name]["calculate"](raw)
+
+"""Industry-specific KPI modules."""
