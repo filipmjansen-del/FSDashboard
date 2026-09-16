@@ -7,14 +7,198 @@ import streamlit as st
 from data_loader import load_raw_data
 from kpi_engine import KPI_DEFINITIONS, calculate_ratio_kpi
 
+# -----------------------------------------------------------------------------
+# Thursday brand palette
+# -----------------------------------------------------------------------------
+WHITE = "#FFFFFF"
+GREY_LIGHT = "#EEEEEE"
+GREY_DARK = "#A1A1A1"
+BLACK = "#000000"
+PURPLE = "#412B48"
+DARK_RED = "#842044"
+COGNAC = "#B25F4D"
+BEIGE = "#DBD4CF"
+BLUE_GREY = "#B8CACE"
+PURPLE_LIGHT = "#8C8AF8"
+ROSE = "#DCB9CA"
+PEACH = "#F5C1AE"
+STONE = "#A9A69F"
+OLIVE = "#877470"
+
+BRAND_SEQUENCE = [PURPLE, DARK_RED, COGNAC, PURPLE_LIGHT, BLUE_GREY, ROSE, OLIVE, PEACH, STONE]
+
 st.set_page_config(
     page_title="Financial Services Intelligence",
     page_icon="📊",
     layout="wide",
 )
 
+# The GitHub repository currently has the data and helper modules in the root.
 DATA_PATH = Path(__file__).parent / "financial_services_long.xlsx"
 KPI_NAME = "Indtjening pr. omkostningskrone"
+
+
+# -----------------------------------------------------------------------------
+# Brand styling for Streamlit UI
+# -----------------------------------------------------------------------------
+st.markdown(
+    f"""
+    <style>
+        :root {{
+            --brand-purple: {PURPLE};
+            --brand-dark-red: {DARK_RED};
+            --brand-cognac: {COGNAC};
+            --brand-beige: {BEIGE};
+            --brand-blue-grey: {BLUE_GREY};
+            --brand-purple-light: {PURPLE_LIGHT};
+            --brand-rose: {ROSE};
+            --brand-peach: {PEACH};
+            --brand-stone: {STONE};
+            --brand-olive: {OLIVE};
+            --brand-grey-light: {GREY_LIGHT};
+            --brand-grey-dark: {GREY_DARK};
+            --brand-black: {BLACK};
+            --brand-white: {WHITE};
+        }}
+
+        /* Main canvas */
+        .stApp {{
+            background-color: {WHITE};
+            color: {BLACK};
+        }}
+
+        .block-container {{
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            max-width: 1450px;
+        }}
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {{
+            color: {PURPLE} !important;
+            letter-spacing: -0.01em;
+        }}
+
+        p, label, .stMarkdown, [data-testid="stCaptionContainer"] {{
+            color: {BLACK};
+        }}
+
+        [data-testid="stCaptionContainer"] p {{
+            color: {GREY_DARK} !important;
+        }}
+
+        /* Sidebar */
+        [data-testid="stSidebar"] {{
+            background-color: {PURPLE};
+            border-right: 0;
+        }}
+
+        [data-testid="stSidebar"] * {{
+            color: {WHITE};
+        }}
+
+        [data-testid="stSidebar"] hr {{
+            border-color: rgba(255,255,255,0.22);
+        }}
+
+        [data-testid="stSidebar"] code {{
+            color: {BLACK} !important;
+            background-color: {BEIGE} !important;
+        }}
+
+        /* Radio controls in sidebar */
+        [data-testid="stSidebar"] [role="radiogroup"] label {{
+            border-radius: 8px;
+            padding: 0.35rem 0.45rem;
+        }}
+
+        [data-testid="stSidebar"] [role="radiogroup"] label:hover {{
+            background: rgba(255,255,255,0.10);
+        }}
+
+        /* Metrics */
+        [data-testid="stMetric"] {{
+            background: {WHITE};
+            border: 1px solid {BEIGE};
+            border-left: 5px solid {PURPLE};
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }}
+
+        [data-testid="stMetricLabel"] {{
+            color: {GREY_DARK} !important;
+        }}
+
+        [data-testid="stMetricValue"] {{
+            color: {PURPLE} !important;
+        }}
+
+        /* Buttons */
+        .stButton > button {{
+            background-color: {PURPLE};
+            color: {WHITE};
+            border: 1px solid {PURPLE};
+            border-radius: 8px;
+        }}
+
+        .stButton > button:hover {{
+            background-color: {DARK_RED};
+            color: {WHITE};
+            border-color: {DARK_RED};
+        }}
+
+        /* Inputs */
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="input"] > div,
+        [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
+            border-color: {BEIGE} !important;
+            background-color: {WHITE} !important;
+        }}
+
+        div[data-baseweb="select"] > div:focus-within,
+        div[data-baseweb="input"] > div:focus-within {{
+            border-color: {PURPLE} !important;
+            box-shadow: 0 0 0 1px {PURPLE} !important;
+        }}
+
+        /* Sliders */
+        [data-testid="stSlider"] [role="slider"] {{
+            background-color: {PURPLE} !important;
+        }}
+
+        /* Expanders */
+        [data-testid="stExpander"] {{
+            border: 1px solid {BEIGE};
+            border-radius: 8px;
+            background: {WHITE};
+        }}
+
+        /* Info / warning boxes */
+        [data-testid="stAlert"] {{
+            border-radius: 8px;
+        }}
+
+        /* Dataframes */
+        [data-testid="stDataFrame"] {{
+            border: 1px solid {BEIGE};
+            border-radius: 8px;
+            overflow: hidden;
+        }}
+
+        /* Horizontal separators */
+        hr {{
+            border-color: {BEIGE};
+        }}
+
+        /* Links */
+        a {{
+            color: {DARK_RED} !important;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 @st.cache_data(show_spinner=False)
@@ -28,6 +212,50 @@ raw, kpi = get_data()
 valid = kpi.dropna(subset=["KPI_Value"]).copy()
 all_years = sorted(int(x) for x in kpi["ÅR"].dropna().unique())
 latest_year = max(all_years)
+
+
+def format_multiple(value):
+    if pd.isna(value):
+        return "–"
+    return f"{value:.2f}x"
+
+
+def brand_plotly(fig, *, legend_title=None):
+    """Apply a consistent Thursday theme to Plotly figures."""
+    fig.update_layout(
+        template="plotly_white",
+        paper_bgcolor=WHITE,
+        plot_bgcolor=WHITE,
+        font=dict(color=BLACK, family="Arial"),
+        title_font=dict(color=PURPLE),
+        legend_title_text=legend_title,
+        legend=dict(
+            bgcolor="rgba(255,255,255,0)",
+            font=dict(color=BLACK),
+        ),
+        margin=dict(l=20, r=20, t=40, b=20),
+        hoverlabel=dict(
+            bgcolor=PURPLE,
+            font_color=WHITE,
+            bordercolor=PURPLE,
+        ),
+    )
+    fig.update_xaxes(
+        showgrid=False,
+        linecolor=BEIGE,
+        tickfont=dict(color=BLACK),
+        title_font=dict(color=GREY_DARK),
+        zeroline=False,
+    )
+    fig.update_yaxes(
+        gridcolor=GREY_LIGHT,
+        linecolor=BEIGE,
+        tickfont=dict(color=BLACK),
+        title_font=dict(color=GREY_DARK),
+        zeroline=False,
+    )
+    return fig
+
 
 st.title("Financial Services Intelligence")
 st.caption("Banking MVP — first KPI implemented from the supplied formula")
@@ -44,13 +272,10 @@ with st.sidebar:
     st.write(KPI_NAME)
     with st.expander("Formula"):
         st.code(KPI_DEFINITIONS[KPI_NAME]["formula_label"], language=None)
-        st.caption("A KPI value is only calculated when all eight required source attributes are present and the denominator is non-zero.")
-
-
-def format_multiple(value):
-    if pd.isna(value):
-        return "–"
-    return f"{value:.2f}x"
+        st.caption(
+            "A KPI value is only calculated when all eight required source attributes "
+            "are present and the denominator is non-zero."
+        )
 
 
 if page == "Bank overview":
@@ -75,8 +300,11 @@ if page == "Bank overview":
         nbins=20,
         labels={"KPI_Value": KPI_NAME},
         hover_data=["navn"],
+        color_discrete_sequence=[PURPLE],
     )
-    fig.update_layout(yaxis_title="Number of banks", xaxis_tickformat=".2f")
+    fig.update_traces(marker_line_color=WHITE, marker_line_width=0.7)
+    fig.update_layout(yaxis_title="Number of banks", xaxis_tickformat=".2f", showlegend=False)
+    brand_plotly(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Sector development")
@@ -84,9 +312,23 @@ if page == "Bank overview":
         valid.groupby("ÅR", as_index=False)
         .agg(Median=("KPI_Value", "median"), Mean=("KPI_Value", "mean"), Banks=("regnr", "nunique"))
     )
-    trend_long = trend.melt(id_vars=["ÅR", "Banks"], value_vars=["Median", "Mean"], var_name="Series", value_name="Value")
-    fig2 = px.line(trend_long, x="ÅR", y="Value", color="Series", markers=True)
+    trend_long = trend.melt(
+        id_vars=["ÅR", "Banks"],
+        value_vars=["Median", "Mean"],
+        var_name="Series",
+        value_name="Value",
+    )
+    fig2 = px.line(
+        trend_long,
+        x="ÅR",
+        y="Value",
+        color="Series",
+        markers=True,
+        color_discrete_map={"Median": PURPLE, "Mean": COGNAC},
+    )
+    fig2.update_traces(line_width=3, marker_size=8)
     fig2.update_layout(yaxis_title=KPI_NAME, xaxis_title=None)
+    brand_plotly(fig2)
     st.plotly_chart(fig2, use_container_width=True)
 
 elif page == "KPI explorer":
@@ -111,8 +353,11 @@ elif page == "KPI explorer":
             color="navn",
             markers=True,
             labels={"KPI_Value": KPI_NAME, "navn": "Bank"},
+            color_discrete_sequence=BRAND_SEQUENCE,
         )
+        fig.update_traces(line_width=2.7, marker_size=7)
         fig.update_layout(xaxis_title=None)
+        brand_plotly(fig, legend_title="Bank")
         st.plotly_chart(fig, use_container_width=True)
 
         table = chart_df.pivot(index="navn", columns="ÅR", values="KPI_Value")
@@ -139,9 +384,23 @@ elif page == "Bank profile":
         c3.metric("Sector median", format_multiple(sector_median))
         c4.metric("Complete years", int(bank_valid["ÅR"].nunique()))
 
-        fig = px.line(bank_valid, x="ÅR", y="KPI_Value", markers=True)
-        fig.add_hline(y=sector_median, line_dash="dash", annotation_text=f"{last_year} sector median")
+        fig = px.line(
+            bank_valid,
+            x="ÅR",
+            y="KPI_Value",
+            markers=True,
+            color_discrete_sequence=[PURPLE],
+        )
+        fig.update_traces(line_width=3, marker_size=8)
+        fig.add_hline(
+            y=sector_median,
+            line_dash="dash",
+            line_color=COGNAC,
+            annotation_text=f"{last_year} sector median",
+            annotation_font_color=COGNAC,
+        )
         fig.update_layout(yaxis_title=KPI_NAME, xaxis_title=None)
+        brand_plotly(fig)
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Underlying calculation — latest available year")
@@ -171,10 +430,21 @@ elif page == "Sector comparison":
             x="KPI_Value",
             y="navn",
             orientation="h",
+            color="Percentile",
+            color_continuous_scale=[
+                [0.0, BEIGE],
+                [0.5, BLUE_GREY],
+                [1.0, PURPLE],
+            ],
             hover_data={"Percentile": ":.0f", "KPI_Value": ":.2f"},
-            labels={"KPI_Value": KPI_NAME, "navn": "Bank"},
+            labels={"KPI_Value": KPI_NAME, "navn": "Bank", "Percentile": "Sector percentile"},
         )
-        fig.update_layout(height=max(500, 24 * len(yr)), yaxis={"categoryorder": "total ascending"})
+        fig.update_layout(
+            height=max(500, 24 * len(yr)),
+            yaxis={"categoryorder": "total ascending"},
+            coloraxis_colorbar=dict(title="Percentile"),
+        )
+        brand_plotly(fig)
         st.plotly_chart(fig, use_container_width=True)
 
         display = yr[["navn", "KPI_Value", "Percentile"]].rename(
@@ -188,7 +458,10 @@ elif page == "Sector comparison":
 
 elif page == "Data quality":
     st.header("Data quality")
-    st.write("This page makes the calculation coverage explicit rather than silently treating missing source attributes as zero.")
+    st.write(
+        "This page makes the calculation coverage explicit rather than silently treating "
+        "missing source attributes as zero."
+    )
 
     coverage = (
         kpi.groupby("ÅR", as_index=False)
