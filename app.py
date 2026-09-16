@@ -5,7 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from data_loader import load_raw_data
-from kpi_engine import KPI_DEFINITIONS, calculate_ratio_kpi
+from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
 
 # -----------------------------------------------------------------------------
 # Thursday brand palette
@@ -35,22 +35,6 @@ st.set_page_config(
 
 # The GitHub repository currently has the data and helper modules in the root.
 DATA_PATH = Path(__file__).parent / "financial_services_long.xlsx"
-
-# -----------------------------------------------------------------------------
-# Navigation catalogue
-# Add new KPI names here after the formula has been defined in kpi_engine.py.
-# The order below is also the order shown in the sidebar.
-# -----------------------------------------------------------------------------
-INDUSTRY_KPI_CATALOG = {
-    "Bank": [
-        "Indtjening pr. omkostningskrone",
-    ],
-    "Realkredit": [],
-    "Forsikring": [],
-    "Pension": [],
-    "Tværgående pensionskasser": [],
-}
-
 
 # -----------------------------------------------------------------------------
 # Brand styling for Streamlit UI
@@ -256,7 +240,7 @@ def get_raw_data():
 @st.cache_data(show_spinner=False)
 def get_kpi_data(kpi_name: str):
     raw_data = get_raw_data()
-    return calculate_ratio_kpi(raw_data, kpi_name)
+    return calculate_kpi(raw_data, kpi_name)
 
 
 raw = get_raw_data()
@@ -327,8 +311,8 @@ def show_navigation_overview():
 
     st.divider()
     st.markdown(
-        "New KPIs can be added under any industry without changing the overall navigation structure. "
-        "Their calculation logic remains in `kpi_engine.py`, while this catalogue controls where they appear."
+        "New KPIs are discovered automatically from the `kpis/` folder. "
+        "Add one KPI file under the relevant industry and it appears in the navigation automatically."
     )
 
 
@@ -341,7 +325,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     st.header(kpi_name)
 
     with st.expander("KPI definition"):
-        st.code(KPI_DEFINITIONS[kpi_name]["formula_label"], language=None)
+        st.code(KPI_REGISTRY[kpi_name]["formula_label"], language=None)
         st.caption(
             "A KPI value is only calculated when all required source attributes are present "
             "and the denominator is non-zero."
