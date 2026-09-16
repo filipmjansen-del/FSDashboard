@@ -1,33 +1,54 @@
 import importlib
 import pkgutil
 
-import kpis
 
-
-INDUSTRIES = [
-    "Bank",
-    "Realkredit",
-    "Forsikring",
-    "Pension",
-    "Tværgående pensionskasser",
-]
-
-PACKAGE_TO_INDUSTRY = {
-    "bank": "Bank",
-    "realkredit": "Realkredit",
-    "forsikring": "Forsikring",
-    "pension": "Pension",
-    "tvaergaaende_pensionskasser": "Tværgående pensionskasser",
+INDUSTRY_PACKAGES = {
+    "Bank": "bank",
+    "Realkredit": "realkredit",
+    "Forsikring": "forsikring",
+    "Pension": "pension",
+    "Tværgående pensionskasser": "tvaergaaende_pensionskasser",
 }
 
 
-def discover_kpis():
-    discovered = []
+KPI_REGISTRY = {}
+INDUSTRY_KPI_CATALOG = {
+    industry: []
+    for industry in INDUSTRY_PACKAGES
+}
 
-    for package_name, industry in PACKAGE_TO_INDUSTRY.items():
-        package = importlib.import_module(f"kpis.{package_name}")
 
-        for module_info in pkgutil.iter_modules(package.__path__):
+def _build_formula_label(module):
+    """
+    Creates a readable formula label automatically for ratio KPIs
+    if NUMERATOR and DENOMINATOR are defined in the KPI module.
+    """
+    numerator = getattr(module, "NUMERATOR", None)
+    denominator = getattr(module, "DENOMINATOR", None)
+
+    if numerator and denominator:
+        numerator_text = " + ".join(numerator)
+        denominator_text = " + ".join(denominator)
+
+        return (
+            f"({numerator_text})\n"
+            f"/\n"
+            f"({denominator_text})"
+        )
+
+    return "Formula definition not provided."
+
+
+def _discover_kpis():
+    for industry, package_name in INDUSTRY_PACKAGES.items():
+
+        package = importlib.import_module(
+            f"kpis.{package_name}"
+        )
+
+        for module_info in pkgutil.iter_modules(
+            package.__path__
+        ):
             if module_info.name.startswith("_"):
                 continue
 
@@ -41,26 +62,38 @@ def discover_kpis():
             if not hasattr(module, "calculate"):
                 continue
 
-            discovered.append(
-                {
-                    **module.KPI_META,
-                    "calculate": module.calculate,
-                }
+            meta = dict(module.KPI_META)
+
+            kpi_name = meta["name"]
+
+            if "formula_label" not in meta:
+                meta["formula_label"] = _build_formula_label(
+                    module
+                )
+
+            meta["calculate"] = module.calculate
+
+            KPI_REGISTRY[kpi_name] = meta
+
+            INDUSTRY_KPI_CATALOG[industry].append(
+                kpi_name
             )
 
-    return discovered
-
-
-def get_kpis_by_industry():
-    result = {industry: [] for industry in INDUSTRIES}
-
-    for kpi in discover_kpis():
-        result[kpi["industry"]].append(kpi)
-
-    for industry in result:
-        result[industry] = sorted(
-            result[industry],
-            key=lambda x: x["name"],
+    for industry in INDUSTRY_KPI_CATALOG:
+        INDUSTRY_KPI_CATALOG[industry] = sorted(
+            INDUSTRY_KPI_CATALOG[industry]
         )
 
-    return result
+
+_discover_kpis()
+
+
+def calculate_kpi(raw_data, kpi_name):
+    if kpi_name not in KPI_REGISTRY:
+        raise KeyError(
+            f"KPI '{kpi_name}' was not found."
+        )
+
+    return KPI_REGISTRY[kpi_name]["calculate"](
+        raw_data
+    )
