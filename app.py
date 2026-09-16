@@ -4,8 +4,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.data_loader import load_raw_data
-from src.kpi_engine import KPI_DEFINITIONS, calculate_ratio_kpi
+from data_loader import load_raw_data
+from kpi_engine import KPI_DEFINITIONS, calculate_ratio_kpi
 
 st.set_page_config(
     page_title="Financial Services Intelligence",
@@ -13,7 +13,7 @@ st.set_page_config(
     layout="wide",
 )
 
-DATA_PATH = Path(__file__).parent / "data" / "financial_services_long.xlsx"
+DATA_PATH = Path(__file__).parent / "financial_services_long.xlsx"
 KPI_NAME = "Indtjening pr. omkostningskrone"
 
 
