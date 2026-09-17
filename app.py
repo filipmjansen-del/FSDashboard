@@ -5,6 +5,11 @@ import plotly.express as px
 import streamlit as st
 
 from data_loader import load_raw_data
+from dashboards.registry import (
+    DASHBOARD_REGISTRY,
+    INDUSTRY_DASHBOARD_CATALOG,
+    render_dashboard,
+)
 from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
 
 WHITE = "#FFFFFF"
@@ -215,6 +220,16 @@ st.markdown(
         a {{
             color: {DARK_RED} !important;
         }}
+
+        .nav-section-label {{
+            color: rgba(255,255,255,0.72);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.35rem;
+            margin-bottom: 0.2rem;
+            font-weight: 700;
+        }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -361,34 +376,46 @@ def brand_plotly(fig, *, legend_title=None):
     return fig
 
 
+def all_industries():
+    ordered = []
+    for industry in list(INDUSTRY_KPI_CATALOG) + list(INDUSTRY_DASHBOARD_CATALOG):
+        if industry not in ordered:
+            ordered.append(industry)
+    return ordered
+
+
 def show_navigation_overview():
     st.header("Navigation overview")
     st.caption(
-        "Choose an industry in the sidebar, then select one of the KPIs available under it."
+        "Choose an industry in the sidebar, then select a KPI or analysis available under it."
     )
 
-    industries = list(INDUSTRY_KPI_CATALOG.items())
+    industries = all_industries()
     first_row = st.columns(3)
     second_row = st.columns(2)
     card_slots = first_row + second_row
 
-    for slot, (industry, kpis) in zip(card_slots, industries):
+    for slot, industry in zip(card_slots, industries):
+        kpis = INDUSTRY_KPI_CATALOG.get(industry, [])
+        dashboards = INDUSTRY_DASHBOARD_CATALOG.get(industry, [])
+
         with slot:
             with st.container(border=True):
                 st.subheader(industry)
-                if kpis:
-                    for kpi_name in kpis:
-                        st.markdown(f"**{kpi_name}**")
-                    kpi_word = "KPI" if len(kpis) == 1 else "KPIs"
-                    st.caption(f"{len(kpis)} {kpi_word} available")
-                else:
-                    st.caption("No KPIs added yet")
+                st.caption(f"{len(kpis)} KPI'er · {len(dashboards)} analyser")
 
-    st.divider()
-    st.markdown(
-        "New KPIs are discovered automatically from the `kpis/` folder. "
-        "Add one KPI file under the relevant industry and it appears in the navigation automatically."
-    )
+                if kpis:
+                    st.markdown("**KPI'er**")
+                    for kpi_name in kpis:
+                        st.markdown(f"• {kpi_name}")
+
+                if dashboards:
+                    st.markdown("**Analyser**")
+                    for dashboard_name in dashboards:
+                        st.markdown(f"• {dashboard_name}")
+
+                if not kpis and not dashboards:
+                    st.caption("No content added yet")
 
 
 def show_kpi_workspace(industry: str, kpi_name: str):
@@ -409,7 +436,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     entity_singular, entity_plural = get_entity_labels(meta, industry)
     direction = meta.get("direction", "neutral")
 
-    st.caption(f"{industry}  /  {kpi_name}")
+    st.caption(f"{industry}  /  KPI  /  {kpi_name}")
     st.header(kpi_name)
 
     with st.expander("KPI definition"):
@@ -763,11 +790,24 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         )
 
 
+def show_dashboard_workspace(industry: str, dashboard_name: str):
+    meta = DASHBOARD_REGISTRY[dashboard_name]
+    st.caption(f"{industry}  /  Analyse  /  {dashboard_name}")
+
+    if meta.get("description"):
+        st.caption(meta["description"])
+
+    render_dashboard(get_raw_data(), dashboard_name)
+
+
 if "selected_industry" not in st.session_state:
     st.session_state.selected_industry = None
 
-if "selected_kpi" not in st.session_state:
-    st.session_state.selected_kpi = None
+if "selected_view_type" not in st.session_state:
+    st.session_state.selected_view_type = None
+
+if "selected_view_name" not in st.session_state:
+    st.session_state.selected_view_name = None
 
 st.title("Financial Services Intelligence")
 st.caption("Danish financial services research and benchmarking")
@@ -781,45 +821,66 @@ with st.sidebar:
         use_container_width=True,
     ):
         st.session_state.selected_industry = None
-        st.session_state.selected_kpi = None
+        st.session_state.selected_view_type = None
+        st.session_state.selected_view_name = None
 
     st.divider()
 
-    for industry, kpis in INDUSTRY_KPI_CATALOG.items():
+    for industry in all_industries():
+        kpis = INDUSTRY_KPI_CATALOG.get(industry, [])
+        dashboards = INDUSTRY_DASHBOARD_CATALOG.get(industry, [])
+
         is_active_industry = st.session_state.selected_industry == industry
-        should_expand = (
-            is_active_industry
-            or (
-                industry == "Bank"
-                and st.session_state.selected_kpi is None
-            )
+        should_expand = is_active_industry or (
+            industry == "Bank" and st.session_state.selected_view_name is None
         )
 
         with st.expander(industry, expanded=should_expand):
-            if not kpis:
+            st.markdown('<div class="nav-section-label">KPI\'er</div>', unsafe_allow_html=True)
+
+            if kpis:
+                for kpi_name in kpis:
+                    if st.button(
+                        kpi_name,
+                        key=f"nav_kpi_{industry}_{kpi_name}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.selected_industry = industry
+                        st.session_state.selected_view_type = "kpi"
+                        st.session_state.selected_view_name = kpi_name
+            else:
                 st.caption("No KPIs added yet")
-                continue
 
-            for kpi_name in kpis:
-                if st.button(
-                    kpi_name,
-                    key=f"nav_{industry}_{kpi_name}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_industry = industry
-                    st.session_state.selected_kpi = kpi_name
+            st.markdown('<div class="nav-section-label">Analyser</div>', unsafe_allow_html=True)
 
-    if st.session_state.selected_kpi:
+            if dashboards:
+                for dashboard_name in dashboards:
+                    if st.button(
+                        dashboard_name,
+                        key=f"nav_dashboard_{industry}_{dashboard_name}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.selected_industry = industry
+                        st.session_state.selected_view_type = "dashboard"
+                        st.session_state.selected_view_name = dashboard_name
+            else:
+                st.caption("No analyses added yet")
+
+    if st.session_state.selected_view_name:
         st.divider()
-        st.caption("Selected KPI")
-        st.write(st.session_state.selected_kpi)
+        label = "Selected KPI" if st.session_state.selected_view_type == "kpi" else "Selected analysis"
+        st.caption(label)
+        st.write(st.session_state.selected_view_name)
 
-if st.session_state.selected_kpi is None:
+if st.session_state.selected_view_name is None:
     show_navigation_overview()
-else:
+elif st.session_state.selected_view_type == "kpi":
     show_kpi_workspace(
         st.session_state.selected_industry,
-        st.session_state.selected_kpi,
+        st.session_state.selected_view_name,
     )
-    
-
+elif st.session_state.selected_view_type == "dashboard":
+    show_dashboard_workspace(
+        st.session_state.selected_industry,
+        st.session_state.selected_view_name,
+    )
