@@ -296,4 +296,3 @@ def render(raw: pd.DataFrame):
 Hver komponent divideres derefter med summen af de seks indtægtskomponenter for den samme bank og det samme år.
 """
         )
- 
