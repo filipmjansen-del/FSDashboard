@@ -124,7 +124,6 @@ st.markdown(
             background: rgba(255,255,255,0.06) !important;
         }}
 
-        /* Expanded industry (Bank, Forsikring, etc.) */
         [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary {{
             background: {DARK_RED} !important;
             border-radius: 7px 7px 0 0 !important;
@@ -457,6 +456,48 @@ def navigate_to(industry: str, view_type: str, view_name: str):
     st.rerun()
 
 
+def show_kpi_definition(meta):
+    formula_label = meta.get("formula_label", "Formeldefinition ikke angivet.")
+    description = meta.get("description")
+    interpretation = meta.get("interpretation")
+    direction = meta.get("direction", "neutral")
+    direction_explanation = meta.get("direction_explanation")
+    caveat = meta.get("caveat")
+
+    direction_labels = {
+        "higher_is_better": "Højere er som udgangspunkt bedre",
+        "lower_is_better": "Lavere er som udgangspunkt bedre",
+        "neutral": "Ingen entydig retning",
+    }
+
+    with st.expander("KPI-definition"):
+        st.markdown("**Formel**")
+        st.code(formula_label, language=None)
+
+        if description:
+            st.markdown("**Hvad måler KPI'en?**")
+            st.write(description)
+
+        if interpretation:
+            st.markdown("**Hvordan skal den fortolkes?**")
+            st.write(interpretation)
+
+        st.markdown("**Retning**")
+        st.write(direction_labels.get(direction, "Ingen entydig retning"))
+
+        if direction_explanation:
+            st.caption(direction_explanation)
+
+        if caveat:
+            st.markdown("**Vigtigt at være opmærksom på**")
+            st.write(caveat)
+
+        st.caption(
+            "Manglende nødvendige input behandles ikke som nul. "
+            "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil."
+        )
+
+
 def show_navigation_overview():
     raw = get_raw_data()
     industries = all_industries()
@@ -467,9 +508,6 @@ def show_navigation_overview():
         "og gå direkte til den analyse, du har brug for."
     )
 
-    # ------------------------------------------------------------------
-    # 1. Overordnet status
-    # ------------------------------------------------------------------
     valid_years = pd.to_numeric(raw["ÅR"], errors="coerce").dropna()
     latest_year = int(valid_years.max()) if not valid_years.empty else None
 
@@ -481,7 +519,6 @@ def show_navigation_overview():
             .shape[0]
         )
     else:
-        latest_raw = raw.iloc[0:0].copy()
         latest_company_count = 0
 
     total_kpis = sum(len(INDUSTRY_KPI_CATALOG.get(i, [])) for i in industries)
@@ -498,9 +535,6 @@ def show_navigation_overview():
 
     st.divider()
 
-    # ------------------------------------------------------------------
-    # 2. KPI-puls
-    # ------------------------------------------------------------------
     st.subheader("KPI-puls")
     st.caption(
         "Vælg et marked og få et hurtigt snapshot af de seneste sektormedianer. "
@@ -579,9 +613,6 @@ def show_navigation_overview():
 
     st.divider()
 
-    # ------------------------------------------------------------------
-    # 3. Hurtig adgang
-    # ------------------------------------------------------------------
     st.subheader("Hurtig adgang")
     st.caption(
         "Gå direkte til en KPI eller analyse uden først at navigere gennem sidepanelet."
@@ -644,9 +675,6 @@ def show_navigation_overview():
 
     st.divider()
 
-    # ------------------------------------------------------------------
-    # 4. Datagrundlag
-    # ------------------------------------------------------------------
     st.subheader("Datagrundlag")
     st.caption(
         "Udviklingen i antal selskaber med regnskabsdata i datasættet samt status pr. marked."
@@ -736,9 +764,6 @@ def show_navigation_overview():
 
     st.divider()
 
-    # ------------------------------------------------------------------
-    # 5. Markedskort
-    # ------------------------------------------------------------------
     st.subheader("Markeder")
     st.caption(
         "Et samlet overblik over hvilke markeder, KPI'er og analyser der allerede er tilgængelige."
@@ -821,15 +846,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     st.caption(f"{industry}  /  KPI  /  {kpi_name}")
     st.header(kpi_name)
 
-    with st.expander("KPI-definition"):
-        st.code(
-            meta.get("formula_label", "Formeldefinition ikke angivet."),
-            language=None,
-        )
-        st.caption(
-            "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil. "
-            "Manglende nødvendige input behandles ikke som nul."
-        )
+    show_kpi_definition(meta)
 
     overview_tab, explorer_tab, profile_tab, comparison_tab, quality_tab = st.tabs(
         [
@@ -1294,4 +1311,3 @@ elif st.session_state.selected_view_type == "dashboard":
         st.session_state.selected_industry,
         st.session_state.selected_view_name,
     )
-
