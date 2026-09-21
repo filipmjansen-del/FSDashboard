@@ -11,6 +11,26 @@ KPI_META = {
     "formula_label": (
         "(Bal_BO_Autd + Bal_BO_Auta) / Bal_BO_PEekTot"
     ),
+    "description": (
+        "Måler størrelsen af bankens samlede udlån i forhold til dens "
+        "egenkapital."
+    ),
+    "interpretation": (
+        "Nøgletallet giver et billede af, hvor stor en udlånsportefølje "
+        "banken understøtter med sin egenkapital. Det kan dermed anvendes "
+        "som et simpelt mål for balancens gearing og bankens udlånsintensitet."
+    ),
+    "direction_explanation": (
+        "Hverken højere eller lavere er entydigt bedre. En høj værdi kan "
+        "indikere en mere intensiv anvendelse af egenkapitalen, men også "
+        "større gearing og højere følsomhed over for tab på udlån."
+    ),
+    "caveat": (
+        "Nøgletallet tager ikke højde for forskelle i kreditrisiko, "
+        "sikkerhedsstillelse, risikovægtede aktiver eller regulatoriske "
+        "kapitalkrav. Banker med samme nøgletal kan derfor have meget "
+        "forskellige risikoprofiler."
+    ),
 }
 
 LOAN_ATTRIBUTES = ["Bal_BO_Autd", "Bal_BO_Auta"]
