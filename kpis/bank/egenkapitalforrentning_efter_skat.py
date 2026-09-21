@@ -7,10 +7,28 @@ KPI_META = {
     "slug": "egenkapitalforrentning_efter_skat",
     "display_format": "percentage",
     "decimals": 1,
-    "direction": "neutral",
+    "direction": "higher_is_better",
     "formula_label": (
         "(Res_RP_RY * 100) / "
         "((Bal_BO_PEekTot året før + Bal_BO_PEekTot) / 2)"
+    ),
+    "description": (
+        "Måler bankens resultat efter skat i forhold til den gennemsnitlige "
+        "egenkapital i perioden."
+    ),
+    "interpretation": (
+        "Nøgletallet viser det afkast, banken skaber til ejerne på den kapital, "
+        "der er bundet i virksomheden. Det gør nøgletallet velegnet til at "
+        "sammenligne profitabilitet på tværs af banker og over tid."
+    ),
+    "direction_explanation": (
+        "Højere er som udgangspunkt bedre, da det indikerer et højere afkast "
+        "på egenkapitalen."
+    ),
+    "caveat": (
+        "En høj egenkapitalforrentning kan både skyldes stærk indtjening og "
+        "en relativt lav egenkapitalbase. Nøgletallet bør derfor vurderes "
+        "sammen med bankens kapitalisering og risikoprofil."
     ),
 }
 
