@@ -126,20 +126,70 @@ st.markdown(
 
         [data-testid="stSidebar"] .stButton > button {{
             width: 100%;
-            background: rgba(255,255,255,0.07);
-            color: {WHITE};
-            border: 1px solid rgba(255,255,255,0.18);
             border-radius: 7px;
             text-align: left;
             justify-content: flex-start;
             white-space: normal;
             min-height: 2.45rem;
+            box-shadow: none !important;
         }}
 
-        [data-testid="stSidebar"] .stButton > button:hover {{
-            background: {DARK_RED};
-            color: {WHITE};
-            border-color: {DARK_RED};
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"] {{
+            background: rgba(255,255,255,0.07) !important;
+            color: {WHITE} !important;
+            border: 1px solid rgba(255,255,255,0.18) !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"] p,
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"] span {{
+            color: {WHITE} !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {{
+            background: rgba(255,255,255,0.14) !important;
+            color: {WHITE} !important;
+            border-color: rgba(255,255,255,0.30) !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="primary"] {{
+            background: {DARK_RED} !important;
+            color: {WHITE} !important;
+            border: 1px solid {DARK_RED} !important;
+            font-weight: 700 !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="primary"] p,
+        [data-testid="stSidebar"] .stButton > button[kind="primary"] span {{
+            color: {WHITE} !important;
+            font-weight: 700 !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {{
+            background: {COGNAC} !important;
+            color: {WHITE} !important;
+            border-color: {COGNAC} !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button:focus,
+        [data-testid="stSidebar"] .stButton > button:focus-visible {{
+            outline: none !important;
+            box-shadow: none !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="primary"]:active,
+        [data-testid="stSidebar"] .stButton > button[kind="primary"]:focus,
+        [data-testid="stSidebar"] .stButton > button[kind="primary"]:focus-visible {{
+            background: {DARK_RED} !important;
+            color: {WHITE} !important;
+            border-color: {DARK_RED} !important;
+        }}
+
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"]:active,
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"]:focus,
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"]:focus-visible {{
+            background: rgba(255,255,255,0.07) !important;
+            color: {WHITE} !important;
+            border-color: rgba(255,255,255,0.18) !important;
         }}
 
         [data-testid="stMetric"] {{
@@ -450,13 +500,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         )
 
     overview_tab, explorer_tab, profile_tab, comparison_tab, quality_tab = st.tabs(
-        [
-            "Overblik",
-            "Udforsk",
-            "Selskabsprofil",
-            "Sektorsammenligning",
-            "Datakvalitet",
-        ]
+        ["Overblik", "Udforsk", "Selskabsprofil", "Sektorsammenligning", "Datakvalitet"]
     )
 
     with overview_tab:
@@ -556,7 +600,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
         if chart_df.empty:
             st.info(
-                f"Vælg mindst ét {entity_singular.lower()} "
+                f"Vælg mindst én {entity_singular.lower()} "
                 "med tilgængelige KPI-observationer i den valgte periode."
             )
         else:
@@ -774,9 +818,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
             hide_index=True,
         )
 
-        st.subheader(
-            f"{entity_singular}-år med manglende KPI-input"
-        )
+        st.subheader(f"{entity_singular}-år med manglende KPI-input")
 
         missing = (
             kpi[kpi["KPI_Value"].isna()][["ÅR", "regnr", "navn"]]
@@ -815,14 +857,18 @@ st.caption("Analyse og benchmarking af den danske finansielle sektor")
 with st.sidebar:
     st.header("Navigation")
 
+    overview_active = st.session_state.selected_view_name is None
+
     if st.button(
         "Navigationsoversigt",
         key="nav_overview",
         use_container_width=True,
+        type="primary" if overview_active else "secondary",
     ):
         st.session_state.selected_industry = None
         st.session_state.selected_view_type = None
         st.session_state.selected_view_name = None
+        st.rerun()
 
     st.divider()
 
@@ -836,33 +882,55 @@ with st.sidebar:
         )
 
         with st.expander(industry, expanded=should_expand):
-            st.markdown('<div class="nav-section-label">KPI\'er</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="nav-section-label">KPI\'er</div>',
+                unsafe_allow_html=True,
+            )
 
             if kpis:
                 for kpi_name in kpis:
+                    is_active = (
+                        st.session_state.selected_view_type == "kpi"
+                        and st.session_state.selected_industry == industry
+                        and st.session_state.selected_view_name == kpi_name
+                    )
+
                     if st.button(
                         kpi_name,
                         key=f"nav_kpi_{industry}_{kpi_name}",
                         use_container_width=True,
+                        type="primary" if is_active else "secondary",
                     ):
                         st.session_state.selected_industry = industry
                         st.session_state.selected_view_type = "kpi"
                         st.session_state.selected_view_name = kpi_name
+                        st.rerun()
             else:
                 st.caption("Ingen KPI'er tilføjet endnu")
 
-            st.markdown('<div class="nav-section-label">Analyser</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="nav-section-label">Analyser</div>',
+                unsafe_allow_html=True,
+            )
 
             if dashboards:
                 for dashboard_name in dashboards:
+                    is_active = (
+                        st.session_state.selected_view_type == "dashboard"
+                        and st.session_state.selected_industry == industry
+                        and st.session_state.selected_view_name == dashboard_name
+                    )
+
                     if st.button(
                         dashboard_name,
                         key=f"nav_dashboard_{industry}_{dashboard_name}",
                         use_container_width=True,
+                        type="primary" if is_active else "secondary",
                     ):
                         st.session_state.selected_industry = industry
                         st.session_state.selected_view_type = "dashboard"
                         st.session_state.selected_view_name = dashboard_name
+                        st.rerun()
             else:
                 st.caption("Ingen analyser tilføjet endnu")
 
