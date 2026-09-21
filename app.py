@@ -124,6 +124,22 @@ st.markdown(
             background: rgba(255,255,255,0.06) !important;
         }}
 
+        /* Expanded industry (Bank, Forsikring, etc.) */
+        [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary {{
+            background: {DARK_RED} !important;
+            border-radius: 7px 7px 0 0 !important;
+        }}
+
+        [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary,
+        [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary * {{
+            color: {WHITE} !important;
+            font-weight: 700 !important;
+        }}
+
+        [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary:hover {{
+            background: {COGNAC} !important;
+        }}
+
         [data-testid="stSidebar"] .stButton > button {{
             width: 100%;
             border-radius: 7px;
