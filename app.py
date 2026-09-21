@@ -40,7 +40,7 @@ BRAND_SEQUENCE = [
 ]
 
 st.set_page_config(
-    page_title="Financial Services Intelligence",
+    page_title="Finansiel Sektoranalyse",
     page_icon="📊",
     layout="wide",
 )
@@ -247,22 +247,22 @@ def get_kpi_data(kpi_name: str):
 
 
 DEFAULT_ENTITY_LABELS = {
-    "Bank": {"singular": "Bank", "plural": "Banks"},
+    "Bank": {"singular": "Bank", "plural": "Banker"},
     "Realkredit": {
-        "singular": "Mortgage credit institution",
-        "plural": "Mortgage credit institutions",
+        "singular": "Realkreditinstitut",
+        "plural": "Realkreditinstitutter",
     },
     "Forsikring": {
-        "singular": "Insurance company",
-        "plural": "Insurance companies",
+        "singular": "Forsikringsselskab",
+        "plural": "Forsikringsselskaber",
     },
     "Pension": {
-        "singular": "Pension company",
-        "plural": "Pension companies",
+        "singular": "Pensionsselskab",
+        "plural": "Pensionsselskaber",
     },
     "Tværgående pensionskasser": {
-        "singular": "Pension fund",
-        "plural": "Pension funds",
+        "singular": "Pensionskasse",
+        "plural": "Pensionskasser",
     },
 }
 
@@ -270,7 +270,7 @@ DEFAULT_ENTITY_LABELS = {
 def get_entity_labels(meta, industry):
     defaults = DEFAULT_ENTITY_LABELS.get(
         industry,
-        {"singular": "Company", "plural": "Companies"},
+        {"singular": "Selskab", "plural": "Selskaber"},
     )
     return (
         meta.get("entity_label_singular", defaults["singular"]),
@@ -294,9 +294,9 @@ def format_kpi_value(value, meta):
     if display_format == "dkk":
         return f"DKK {value:,.{decimals}f}"
     if display_format == "dkk_million":
-        return f"DKK {value / 1_000_000:,.{decimals}f}m"
+        return f"DKK {value / 1_000_000:,.{decimals}f} mio."
     if display_format == "dkk_billion":
-        return f"DKK {value / 1_000_000_000:,.{decimals}f}bn"
+        return f"DKK {value / 1_000_000_000:,.{decimals}f} mia."
 
     return f"{value:,.{decimals}f}"
 
@@ -385,9 +385,9 @@ def all_industries():
 
 
 def show_navigation_overview():
-    st.header("Navigation overview")
+    st.header("Navigationsoversigt")
     st.caption(
-        "Choose an industry in the sidebar, then select a KPI or analysis available under it."
+        "Vælg en branche i sidepanelet, og vælg derefter en tilgængelig KPI eller analyse."
     )
 
     industries = all_industries()
@@ -415,7 +415,7 @@ def show_navigation_overview():
                         st.markdown(f"• {dashboard_name}")
 
                 if not kpis and not dashboards:
-                    st.caption("No content added yet")
+                    st.caption("Intet indhold tilføjet endnu")
 
 
 def show_kpi_workspace(industry: str, kpi_name: str):
@@ -423,14 +423,14 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     kpi = get_kpi_data(kpi_name)
 
     if kpi.empty:
-        st.warning("This KPI currently contains no observations.")
+        st.warning("Denne KPI indeholder i øjeblikket ingen observationer.")
         return
 
     valid = kpi.dropna(subset=["KPI_Value"]).copy()
     all_years = sorted(int(x) for x in kpi["ÅR"].dropna().unique())
 
     if not all_years:
-        st.warning("No years are available for this KPI.")
+        st.warning("Der er ingen tilgængelige år for denne KPI.")
         return
 
     entity_singular, entity_plural = get_entity_labels(meta, industry)
@@ -439,29 +439,29 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     st.caption(f"{industry}  /  KPI  /  {kpi_name}")
     st.header(kpi_name)
 
-    with st.expander("KPI definition"):
+    with st.expander("KPI-definition"):
         st.code(
-            meta.get("formula_label", "Formula definition not provided."),
+            meta.get("formula_label", "Formeldefinition ikke angivet."),
             language=None,
         )
         st.caption(
-            "A KPI value is calculated according to the rules defined in the KPI file. "
-            "Missing required inputs are not treated as zero."
+            "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil. "
+            "Manglende nødvendige input behandles ikke som nul."
         )
 
     overview_tab, explorer_tab, profile_tab, comparison_tab, quality_tab = st.tabs(
         [
-            "Overview",
-            "Explorer",
-            "Company profile",
-            "Sector comparison",
-            "Data quality",
+            "Overblik",
+            "Udforsk",
+            "Selskabsprofil",
+            "Sektorsammenligning",
+            "Datakvalitet",
         ]
     )
 
     with overview_tab:
         selected_year = st.selectbox(
-            "Year",
+            "År",
             all_years,
             index=len(all_years) - 1,
             key=f"overview_year_{industry}_{kpi_name}",
@@ -474,12 +474,12 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         mean = yr["KPI_Value"].mean()
 
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric(f"{entity_plural} represented", represented)
-        c2.metric(f"{entity_plural} with complete KPI", complete)
-        c3.metric("Sector median", format_kpi_value(median, meta))
-        c4.metric("Sector mean", format_kpi_value(mean, meta))
+        c1.metric(f"{entity_plural} repræsenteret", represented)
+        c2.metric(f"{entity_plural} med komplet KPI", complete)
+        c3.metric("Sektormedian", format_kpi_value(median, meta))
+        c4.metric("Sektorgennemsnit", format_kpi_value(mean, meta))
 
-        st.subheader(f"Distribution across {entity_plural.lower()}")
+        st.subheader(f"Fordeling på tværs af {entity_plural.lower()}")
 
         fig = px.histogram(
             yr,
@@ -491,42 +491,42 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         )
         fig.update_traces(marker_line_color=WHITE, marker_line_width=0.7)
         fig.update_layout(
-            yaxis_title=f"Number of {entity_plural.lower()}",
+            yaxis_title=f"Antal {entity_plural.lower()}",
             showlegend=False,
         )
         brand_plotly(fig)
         apply_kpi_axis_format(fig, meta, axis="x")
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Sector development")
+        st.subheader("Sektorudvikling")
 
         trend = (
             valid.groupby("ÅR", as_index=False)
             .agg(
                 Median=("KPI_Value", "median"),
-                Mean=("KPI_Value", "mean"),
-                Companies=("regnr", "nunique"),
+                Gennemsnit=("KPI_Value", "mean"),
+                Selskaber=("regnr", "nunique"),
             )
         )
 
         trend_long = trend.melt(
-            id_vars=["ÅR", "Companies"],
-            value_vars=["Median", "Mean"],
-            var_name="Series",
-            value_name="Value",
+            id_vars=["ÅR", "Selskaber"],
+            value_vars=["Median", "Gennemsnit"],
+            var_name="Serie",
+            value_name="Værdi",
         )
 
         fig2 = px.line(
             trend_long,
             x="ÅR",
-            y="Value",
-            color="Series",
+            y="Værdi",
+            color="Serie",
             markers=True,
-            color_discrete_map={"Median": PURPLE, "Mean": COGNAC},
+            color_discrete_map={"Median": PURPLE, "Gennemsnit": COGNAC},
         )
         fig2.update_traces(line_width=3, marker_size=8)
         fig2.update_layout(yaxis_title=kpi_name, xaxis_title=None)
-        brand_plotly(fig2)
+        brand_plotly(fig2, legend_title="Serie")
         apply_kpi_axis_format(fig2, meta, axis="y")
         st.plotly_chart(fig2, use_container_width=True)
 
@@ -542,7 +542,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         )
 
         year_range = st.slider(
-            "Years",
+            "År",
             min(all_years),
             max(all_years),
             (min(all_years), max(all_years)),
@@ -556,8 +556,8 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
         if chart_df.empty:
             st.info(
-                f"Select at least one {entity_singular.lower()} "
-                "with available KPI observations in the chosen period."
+                f"Vælg mindst ét {entity_singular.lower()} "
+                "med tilgængelige KPI-observationer i den valgte periode."
             )
         else:
             fig = px.line(
@@ -602,7 +602,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
         if entity_valid.empty:
             st.warning(
-                f"No complete observations are available for this KPI for the selected "
+                f"Der er ingen komplette observationer for denne KPI for det valgte "
                 f"{entity_singular.lower()}."
             )
         else:
@@ -612,10 +612,10 @@ def show_kpi_workspace(industry: str, kpi_name: str):
             sector_median = sector_year["KPI_Value"].median()
 
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Latest available year", last_year)
+            c1.metric("Seneste tilgængelige år", last_year)
             c2.metric(kpi_name, format_kpi_value(last_row["KPI_Value"], meta))
-            c3.metric("Sector median", format_kpi_value(sector_median, meta))
-            c4.metric("Complete years", int(entity_valid["ÅR"].nunique()))
+            c3.metric("Sektormedian", format_kpi_value(sector_median, meta))
+            c4.metric("År med komplette data", int(entity_valid["ÅR"].nunique()))
 
             fig = px.line(
                 entity_valid,
@@ -629,7 +629,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 y=sector_median,
                 line_dash="dash",
                 line_color=COGNAC,
-                annotation_text=f"{last_year} sector median",
+                annotation_text=f"{last_year} sektormedian",
                 annotation_font_color=COGNAC,
             )
             fig.update_layout(yaxis_title=kpi_name, xaxis_title=None)
@@ -641,22 +641,22 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
             if "Numerator" in last_row.index:
                 calculation_rows.append(
-                    {"Item": "Numerator", "Value": last_row["Numerator"]}
+                    {"Element": "Tæller", "Værdi": last_row["Numerator"]}
                 )
 
             if "Denominator" in last_row.index:
                 calculation_rows.append(
-                    {"Item": "Denominator", "Value": last_row["Denominator"]}
+                    {"Element": "Nævner", "Værdi": last_row["Denominator"]}
                 )
 
             calculation_rows.append(
                 {
-                    "Item": kpi_name,
-                    "Value": format_kpi_value(last_row["KPI_Value"], meta),
+                    "Element": kpi_name,
+                    "Værdi": format_kpi_value(last_row["KPI_Value"], meta),
                 }
             )
 
-            st.subheader("Underlying calculation — latest available year")
+            st.subheader("Underliggende beregning – seneste tilgængelige år")
             st.dataframe(
                 pd.DataFrame(calculation_rows),
                 use_container_width=True,
@@ -665,7 +665,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
     with comparison_tab:
         selected_year = st.selectbox(
-            "Year",
+            "År",
             all_years,
             index=len(all_years) - 1,
             key=f"comparison_year_{industry}_{kpi_name}",
@@ -674,7 +674,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         yr = valid[valid["ÅR"] == selected_year].copy()
 
         if yr.empty:
-            st.info("No complete KPI observations for the selected year.")
+            st.info("Der er ingen komplette KPI-observationer for det valgte år.")
         else:
             if direction == "higher_is_better":
                 yr["PerformancePercentile"] = (
@@ -709,13 +709,13 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 labels={
                     "KPI_Value": kpi_name,
                     "navn": entity_singular,
-                    "PerformancePercentile": "Performance percentile",
+                    "PerformancePercentile": "Percentil",
                 },
             )
             fig.update_layout(
                 height=max(500, 24 * len(yr)),
                 yaxis={"categoryorder": "total ascending"},
-                coloraxis_colorbar=dict(title="Percentile"),
+                coloraxis_colorbar=dict(title="Percentil"),
             )
             brand_plotly(fig)
             apply_kpi_axis_format(fig, meta, axis="x")
@@ -727,7 +727,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 columns={
                     "navn": entity_singular,
                     "KPI_Value": kpi_name,
-                    "PerformancePercentile": "Performance percentile",
+                    "PerformancePercentile": "Percentil",
                 }
             )
 
@@ -735,7 +735,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 display.style.format(
                     {
                         kpi_name: lambda value: format_kpi_value(value, meta),
-                        "Performance percentile": "{:.0f}",
+                        "Percentil": "{:.0f}",
                     }
                 ),
                 use_container_width=True,
@@ -744,8 +744,8 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
     with quality_tab:
         st.write(
-            "This page makes calculation coverage explicit rather than silently treating "
-            "missing source attributes as zero."
+            "Denne side viser beregningsdækningen eksplicit i stedet for stiltiende at "
+            "behandle manglende kilde-attributter som nul."
         )
 
         coverage = (
@@ -762,20 +762,20 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
         coverage = coverage.rename(
             columns={
-                "EntitiesRepresented": f"{entity_plural} represented",
-                "CompleteKPI": "Complete KPI observations",
-                "CoveragePct": "Coverage",
+                "EntitiesRepresented": f"{entity_plural} repræsenteret",
+                "CompleteKPI": "Komplette KPI-observationer",
+                "CoveragePct": "Dækning",
             }
         )
 
         st.dataframe(
-            coverage.style.format({"Coverage": "{:.1f}%"}),
+            coverage.style.format({"Dækning": "{:.1f}%"}),
             use_container_width=True,
             hide_index=True,
         )
 
         st.subheader(
-            f"{entity_singular}-year observations with missing KPI inputs"
+            f"{entity_singular}-år med manglende KPI-input"
         )
 
         missing = (
@@ -809,14 +809,14 @@ if "selected_view_type" not in st.session_state:
 if "selected_view_name" not in st.session_state:
     st.session_state.selected_view_name = None
 
-st.title("Financial Services Intelligence")
-st.caption("Danish financial services research and benchmarking")
+st.title("Finansiel Sektoranalyse")
+st.caption("Analyse og benchmarking af den danske finansielle sektor")
 
 with st.sidebar:
     st.header("Navigation")
 
     if st.button(
-        "Navigation overview",
+        "Navigationsoversigt",
         key="nav_overview",
         use_container_width=True,
     ):
@@ -849,7 +849,7 @@ with st.sidebar:
                         st.session_state.selected_view_type = "kpi"
                         st.session_state.selected_view_name = kpi_name
             else:
-                st.caption("No KPIs added yet")
+                st.caption("Ingen KPI'er tilføjet endnu")
 
             st.markdown('<div class="nav-section-label">Analyser</div>', unsafe_allow_html=True)
 
@@ -864,11 +864,15 @@ with st.sidebar:
                         st.session_state.selected_view_type = "dashboard"
                         st.session_state.selected_view_name = dashboard_name
             else:
-                st.caption("No analyses added yet")
+                st.caption("Ingen analyser tilføjet endnu")
 
     if st.session_state.selected_view_name:
         st.divider()
-        label = "Selected KPI" if st.session_state.selected_view_type == "kpi" else "Selected analysis"
+        label = (
+            "Valgt KPI"
+            if st.session_state.selected_view_type == "kpi"
+            else "Valgt analyse"
+        )
         st.caption(label)
         st.write(st.session_state.selected_view_name)
 
