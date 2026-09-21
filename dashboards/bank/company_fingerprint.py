@@ -6,7 +6,7 @@ from kpis.registry import KPI_REGISTRY, calculate_kpi
 
 
 DASHBOARD_META = {
-    "name": "Company fingerprint",
+    "name": "Selskabsanalyse",
     "industry": "Bank",
     "slug": "company_fingerprint",
     "description": "Sammenlign en banks KPI-profil med sektoren eller en gemt peer group.",
