@@ -1,10 +1,8 @@
-from pathlib import Path
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from data_loader import load_raw_data
+from data.access import load_financial_services_data
 from dashboards.registry import (
     DASHBOARD_REGISTRY,
     INDUSTRY_DASHBOARD_CATALOG,
@@ -24,8 +22,6 @@ st.set_page_config(
     page_icon="📊",
     layout="wide",
 )
-
-DATA_PATH = Path(__file__).parent / "financial_services_long.xlsx"
 
 apply_theme(st)
 st.markdown(
@@ -284,7 +280,7 @@ st.markdown(
 
 @st.cache_data(show_spinner=False)
 def get_raw_data():
-    return load_raw_data(DATA_PATH)
+    return load_financial_services_data()
 
 
 @st.cache_data(show_spinner=False)
