@@ -4,7 +4,7 @@ import streamlit as st
 
 
 DASHBOARD_META = {
-    "name": "Indtjeningsmix",
+    "name": "Regnskabsmæssigt indtjeningsmix",
     "industry": "Bank",
     "slug": "indtjeningsmix",
     "description": "100% normaliseret fordeling af bankernes indtjeningskomponenter.",
@@ -166,7 +166,7 @@ def _brand_chart(fig):
 
 def render(raw: pd.DataFrame):
     st.caption("Bank  /  Analyse")
-    st.header("Indtjeningsmix")
+    st.header("Regnskabsmæssigt indtjeningsmix")
     st.caption(
         "Hver bank normaliseres til sin egen samlede indtjening, så store og små banker "
         "kan sammenlignes direkte."
@@ -264,7 +264,7 @@ def render(raw: pd.DataFrame):
             "Søjlerne er 100% normaliserede: hver banks indtægtskomponenter summerer til 100%."
         )
 
-    st.subheader("Indtjeningsmix i procent")
+    st.subheader("Regnskabsmæssigt indtjeningsmix i procent")
 
     share_table = (
         chart_df.pivot_table(
