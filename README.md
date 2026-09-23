@@ -26,6 +26,9 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
+# Windows, without activating the virtual environment
+.\.venv\Scripts\python.exe -m streamlit run app.py
+# macOS/Linux
 streamlit run app.py
 ```
 

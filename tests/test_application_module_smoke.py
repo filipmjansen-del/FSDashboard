@@ -1,6 +1,7 @@
 import unittest
 
 from modules.registry import MODULE_REGISTRY, module_id_for
+from dashboards.registry import DASHBOARD_REGISTRY
 from views.dashboard_workspace import render_dashboard_workspace
 from views.home import render_home
 from views.kpi_workspace import render_kpi_workspace
@@ -22,6 +23,11 @@ class ApplicationModuleSmokeTests(unittest.TestCase):
         self.assertEqual(module_id_for(None, None), "home")
         self.assertIn(module_id_for("kpi", "example"), MODULE_REGISTRY)
         self.assertIn(module_id_for("dashboard", "example"), MODULE_REGISTRY)
+
+    def test_registered_dashboards_have_resolvable_renderers(self):
+        self.assertTrue(DASHBOARD_REGISTRY)
+        for dashboard in DASHBOARD_REGISTRY.values():
+            self.assertTrue(callable(dashboard["render"]))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,11 @@
 from pathlib import Path
 import unittest
 
-from dashboards.bank.vækstvsprofitabillitet import build_matrix_data, default_banks_by_assets
+from dashboards.bank.vækstvsprofitabillitet import (
+    build_matrix_data,
+    default_banks_by_assets,
+    reset_matrix_banks,
+)
 from data_loader import load_raw_data
 from kpis.registry import KPI_REGISTRY, calculate_kpi
 
@@ -38,3 +42,11 @@ class GrowthProfitabilityRegressionTests(unittest.TestCase):
         self.assertEqual(len(selected), 5)
         selected_assets = matrix.set_index("navn").loc[selected, "Assets"].tolist()
         self.assertEqual(selected_assets, sorted(selected_assets, reverse=True))
+
+    def test_reset_restores_the_current_asset_based_default(self):
+        session_state = {"matrix_banks": ["Previously selected bank"]}
+        default_banks = ["Largest bank", "Second largest bank"]
+
+        reset_matrix_banks(session_state, default_banks)
+
+        self.assertEqual(session_state["matrix_banks"], default_banks)

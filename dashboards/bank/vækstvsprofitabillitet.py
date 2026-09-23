@@ -134,6 +134,11 @@ def default_banks_by_assets(matrix: pd.DataFrame, count: int = 5) -> list[str]:
     return largest["navn"].drop_duplicates().head(count).tolist()
 
 
+def reset_matrix_banks(session_state, default_banks: list[str]):
+    """Restore the matrix selector to the current asset-based default."""
+    session_state["matrix_banks"] = default_banks
+
+
 def render(raw: pd.DataFrame):
     from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
     from ui.components import render_page_intro, render_section_intro
@@ -190,6 +195,9 @@ def render(raw: pd.DataFrame):
 
     bank_options = sorted(matrix["navn"].unique())
     default_banks = default_banks_by_assets(matrix)
+    if st.button("Nulstil til top 5", key="matrix_reset_top_five"):
+        reset_matrix_banks(st.session_state, default_banks)
+        st.rerun()
     selected_banks = st.multiselect(
         "Banker",
         bank_options,
