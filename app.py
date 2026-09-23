@@ -19,6 +19,7 @@ from ui.theme import (
 )
 from views.home import render_home
 from views.kpi_workspace import render_kpi_workspace
+from views.dashboard_workspace import render_dashboard_workspace
 
 st.set_page_config(
     page_title="Finansiel Sektoranalyse",
@@ -304,16 +305,6 @@ def show_navigation_overview():
 def show_kpi_workspace(industry: str, kpi_name: str):
     render_kpi_workspace(industry, kpi_name, get_kpi_data)
 
-def show_dashboard_workspace(industry: str, dashboard_name: str):
-    meta = DASHBOARD_REGISTRY[dashboard_name]
-    st.caption(f"{industry}  /  Analyse  /  {dashboard_name}")
-
-    if meta.get("description"):
-        st.caption(meta["description"])
-
-    render_dashboard(get_raw_data(), dashboard_name)
-
-
 initialize_navigation_state()
 
 st.title("Finansiel Sektoranalyse")
@@ -329,7 +320,8 @@ elif st.session_state.selected_view_type == "kpi":
         st.session_state.selected_view_name,
     )
 elif st.session_state.selected_view_type == "dashboard":
-    show_dashboard_workspace(
+    render_dashboard_workspace(
         st.session_state.selected_industry,
         st.session_state.selected_view_name,
+        get_raw_data,
     )
