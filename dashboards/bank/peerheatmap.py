@@ -38,7 +38,9 @@ def _format_value(value, meta):
 
 
 def _relative_percentile(series: pd.Series, direction: str) -> pd.Series:
-    numeric = pd.to_numeric(series, errors="coerce")
+    numeric = pd.to_numeric(pd.Series(series), errors="coerce")
+    if direction == "neutral":
+        return pd.Series(pd.NA, index=numeric.index, dtype="Float64")
     if direction == "lower_is_better":
         return numeric.rank(pct=True, ascending=False) * 100
     return numeric.rank(pct=True, ascending=True) * 100
@@ -196,7 +198,7 @@ def render(raw: pd.DataFrame):
     st.plotly_chart(fig, use_container_width=True)
 
     st.caption(
-        "For KPI'er markeret som `lower_is_better` vendes percentilen. For `neutral` og "
-        "`higher_is_better` betyder en højere percentile blot en højere relativ position."
+        "For KPI'er markeret som `lower_is_better` vendes percentilen. Neutrale KPI'er "
+        "har ingen performance-percentil og vises derfor uden performancefarve."
     )
  
