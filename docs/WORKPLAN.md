@@ -203,7 +203,7 @@ Every active metric has a unique ID, documented definition, source and interpret
 ---
 
 ### Phase 5 - Migrate existing analytics
-Status: NOT STARTED
+Status: COMPLETE
 
 Migrate without adding new functionality:
 - KPI workspace
