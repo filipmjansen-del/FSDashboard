@@ -114,7 +114,7 @@ CI green and no known baseline engineering errors.
 ---
 
 ### Phase 2 - Data audit
-Status: NOT STARTED
+Status: COMPLETE
 
 Create:
 `scripts/audit_data.py`
