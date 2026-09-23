@@ -11,7 +11,7 @@ from dashboards.registry import (
     render_dashboard,
 )
 from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi, get_metric_metadata
-from navigation.sidebar import initialize_navigation_state, render_sidebar
+from navigation.sidebar import all_industries, initialize_navigation_state, render_sidebar
 from ui.formatting import apply_kpi_axis_format, brand_plotly, format_kpi_value, get_plotly_hover_format
 from ui.theme import (
     BLACK, BEIGE, BLUE_GREY, COGNAC, DARK_RED, GREY_DARK, GREY_LIGHT,
