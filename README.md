@@ -1,24 +1,18 @@
-# Financial Services Intelligence — Streamlit MVP
+# Financial Services Intelligence
 
-This first version implements one banking KPI from the supplied annual-account dataset:
+A Streamlit dashboard for comparing financial institutions by market, year, and company. KPI modules live under `kpis/<market>/` and are discovered automatically by `kpis/registry.py`.
 
-**Indtjening pr. omkostningskrone**
+## Markets and KPIs
 
-```text
-(Res_RGTot_RY + Res_Kreg_RY + Res_Xdi_RY + Res_Rat_RY)
-/
-(Res_UPa_RY + Res_ImMa_RY + Res_Xdu_RY + Res_UGn_RY)
-```
+- **Bank:** income per expense krone, return on equity before and after tax, and loans relative to equity.
+- **Forsikring:** bruttoerstatningsprocent, bruttoomkostningsprocent, combined ratio, operating ratio, relativt afløbsresultat, and egenkapitalforrentning.
+- **Realkredit, Pension, Tværgående pensionskasser:** market navigation is available; KPI modules can be added as source definitions are confirmed.
 
-No missing input is assumed to be zero. The KPI is only calculated when all eight source attributes are available and the denominator is non-zero.
+The six Forsikring definitions come from the supplied `Finanstilsynet_noegletal_master.xlsx` and [the underlying regulation, Bilag 10](https://www.retsinformation.dk/api/pdf/249994). The dashboard displays the reported company-level values from the companion `LongFormatDataMedKPIForSkadeOgBank.csv`, extracted into `data/forsikring_kpis.csv`. The source's sector-average rows are excluded; dashboard sector statistics are calculated from the displayed companies. Percentage-point values in the source are divided by 100 for the app's percentage formatter. Missing reported values remain missing.
 
-## Views
+The master workbook notes that its public database fields have not yet been reconciled 1:1 against Finanstilsynet's 2025 pivot file. The displayed values are therefore identified as reported source values rather than re-calculated from the raw account codes. Registration numbers missing in the source are filled from a unique historical company-name match when available; otherwise the extract assigns a stable negative surrogate ID.
 
-- Bank overview
-- KPI explorer
-- Bank profile
-- Sector comparison
-- Data quality
+To regenerate the checked-in extract, run `python scripts/import_forsikring_kpis.py <path-to-companion-csv>`.
 
 ## Run locally
 
@@ -33,14 +27,6 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Deploy with Streamlit Community Cloud
+## Add a KPI
 
-1. Create a GitHub repository.
-2. Upload this project while preserving its folder structure.
-3. In Streamlit Community Cloud, create a new app from the repository.
-4. Set the main file to `app.py`.
-5. Deploy.
-
-## Adding the next KPI
-
-Add the user-supplied definition to `src/kpi_engine.py`, then expose it through the app. Do not infer financial formulas from labels or account codes.
+Create a module in the appropriate `kpis/<market>/` package with `KPI_META` and `calculate(raw)`. Calculations should leave incomplete input as missing. Use documented source-field definitions rather than inferring formulas from account labels or codes.

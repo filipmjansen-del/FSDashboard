@@ -492,10 +492,17 @@ def show_kpi_definition(meta):
             st.markdown("**Vigtigt at være opmærksom på**")
             st.write(caveat)
 
-        st.caption(
-            "Manglende nødvendige input behandles ikke som nul. "
-            "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil."
-        )
+        if meta.get("source_type") == "reported":
+            st.caption(
+                "Værdien er rapporteret i kildedatasættet. Manglende KPI-værdier "
+                "behandles ikke som nul. Kildens 1:1-afstemning mod Finanstilsynets "
+                "offentlige pivottabel er endnu ikke verificeret."
+            )
+        else:
+            st.caption(
+                "Manglende nødvendige input behandles ikke som nul. "
+                "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil."
+            )
 
 
 def show_navigation_overview():
@@ -1143,8 +1150,8 @@ def show_kpi_workspace(industry: str, kpi_name: str):
 
     with quality_tab:
         st.write(
-            "Denne side viser beregningsdækningen eksplicit i stedet for stiltiende at "
-            "behandle manglende kilde-attributter som nul."
+            "Denne side viser KPI-dækningen eksplicit. Manglende beregningsinput "
+            "eller rapporterede KPI-værdier behandles ikke som nul."
         )
 
         coverage = (
@@ -1173,7 +1180,7 @@ def show_kpi_workspace(industry: str, kpi_name: str):
             hide_index=True,
         )
 
-        st.subheader(f"{entity_singular}-år med manglende KPI-input")
+        st.subheader(f"{entity_singular}-år med manglende KPI-værdi")
 
         missing = (
             kpi[kpi["KPI_Value"].isna()][["ÅR", "regnr", "navn"]]
