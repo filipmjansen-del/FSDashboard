@@ -37,6 +37,7 @@ def apply_theme(st_module):
                 --brand-stone: {STONE}; --brand-olive: {OLIVE};
                 --brand-grey-light: {GREY_LIGHT}; --brand-grey-dark: {GREY_DARK};
                 --brand-black: {BLACK}; --brand-white: {WHITE};
+                --primary-color: {PURPLE}; --secondary-background-color: #FAF9F8;
             }}
             .stApp {{ background-color: {WHITE}; color: {BLACK}; }}
             .block-container {{ padding-top: {SPACING['section']}; padding-bottom: {SPACING['content_bottom']}; max-width: {SPACING['max_width']}; }}
@@ -47,7 +48,7 @@ def apply_theme(st_module):
             [data-testid="stSidebar"] * {{ color: {WHITE}; }}
             [data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.22); }}
             [data-testid="stSidebar"] code {{ color: {BLACK} !important; background-color: {BEIGE} !important; }}
-            [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {{ color: rgba(255,255,255,0.68) !important; }}
+            [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {{ color: rgba(255,255,255,0.84) !important; }}
             [data-testid="stSidebar"] [data-testid="stExpander"] {{ background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.18) !important; border-radius: 8px !important; margin-bottom: 0.45rem; }}
             [data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {{ background: rgba(255,255,255,0.06) !important; }}
             [data-testid="stSidebar"] [data-testid="stExpander"] details[open] > summary {{ background: {DARK_RED} !important; border-radius: 7px 7px 0 0 !important; }}
@@ -70,15 +71,20 @@ def apply_theme(st_module):
             section.main .stButton > button:hover {{ background-color: {DARK_RED}; color: {WHITE}; border-color: {DARK_RED}; }}
             div[data-baseweb="select"] > div, div[data-baseweb="input"] > div, [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{ border-color: {BEIGE} !important; background-color: {WHITE} !important; }}
             div[data-baseweb="select"] > div:focus-within, div[data-baseweb="input"] > div:focus-within {{ border-color: {PURPLE} !important; box-shadow: 0 0 0 1px {PURPLE} !important; }}
+            div[data-baseweb="tag"] {{ background-color: {PURPLE} !important; color: {WHITE} !important; border-radius: 5px !important; }}
+            div[data-baseweb="tag"] span {{ color: {WHITE} !important; }}
             [data-testid="stSlider"] [role="slider"] {{ background-color: {PURPLE} !important; }}
+            [data-testid="stRadio"] [role="radio"][aria-checked="true"] {{ border-color: {PURPLE} !important; background-color: {PURPLE} !important; }}
+            [data-testid="stCheckbox"] [data-checked="true"] {{ background-color: {PURPLE} !important; border-color: {PURPLE} !important; }}
             section.main [data-testid="stExpander"] {{ border: 1px solid {BEIGE}; border-radius: 8px; background: {WHITE}; }}
             button[data-baseweb="tab"] {{ color: {GREY_DARK}; }}
             button[data-baseweb="tab"][aria-selected="true"] {{ color: {PURPLE} !important; }}
+            button[data-baseweb="tab"][aria-selected="true"]::after {{ background-color: {PURPLE} !important; }}
             [data-testid="stAlert"] {{ border-radius: 8px; }}
             [data-testid="stDataFrame"] {{ border: 1px solid {BEIGE}; border-radius: 8px; overflow: hidden; }}
             hr {{ border-color: {BEIGE}; }}
             a {{ color: {DARK_RED} !important; }}
-            .nav-section-label {{ color: rgba(255,255,255,0.72); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; margin-bottom: 0.2rem; font-weight: 700; }}
+            .nav-section-label {{ color: rgba(255,255,255,0.84); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; margin-bottom: 0.2rem; font-weight: 700; }}
             .page-intro {{ margin: 0 0 {SPACING['section_gap']}; max-width: 760px; }}
             .page-intro h1 {{ margin: 0 0 0.5rem; font-size: 2.1rem; }}
             .page-intro p, .section-intro p, .orientation-card p {{ color: {GREY_DARK}; line-height: 1.55; margin: 0; }}

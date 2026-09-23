@@ -1,3 +1,5 @@
+import textwrap
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -165,12 +167,16 @@ def render(raw: pd.DataFrame):
         text.append(row)
 
     z = pct_view[selected_kpis].astype(float).values
+    display_kpi_labels = [
+        "<br>".join(textwrap.wrap(kpi_name, width=22))
+        for kpi_name in selected_kpis
+    ]
 
     render_section_intro("Sammenligning", "Læs værdier og relative percentiler på tværs af de valgte banker og KPI'er.")
     fig = go.Figure(
         data=go.Heatmap(
             z=z,
-            x=selected_kpis,
+            x=display_kpi_labels,
             y=pct_view.index.tolist(),
             text=text,
             texttemplate="%{text}",
@@ -192,9 +198,10 @@ def render(raw: pd.DataFrame):
     )
     fig.update_layout(
         template="plotly_white",
-        height=max(500, 34 * len(pct_view.index)),
+        height=max(560, 46 * len(pct_view.index)),
         margin=dict(l=20, r=20, t=20, b=20),
-        xaxis=dict(side="top"),
+        xaxis=dict(side="top", tickangle=-25, automargin=True, tickfont=dict(size=12)),
+        yaxis=dict(automargin=True, tickfont=dict(size=13)),
         font=dict(color=BLACK),
     )
     st.plotly_chart(fig, use_container_width=True)

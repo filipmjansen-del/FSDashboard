@@ -289,7 +289,7 @@ def render(raw):
     c2.metric("Benchmarkgruppe", f"{len(benchmark_regnrs)} banker")
     c3.metric("KPI'er med data", len(rows))
     if asset_value is not None:
-        c4.metric("Aktiver i alt", f"DKK {asset_value / 1_000_000:.1f} mia.")
+        c4.metric("Aktiver i alt", f"DKK {asset_value / 1_000_000:,.0f} mia.")
     else:
         c4.metric("Aktiver i alt", "–")
 
@@ -337,8 +337,8 @@ def render(raw):
         st.plotly_chart(fig, use_container_width=True)
         st.caption(
             "50% svarer omtrent til midten af benchmarkgruppen. For KPI'er markeret som lower_is_better "
-            "vendes percentilen, så en lavere KPI-værdi giver en højere relativ placering. Neutral KPI'er "
-            "vises som ren statistisk percentile."
+            "vendes percentilen, så en lavere KPI-værdi giver en højere relativ placering. Neutrale KPI'er "
+            "får ingen performance-percentil og indgår derfor ikke i den relative profil."
         )
 
     table_rows = []
