@@ -114,13 +114,14 @@ def build_matrix_data(raw, calculate_kpi_fn, profitability_kpi, growth_key, year
 
     assets = _asset_size(raw, year)
 
+    # Registration number is the legal entity key; names remain display attributes.
     matrix = growth.merge(
-        profitability,
-        on=["regnr", "navn"],
+        profitability.drop(columns=["navn"]),
+        on="regnr",
         how="inner",
     ).merge(
-        assets,
-        on=["regnr", "navn"],
+        assets.drop(columns=["navn"]),
+        on="regnr",
         how="left",
     )
 
@@ -136,7 +137,11 @@ def render(raw: pd.DataFrame):
         "Boblestørrelsen repræsenterer bankens samlede aktiver i det valgte år."
     )
 
-    bank_kpis = list(INDUSTRY_KPI_CATALOG.get("Bank", []))
+    bank_kpis = [
+        name
+        for name in INDUSTRY_KPI_CATALOG.get("Bank", [])
+        if KPI_REGISTRY[name].get("category") == "profitability"
+    ]
     if not bank_kpis:
         st.warning("Der er ingen registrerede Bank-KPI'er at bruge som profitabilitetsmål.")
         return
