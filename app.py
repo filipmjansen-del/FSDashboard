@@ -11,15 +11,13 @@ from dashboards.registry import (
     render_dashboard,
 )
 from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi, get_metric_metadata
+from modules.registry import ModuleContext, dispatch_module, module_id_for
 from navigation.sidebar import all_industries, initialize_navigation_state, navigate_to, render_sidebar
 from ui.formatting import apply_kpi_axis_format, brand_plotly, format_kpi_value, get_plotly_hover_format
 from ui.theme import (
     BLACK, BEIGE, BLUE_GREY, COGNAC, DARK_RED, GREY_DARK, GREY_LIGHT,
     OLIVE, PEACH, PURPLE, PURPLE_LIGHT, ROSE, STONE, WHITE, BRAND_SEQUENCE, apply_theme,
 )
-from views.home import render_home
-from views.kpi_workspace import render_kpi_workspace
-from views.dashboard_workspace import render_dashboard_workspace
 
 st.set_page_config(
     page_title="Finansiel Sektoranalyse",
@@ -294,17 +292,6 @@ def get_kpi_data(kpi_name: str):
     return calculate_kpi(get_raw_data(), kpi_name)
 
 
-def show_navigation_overview():
-    render_home(
-        get_raw_data(),
-        get_kpi_data,
-        navigate_to,
-        all_industries(),
-    )
-
-def show_kpi_workspace(industry: str, kpi_name: str):
-    render_kpi_workspace(industry, kpi_name, get_kpi_data)
-
 initialize_navigation_state()
 
 st.title("Finansiel Sektoranalyse")
@@ -312,16 +299,17 @@ st.caption("Analyse og benchmarking af den danske finansielle sektor")
 
 render_sidebar()
 
-if st.session_state.selected_view_name is None:
-    show_navigation_overview()
-elif st.session_state.selected_view_type == "kpi":
-    show_kpi_workspace(
-        st.session_state.selected_industry,
+dispatch_module(
+    module_id_for(
+        st.session_state.selected_view_type,
         st.session_state.selected_view_name,
-    )
-elif st.session_state.selected_view_type == "dashboard":
-    render_dashboard_workspace(
-        st.session_state.selected_industry,
-        st.session_state.selected_view_name,
-        get_raw_data,
-    )
+    ),
+    ModuleContext(
+        selected_industry=st.session_state.selected_industry,
+        selected_view_name=st.session_state.selected_view_name,
+        get_raw_data=get_raw_data,
+        get_kpi_data=get_kpi_data,
+        navigate_to=navigate_to,
+        industries=all_industries,
+    ),
+)
