@@ -167,7 +167,7 @@ No duplicate canonical observation keys and data model documented.
 ---
 
 ### Phase 4 - Metric framework v2
-Status: NOT STARTED
+Status: COMPLETE
 
 Introduce stable metric IDs, e.g.:
 - `bank.roe_pre_tax`
