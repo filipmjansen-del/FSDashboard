@@ -59,9 +59,10 @@ def _asset_table(raw, year):
     frame["regnr"] = frame["regnr"].astype(str)
     frame["Value"] = pd.to_numeric(frame["Value"], errors="coerce")
     frame = frame.dropna(subset=["Value"])
+    # `regnr` identifies the legal entity; `navn` is retained only for display.
     frame = (
         frame.sort_values(["regnr"])
-        .groupby(["regnr", "navn"], as_index=False)["Value"]
+        .groupby("regnr", as_index=False)
         .last()
         .rename(columns={"Value": "TotalAssets"})
     )
