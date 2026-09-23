@@ -1,6 +1,6 @@
 import unittest
 
-from kpis.registry import INDUSTRY_METRIC_CATALOG, KPI_REGISTRY, METRIC_REGISTRY
+from kpis.registry import INDUSTRY_METRIC_CATALOG, KPI_REGISTRY, METRIC_REGISTRY, get_metric_metadata
 
 
 class MetricRegistryTests(unittest.TestCase):
@@ -19,3 +19,9 @@ class MetricRegistryTests(unittest.TestCase):
                 self.assertTrue(required.issubset(metadata))
         self.assertIn("bank.roe_pre_tax", INDUSTRY_METRIC_CATALOG["Bank"])
         self.assertIn("insurance.combined_ratio", INDUSTRY_METRIC_CATALOG["Forsikring"])
+
+    def test_stable_id_resolves_to_the_legacy_workspace_metadata(self):
+        self.assertEqual(
+            get_metric_metadata("bank.roe_pre_tax"),
+            get_metric_metadata("Egenkapitalforrentning før skat"),
+        )

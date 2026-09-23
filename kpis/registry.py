@@ -147,3 +147,11 @@ def calculate_kpi(raw_data, kpi_identifier):
     return registry[kpi_identifier]["calculate"](
         raw_data
     )
+
+
+def get_metric_metadata(kpi_identifier):
+    """Return metadata for a stable metric ID or legacy display name."""
+    registry = METRIC_REGISTRY if kpi_identifier in METRIC_REGISTRY else KPI_REGISTRY
+    if kpi_identifier not in registry:
+        raise KeyError(f"KPI '{kpi_identifier}' was not found.")
+    return registry[kpi_identifier]

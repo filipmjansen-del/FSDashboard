@@ -10,7 +10,7 @@ from dashboards.registry import (
     INDUSTRY_DASHBOARD_CATALOG,
     render_dashboard,
 )
-from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
+from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi, get_metric_metadata
 
 WHITE = "#FFFFFF"
 GREY_LIGHT = "#EEEEEE"
@@ -838,7 +838,8 @@ def show_navigation_overview():
 
 
 def show_kpi_workspace(industry: str, kpi_name: str):
-    meta = KPI_REGISTRY[kpi_name]
+    # The UI still displays legacy names, while the workspace accepts stable metric IDs.
+    meta = get_metric_metadata(kpi_name)
     kpi = get_kpi_data(kpi_name)
 
     if kpi.empty:
