@@ -9,6 +9,7 @@ KPI_META = {
     "display_format": "percentage",
     "decimals": 1,
     "direction": "higher_is_better",
+    "reading_guide": "10 % betyder 10 kr. resultat efter skat pr. 100 kr. tidsvægtet gennemsnitlig egenkapital. Negativ værdi betyder underskud. Højere er normalt gunstigt, men skal ses sammen med risiko og kapitalstyrke.",
     "formula_label": "Årets resultat / tidsvægtet gennemsnitlig egenkapital",
     "description": "Årets afkast til ejerne i forhold til den gennemsnitlige egenkapital.",
     "interpretation": "Viser selskabets samlede lønsomhed efter skat.",

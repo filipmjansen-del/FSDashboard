@@ -10,6 +10,8 @@ A Streamlit dashboard for comparing financial institutions by market, year, and 
 
 The six Forsikring definitions come from the supplied `Finanstilsynet_noegletal_master.xlsx` and [the underlying regulation, Bilag 10](https://www.retsinformation.dk/api/pdf/249994). The dashboard displays the reported company-level values from the companion `LongFormatDataMedKPIForSkadeOgBank.csv`, extracted into `data/forsikring_kpis.csv`. The source's sector-average rows are excluded; dashboard sector statistics are calculated from the displayed companies. Percentage-point values in the source are divided by 100 for the app's percentage formatter. Missing reported values remain missing.
 
+For definitions, examples, interpretation direction, and help reading every graph, see [KPI-guiden](docs/KPI_GUIDE.md).
+
 The master workbook notes that its public database fields have not yet been reconciled 1:1 against Finanstilsynet's 2025 pivot file. The displayed values are therefore identified as reported source values rather than re-calculated from the raw account codes. Registration numbers missing in the source are filled from a unique historical company-name match when available; otherwise the extract assigns a stable negative surrogate ID.
 
 To regenerate the checked-in extract, run `python scripts/import_forsikring_kpis.py <path-to-companion-csv>`.

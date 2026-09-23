@@ -9,6 +9,7 @@ KPI_META = {
     "display_format": "percentage",
     "decimals": 1,
     "direction": "lower_is_better",
+    "reading_guide": "95 % betyder 95 kr. i de samlede combined-ratio-komponenter pr. 100 kr. præmier inklusive allokeret forsikringsteknisk rente. Under 100 % er normalt gunstigt; tallet kan afvige fra combined ratio, fordi nævneren er anderledes.",
     "formula_label": "Combined-ratio-komponenter / (præmieindtægter efter bonus og præmierabatter + forsikringsteknisk rente)",
     "description": "Combined ratio genberegnet med allokeret investeringsafkast i præmiegrundlaget.",
     "interpretation": "Viser forsikringsdriftens samlede omkostningsandel inklusive forsikringsteknisk rente.",

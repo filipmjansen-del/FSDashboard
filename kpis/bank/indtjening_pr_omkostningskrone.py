@@ -8,6 +8,7 @@ KPI_META = {
     "display_format": "multiple",
     "decimals": 2,
     "direction": "higher_is_better",
+    "reading_guide": "1,50x betyder 1,50 kr. indtjening for hver 1,00 kr. af de medtagne omkostninger. Over 1,00x dækker denne indtjening de medtagne omkostninger; under 1,00x gør den ikke. Højere er normalt gunstigt, men engangsindtægter kan løfte tallet.",
     "formula_label": (
         "(Res_RGTot_RY + Res_Kreg_RY + Res_Xdi_RY + Res_Rat_RY) / "
         "(Res_UPa_RY + Res_ImMa_RY + Res_Xdu_RY + Res_UGn_RY)"

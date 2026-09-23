@@ -9,6 +9,7 @@ KPI_META = {
     "display_format": "percentage",
     "decimals": 1,
     "direction": "lower_is_better",
+    "reading_guide": "70 % betyder 70 kr. bruttoerstatninger pr. 100 kr. bruttopræmier efter bonus og præmierabatter. Lavere er normalt gunstigt; over 100 % overstiger erstatningerne alene præmierne, før drift og genforsikring.",
     "formula_label": "Bruttoerstatningsudgifter / bruttopræmieindtægter efter bonus og præmierabatter",
     "description": "Andelen af bruttopræmier, som går til erstatninger før genforsikring.",
     "interpretation": "70 % betyder, at bruttoerstatninger svarer til 70 % af præmieindtægterne efter bonus og præmierabatter.",

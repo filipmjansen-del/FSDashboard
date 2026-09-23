@@ -8,6 +8,7 @@ KPI_META = {
     "display_format": "percentage",
     "decimals": 1,
     "direction": "higher_is_better",
+    "reading_guide": "10 % betyder 10 kr. resultat efter skat pr. 100 kr. gennemsnitlig egenkapital. En negativ værdi betyder underskud efter skat. Højere er normalt gunstigt, når risiko og kapitalisering er sammenlignelige.",
     "formula_label": (
         "(Res_RP_RY * 100) / "
         "((Bal_BO_PEekTot året før + Bal_BO_PEekTot) / 2)"

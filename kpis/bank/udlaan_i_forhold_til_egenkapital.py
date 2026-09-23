@@ -8,6 +8,7 @@ KPI_META = {
     "display_format": "multiple",
     "decimals": 2,
     "direction": "neutral",
+    "reading_guide": "5,00x betyder 5 kr. udlån pr. 1 kr. egenkapital. Højere kan både vise mere udlånsaktivitet og større gearing; lavere kan både vise mere kapital og mindre udlån. Nøgletallet har ingen entydig god eller dårlig retning.",
     "formula_label": (
         "(Bal_BO_Autd + Bal_BO_Auta) / Bal_BO_PEekTot"
     ),

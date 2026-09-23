@@ -463,6 +463,7 @@ def show_kpi_definition(meta):
     direction = meta.get("direction", "neutral")
     direction_explanation = meta.get("direction_explanation")
     caveat = meta.get("caveat")
+    reading_guide = meta.get("reading_guide")
 
     direction_labels = {
         "higher_is_better": "Højere er som udgangspunkt bedre",
@@ -481,6 +482,10 @@ def show_kpi_definition(meta):
         if interpretation:
             st.markdown("**Hvordan skal den fortolkes?**")
             st.write(interpretation)
+
+        if reading_guide:
+            st.markdown("**Sådan læses værdien**")
+            st.write(reading_guide)
 
         st.markdown("**Retning**")
         st.write(direction_labels.get(direction, "Ingen entydig retning"))
@@ -853,6 +858,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
     st.caption(f"{industry}  /  KPI  /  {kpi_name}")
     st.header(kpi_name)
 
+    if meta.get("description"):
+        st.write(meta["description"])
+    if meta.get("reading_guide"):
+        st.info(meta["reading_guide"])
+
     show_kpi_definition(meta)
 
     overview_tab, explorer_tab, profile_tab, comparison_tab, quality_tab = st.tabs(
@@ -886,6 +896,10 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         c4.metric("Sektorgennemsnit", format_kpi_value(mean, meta))
 
         st.subheader(f"Fordeling på tværs af {entity_plural.lower()}")
+        st.caption(
+            "Den vandrette akse viser KPI-værdien; søjlehøjden viser antal "
+            f"{entity_plural.lower()} i hvert interval. En søjle er ikke ét selskab."
+        )
 
         fig = px.histogram(
             yr,
@@ -905,6 +919,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Sektorudvikling")
+        st.caption(
+            "Hvert punkt er medianen eller gennemsnittet blandt selskaber med en "
+            "tilgængelig værdi det pågældende år. Selskabskredsen kan ændre sig "
+            "mellem år; store udsving kan trække gennemsnittet mere end medianen."
+        )
 
         trend = (
             valid.groupby("ÅR", as_index=False)
@@ -937,6 +956,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         st.plotly_chart(fig2, use_container_width=True)
 
     with explorer_tab:
+        st.caption(
+            "Hver linje viser ét selskabs KPI over tid. År står på den vandrette "
+            "akse og KPI-værdien på den lodrette. Manglende punkter er manglende "
+            "data, ikke nul."
+        )
         names = sorted(valid["navn"].dropna().unique())
         default_names = names[: min(5, len(names))]
 
@@ -995,6 +1019,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
             )
 
     with profile_tab:
+        st.caption(
+            "Linjen viser det valgte selskabs udvikling. Den stiplede linje er "
+            "sektormedianen i selskabets seneste år med data og er derfor ikke en "
+            "årsspecifik median for hele tidsserien."
+        )
         entity_names = sorted(kpi["navn"].dropna().unique())
 
         selected_entity = st.selectbox(
@@ -1062,7 +1091,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 }
             )
 
-            st.subheader("Underliggende beregning – seneste tilgængelige år")
+            st.subheader(
+                "Rapporteret værdi – seneste tilgængelige år"
+                if meta.get("source_type") == "reported"
+                else "Underliggende beregning – seneste tilgængelige år"
+            )
             st.dataframe(
                 pd.DataFrame(calculation_rows),
                 use_container_width=True,
@@ -1090,46 +1123,60 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 yr["PerformancePercentile"] = (
                     yr["KPI_Value"].rank(pct=True, ascending=False) * 100
                 )
+            yr = yr.sort_values("KPI_Value", ascending=False)
+            has_direction = direction in {"higher_is_better", "lower_is_better"}
+            if has_direction:
+                st.caption(
+                    "Søjlelængden er den faktiske KPI-værdi. Farven og percentilen "
+                    "viser placering blandt selskaber med data i det valgte år: "
+                    "højere percentil er bedre i den angivne retning. Det er en "
+                    "relativ placering, ikke en absolut kvalitetsgrænse."
+                )
             else:
-                yr["PerformancePercentile"] = (
-                    yr["KPI_Value"].rank(pct=True) * 100
+                st.caption(
+                    "Søjlelængden er den faktiske KPI-værdi. Selskaberne vises "
+                    "efter størrelse, uden rangering af hvad der er bedst."
                 )
 
-            yr = yr.sort_values("KPI_Value", ascending=False)
+            hover_data = {"KPI_Value": get_plotly_hover_format(meta)}
+            labels = {"KPI_Value": kpi_name, "navn": entity_singular}
+            color_options = {"color_discrete_sequence": [PURPLE]}
+            if has_direction:
+                hover_data["PerformancePercentile"] = ":.0f"
+                labels["PerformancePercentile"] = "Percentil"
+                color_options = {
+                    "color": "PerformancePercentile",
+                    "color_continuous_scale": [
+                        [0.0, BEIGE],
+                        [0.5, BLUE_GREY],
+                        [1.0, PURPLE],
+                    ],
+                }
 
             fig = px.bar(
                 yr,
                 x="KPI_Value",
                 y="navn",
                 orientation="h",
-                color="PerformancePercentile",
-                color_continuous_scale=[
-                    [0.0, BEIGE],
-                    [0.5, BLUE_GREY],
-                    [1.0, PURPLE],
-                ],
-                hover_data={
-                    "PerformancePercentile": ":.0f",
-                    "KPI_Value": get_plotly_hover_format(meta),
-                },
-                labels={
-                    "KPI_Value": kpi_name,
-                    "navn": entity_singular,
-                    "PerformancePercentile": "Percentil",
-                },
+                hover_data=hover_data,
+                labels=labels,
+                **color_options,
             )
             fig.update_layout(
                 height=max(500, 24 * len(yr)),
                 yaxis={"categoryorder": "total ascending"},
-                coloraxis_colorbar=dict(title="Percentil"),
+                showlegend=False,
             )
+            if has_direction:
+                fig.update_layout(coloraxis_colorbar=dict(title="Percentil"))
             brand_plotly(fig)
             apply_kpi_axis_format(fig, meta, axis="x")
             st.plotly_chart(fig, use_container_width=True)
 
-            display = yr[
-                ["navn", "KPI_Value", "PerformancePercentile"]
-            ].rename(
+            display_columns = ["navn", "KPI_Value"]
+            if has_direction:
+                display_columns.append("PerformancePercentile")
+            display = yr[display_columns].rename(
                 columns={
                     "navn": entity_singular,
                     "KPI_Value": kpi_name,
@@ -1137,13 +1184,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
                 }
             )
 
+            table_formats = {kpi_name: lambda value: format_kpi_value(value, meta)}
+            if has_direction:
+                table_formats["Percentil"] = "{:.0f}"
             st.dataframe(
-                display.style.format(
-                    {
-                        kpi_name: lambda value: format_kpi_value(value, meta),
-                        "Percentil": "{:.0f}",
-                    }
-                ),
+                display.style.format(table_formats),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -1152,6 +1197,11 @@ def show_kpi_workspace(industry: str, kpi_name: str):
         st.write(
             "Denne side viser KPI-dækningen eksplicit. Manglende beregningsinput "
             "eller rapporterede KPI-værdier behandles ikke som nul."
+        )
+        st.caption(
+            "Dækning er andelen af repræsenterede selskaber med en gyldig "
+            "KPI-værdi i året. Den siger noget om datatilgængelighed, ikke om "
+            "selskabernes resultater."
         )
 
         coverage = (
