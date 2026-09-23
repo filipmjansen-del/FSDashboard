@@ -6,6 +6,7 @@ import streamlit as st
 
 from kpis.registry import get_metric_metadata
 from ui.formatting import apply_kpi_axis_format, brand_plotly, format_kpi_value, get_plotly_hover_format
+from ui.components import render_page_intro, render_section_intro
 from ui.theme import BEIGE, BLUE_GREY, BRAND_SEQUENCE, COGNAC, PURPLE, WHITE
 
 
@@ -115,10 +116,10 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
     direction = meta.get("direction", "neutral")
 
     st.caption(f"{industry}  /  KPI  /  {kpi_name}")
-    st.header(kpi_name)
-
-    if meta.get("description"):
-        st.write(meta["description"])
+    render_page_intro(
+        kpi_name,
+        meta.get("description", "Udforsk KPI'en på tværs af selskaber og over tid."),
+    )
     if meta.get("reading_guide"):
         st.info(meta["reading_guide"])
 
@@ -154,8 +155,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
         c3.metric("Sektormedian", format_kpi_value(median, meta))
         c4.metric("Sektorgennemsnit", format_kpi_value(mean, meta))
 
-        st.subheader(f"Fordeling på tværs af {entity_plural.lower()}")
-        st.caption(
+        render_section_intro(f"Fordeling på tværs af {entity_plural.lower()}",
             "Den vandrette akse viser KPI-værdien; søjlehøjden viser antal "
             f"{entity_plural.lower()} i hvert interval. En søjle er ikke ét selskab."
         )
@@ -177,8 +177,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
         apply_kpi_axis_format(fig, meta, axis="x")
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Sektorudvikling")
-        st.caption(
+        render_section_intro("Sektorudvikling",
             "Hvert punkt er medianen eller gennemsnittet blandt selskaber med en "
             "tilgængelig værdi det pågældende år. Selskabskredsen kan ændre sig "
             "mellem år; store udsving kan trække gennemsnittet mere end medianen."
@@ -350,10 +349,11 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
                 }
             )
 
-            st.subheader(
+            render_section_intro(
                 "Rapporteret værdi – seneste tilgængelige år"
                 if meta.get("source_type") == "reported"
-                else "Underliggende beregning – seneste tilgængelige år"
+                else "Underliggende beregning – seneste tilgængelige år",
+                "Viser den rapporterede værdi eller de input, der ligger bag den seneste observation.",
             )
             st.dataframe(
                 pd.DataFrame(calculation_rows),
@@ -489,7 +489,10 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
             hide_index=True,
         )
 
-        st.subheader(f"{entity_singular}-år med manglende KPI-værdi")
+        render_section_intro(
+            f"{entity_singular}-år med manglende KPI-værdi",
+            "Manglende værdier vises eksplicit og behandles ikke som nul.",
+        )
 
         missing = (
             kpi[kpi["KPI_Value"].isna()][["ÅR", "regnr", "navn"]]

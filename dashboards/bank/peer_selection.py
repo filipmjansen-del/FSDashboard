@@ -5,6 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from kpis.registry import KPI_REGISTRY, calculate_kpi
+from ui.components import render_page_intro, render_section_intro
 
 
 DASHBOARD_META = {
@@ -97,9 +98,9 @@ def _similar_peers(asset_df, target_regnr, count):
 
 
 def render(raw):
-    st.header("Peer selection")
-    st.caption(
-        "Vælg en målbank og byg en peer group. Den gemte gruppe kan efterfølgende bruges i Company fingerprint."
+    render_page_intro(
+        "Peer selection",
+        "Vælg en målbank og byg en peer group, som efterfølgende kan bruges i Company fingerprint.",
     )
 
     bank_raw = raw[raw["Branche"] == "Bank"].copy()
@@ -220,7 +221,7 @@ def render(raw):
         st.info("Den valgte metode har ikke produceret nogen peers endnu.")
         return
 
-    st.subheader("Peer group efter størrelse")
+    render_section_intro("Peer group efter størrelse", "Sammenlign målbanken med den valgte peer group på aktiver i alt.")
     chart = selected.sort_values("TotalAssets", ascending=True)
     fig = px.bar(
         chart,
@@ -261,7 +262,7 @@ def render(raw):
 
     bank_kpis = _bank_kpis()
     if bank_kpis:
-        st.subheader("KPI-preview")
+        render_section_intro("KPI-preview", "Se udvalgte KPI'er for målbanken og peer groupen før gruppen gemmes.")
         preview_kpis = st.multiselect(
             "KPI'er",
             bank_kpis,

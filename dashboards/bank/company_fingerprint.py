@@ -3,6 +3,7 @@ import plotly.express as px
 import streamlit as st
 
 from kpis.registry import KPI_REGISTRY, calculate_kpi
+from ui.components import render_page_intro, render_section_intro
 
 
 DASHBOARD_META = {
@@ -129,10 +130,9 @@ def _percentile(values, target_value, direction):
 
 
 def render(raw):
-    st.header("Company fingerprint")
-    st.caption(
-        "Se en banks relative KPI-profil mod alle banker eller en peer group gemt fra Peer selection. "
-        "Percentiler viser relativ placering i den valgte benchmarkgruppe."
+    render_page_intro(
+        "Company fingerprint",
+        "Se en banks KPI-profil mod alle banker eller en gemt peer group. Percentiler viser placering i den valgte benchmarkgruppe.",
     )
 
     bank_raw = raw[raw["Branche"] == "Bank"].copy()
@@ -304,7 +304,7 @@ def render(raw):
 
     if not chart_df.empty:
         chart_df = chart_df.sort_values("Percentile", ascending=True)
-        st.subheader("Relativ profil")
+        render_section_intro("Relativ profil", "Sammenligner bankens placering for KPI'er med en entydig retning.")
         fig = px.bar(
             chart_df,
             x="Percentile",
@@ -353,7 +353,7 @@ def render(raw):
             }
         )
 
-    st.subheader("Detaljer")
+    render_section_intro("Detaljer", "Se KPI-værdier, peer medianer og ændringer for den valgte bank.")
     st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
 
     if not saved_group_available:

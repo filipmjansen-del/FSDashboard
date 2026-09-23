@@ -130,11 +130,11 @@ def build_matrix_data(raw, calculate_kpi_fn, profitability_kpi, growth_key, year
 
 def render(raw: pd.DataFrame):
     from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
+    from ui.components import render_page_intro, render_section_intro
 
-    st.header("Growth vs profitability matrix")
-    st.caption(
-        "Matrixen kombinerer en valgfri Bank-KPI for profitabilitet med en år-til-år vækstindikator. "
-        "Boblestørrelsen repræsenterer bankens samlede aktiver i det valgte år."
+    render_page_intro(
+        "Growth vs profitability matrix",
+        "Sammenlign en valgt profitabilitets-KPI med en år-til-år-vækstindikator. Boblestørrelsen viser aktiver i alt.",
     )
 
     bank_kpis = [
@@ -201,6 +201,7 @@ def render(raw: pd.DataFrame):
     # Use asset size for bubbles when available; otherwise equal-sized bubbles.
     size_col = "Assets" if matrix["Assets"].notna().any() else None
 
+    render_section_intro("Matrix", "Placerer de valgte banker efter vækst og profitabilitet i det valgte år.")
     fig = px.scatter(
         matrix,
         x="Growth",

@@ -165,11 +165,12 @@ def _brand_chart(fig):
 
 
 def render(raw: pd.DataFrame):
+    from ui.components import render_page_intro, render_section_intro
+
     st.caption("Bank  /  Analyse")
-    st.header("Regnskabsmæssigt indtjeningsmix")
-    st.caption(
-        "Hver bank normaliseres til sin egen samlede indtjening, så store og små banker "
-        "kan sammenlignes direkte."
+    render_page_intro(
+        "Regnskabsmæssigt indtjeningsmix",
+        "Hver bank normaliseres til sin egen samlede indtjening, så store og små banker kan sammenlignes direkte.",
     )
 
     mix = _calculate_income_mix(raw)
@@ -219,7 +220,7 @@ def render(raw: pd.DataFrame):
         .tolist()
     )
 
-    st.subheader("Fordeling af indtægter")
+    render_section_intro("Fordeling af indtægter", "Se hvordan den valgte banks indtægter fordeler sig på regnskabsmæssige komponenter.")
 
     fig = px.bar(
         chart_df,
@@ -264,7 +265,7 @@ def render(raw: pd.DataFrame):
             "Søjlerne er 100% normaliserede: hver banks indtægtskomponenter summerer til 100%."
         )
 
-    st.subheader("Regnskabsmæssigt indtjeningsmix i procent")
+    render_section_intro("Regnskabsmæssigt indtjeningsmix i procent", "Tabellen viser de samme komponenter som andele af samlet indtjening.")
 
     share_table = (
         chart_df.pivot_table(

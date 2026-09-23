@@ -2,6 +2,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui.components import render_page_intro, render_section_intro
+
 
 DASHBOARD_META = {
     "name": "Peer heatmap",
@@ -95,10 +97,9 @@ def _top_banks_by_assets(raw, year, available_names, n=15):
 def render(raw: pd.DataFrame):
     from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
 
-    st.header("Peer heatmap")
-    st.caption(
-        "Heatmappet bruger de KPI'er, der allerede er registreret under Bank. "
-        "Farven viser bankens relative position blandt banker med en gyldig observation i det valgte år."
+    render_page_intro(
+        "Peer heatmap",
+        "Sammenlign banker på tværs af registrerede KPI'er. Farven viser relativ placering blandt banker med data i det valgte år.",
     )
 
     bank_kpis = list(INDUSTRY_KPI_CATALOG.get("Bank", []))
@@ -165,6 +166,7 @@ def render(raw: pd.DataFrame):
 
     z = pct_view[selected_kpis].astype(float).values
 
+    render_section_intro("Sammenligning", "Læs værdier og relative percentiler på tværs af de valgte banker og KPI'er.")
     fig = go.Figure(
         data=go.Heatmap(
             z=z,
