@@ -51,6 +51,12 @@ Current analytical structure:
 - homepage
 - chart formatting
 
+Phase 5.5 foundation direction:
+- navigation, views, analytics and data access have separate responsibilities
+- analytical modules are independently registered through a small common interface
+- shared colors, typography, text colors, spacing and reusable UI components are centrally controlled
+- adding an analytical module should not require changes to core application dispatch logic
+
 ## Current strengths
 
 - modular KPI discovery
@@ -190,6 +196,19 @@ Streamlit handles:
 - exports
 
 It should consume analytical outputs rather than contain core calculation logic.
+
+### 8. Extensible module and UI foundation
+
+The application foundation should expose a simple module interface and registry
+for independently addable analytical modules. The registry owns discovery and
+dispatch; each module owns its view and analytical wiring within the agreed
+interfaces. Existing analytical logic is migrated incrementally and must retain
+validated numerical outputs.
+
+Shared UI styling is centralized in one UI layer covering colors, typography,
+text colors, spacing and reusable components. New modules consume that layer
+instead of duplicating style constants. This is deliberately a small internal
+interface, not a general-purpose plugin framework.
 
 ## Target repository direction
 

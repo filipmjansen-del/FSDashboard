@@ -246,3 +246,20 @@ Every proposed feature should be assessed against:
 Does this make it faster and more robust to move from standardized Financial Services data to a documented analysis that can be used in a client or market dialogue?
 
 If not, it is normally lower priority.
+
+---
+
+## D021 - Simple extensible analytical module foundation
+
+Status: LOCKED
+
+Decision:
+Analytical modules should be independently addable through a simple common
+interface and registry, and shared UI styling should be centralized.
+
+Avoid an overengineered plugin framework unless a demonstrated need emerges.
+
+Reason:
+The platform should support new analytical products without repeatedly
+modifying core application dispatch or duplicating styling, while keeping the
+foundation proportional to current needs.

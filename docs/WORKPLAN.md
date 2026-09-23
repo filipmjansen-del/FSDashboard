@@ -224,6 +224,30 @@ Existing analytical outputs are reproduced without unexplained numerical changes
 
 ---
 
+### Phase 5.5 - Extensible Platform Foundation
+Status: NOT STARTED
+
+Purpose:
+Create a robust and extensible application foundation before implementing new analytical products in Phases 6 and 7.
+
+Scope:
+- reduce `app.py` responsibilities
+- separate navigation, views, analytics, data access and shared formatting/UI utilities
+- establish a simple common interface/registry for analytical modules
+- allow future analytical modules to be added without modifying core application logic
+- centralize colors, typography, text colors, spacing and reusable UI components
+- later migrate existing analytical workflows into this structure without changing analytical logic or validated numerical outputs
+- document how a new analytical module should be added
+
+Definition of Done:
+- existing validated analytical outputs remain unchanged
+- existing workflows remain usable
+- a new analytical module can be added through the documented interface without modifying core application logic
+- shared styling is centrally controlled rather than duplicated across modules
+- CI remains green
+
+---
+
 ### Phase 6 - Market Structure
 Status: NOT STARTED
 
@@ -305,7 +329,7 @@ Workflow materially improves preparation for at least:
 ### Phase 8 - Navigation and application refactor
 Status: NOT STARTED
 
-Move away from one large `app.py`.
+Continue the application refactor after Phase 5.5 has established the foundation.
 
 Target areas:
 - UI utilities
