@@ -7,13 +7,27 @@ import streamlit as st
 from dashboards.registry import INDUSTRY_DASHBOARD_CATALOG
 from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY
 from ui.formatting import brand_plotly, format_kpi_value
+from ui.components import render_orientation_card, render_page_intro, render_section_intro
 from ui.theme import BRAND_SEQUENCE
 
 
 def render_home(raw, get_kpi_data, navigate_to, industries):
-    st.header("Finansiel markedsoversigt")
-    st.caption("Få et hurtigt overblik over datagrundlaget, se sektorens centrale KPI'er "
-               "og gå direkte til den analyse, du har brug for.")
+    render_page_intro(
+        "Finansiel markedsoversigt",
+        "Start med et overblik over datagrundlaget, vælg en KPI eller gå direkte til en analyse.",
+    )
+    render_orientation_card(
+        "Find dit marked i navigationen",
+        "Brug sidepanelet til at vælge et marked og åbne dets KPI'er eller analyser.",
+    )
+    render_orientation_card(
+        "Få et hurtigt KPI-overblik",
+        "KPI-puls viser de seneste sektormedianer og fører videre til den enkelte KPI.",
+    )
+    render_orientation_card(
+        "Gå direkte til et arbejdsområde",
+        "Hurtig adgang åbner en valgt KPI eller analyse uden at gå gennem sidepanelet.",
+    )
     valid_years = pd.to_numeric(raw["ÅR"], errors="coerce").dropna()
     latest_year = int(valid_years.max()) if not valid_years.empty else None
     if latest_year is not None:
@@ -30,10 +44,10 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
     c4.metric("KPI'er", total_kpis)
     c5.metric("Analyser", total_dashboards)
 
-    st.divider()
-    st.subheader("KPI-puls")
-    st.caption("Vælg et marked og få et hurtigt snapshot af de seneste sektormedianer. "
-               "Klik direkte videre til den enkelte KPI.")
+    render_section_intro(
+        "KPI-puls",
+        "Vælg et marked og se de seneste sektormedianer, før du går videre til en KPI.",
+    )
     industries_with_kpis = [industry for industry in industries if INDUSTRY_KPI_CATALOG.get(industry, [])]
     if industries_with_kpis:
         pulse_industry = st.selectbox("Marked", industries_with_kpis, key="home_pulse_industry")
@@ -70,9 +84,10 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
     else:
         st.info("Der er endnu ingen KPI'er tilgængelige.")
 
-    st.divider()
-    st.subheader("Hurtig adgang")
-    st.caption("Gå direkte til en KPI eller analyse uden først at navigere gennem sidepanelet.")
+    render_section_intro(
+        "Hurtig adgang",
+        "Åbn en KPI eller analyse direkte, når du allerede ved, hvad du vil undersøge.",
+    )
     q1, q2, q3, q4 = st.columns([1.2, 1.0, 2.0, 0.8])
     with q1:
         quick_industry = st.selectbox("Marked", industries, key="home_quick_industry")
@@ -101,9 +116,10 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
         with q4:
             st.write("")
 
-    st.divider()
-    st.subheader("Datagrundlag")
-    st.caption("Udviklingen i antal selskaber med regnskabsdata i datasættet samt status pr. marked.")
+    render_section_intro(
+        "Datagrundlag",
+        "Se datadækningen over tid og status for de markeder, der er tilgængelige i løsningen.",
+    )
     left, right = st.columns([1.7, 1.0])
     with left:
         coverage_source = raw.copy()
@@ -138,9 +154,10 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
                                 "Analyser": len(INDUSTRY_DASHBOARD_CATALOG.get(industry, []))})
         st.dataframe(pd.DataFrame(status_rows), use_container_width=True, hide_index=True)
 
-    st.divider()
-    st.subheader("Markeder")
-    st.caption("Et samlet overblik over hvilke markeder, KPI'er og analyser der allerede er tilgængelige.")
+    render_section_intro(
+        "Markeder",
+        "Se hvilke markeder, KPI'er og analyser der er tilgængelige, før du går i dybden.",
+    )
     for row_industries in [industries[i:i + 3] for i in range(0, len(industries), 3)]:
         cols = st.columns(len(row_industries))
         for col, industry in zip(cols, row_industries):

@@ -2,7 +2,7 @@
 
 WHITE = "#FFFFFF"
 GREY_LIGHT = "#EEEEEE"
-GREY_DARK = "#A1A1A1"
+GREY_DARK = "#5C5C5C"
 BLACK = "#000000"
 PURPLE = "#412B48"
 DARK_RED = "#842044"
@@ -20,7 +20,7 @@ BRAND_SEQUENCE = [
     ROSE, OLIVE, PEACH, STONE,
 ]
 
-SPACING = {"section": "2rem", "content_bottom": "3rem", "max_width": "1450px"}
+SPACING = {"section": "2rem", "content_bottom": "3rem", "max_width": "1180px", "section_gap": "2.5rem"}
 TYPOGRAPHY = {"font_family": "Arial", "heading_letter_spacing": "-0.01em"}
 
 
@@ -79,6 +79,13 @@ def apply_theme(st_module):
             hr {{ border-color: {BEIGE}; }}
             a {{ color: {DARK_RED} !important; }}
             .nav-section-label {{ color: rgba(255,255,255,0.72); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; margin-bottom: 0.2rem; font-weight: 700; }}
+            .page-intro {{ margin: 0 0 {SPACING['section_gap']}; max-width: 760px; }}
+            .page-intro h1 {{ margin: 0 0 0.5rem; font-size: 2.1rem; }}
+            .page-intro p, .section-intro p, .orientation-card p {{ color: {GREY_DARK}; line-height: 1.55; margin: 0; }}
+            .section-intro {{ margin: {SPACING['section_gap']} 0 1rem; max-width: 760px; }}
+            .section-intro h2 {{ margin: 0 0 0.35rem; font-size: 1.35rem; }}
+            .orientation-card {{ border: 1px solid {BEIGE}; border-radius: 8px; background: #FAF9F8; padding: 1rem 1.1rem; margin: 0 0 0.7rem; }}
+            .orientation-card-title {{ color: {PURPLE}; font-weight: 700; margin-bottom: 0.2rem; }}
         </style>
         """,
         unsafe_allow_html=True,
