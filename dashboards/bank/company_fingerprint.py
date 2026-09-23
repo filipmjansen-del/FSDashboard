@@ -247,13 +247,18 @@ def render(raw):
         peer_median = float(current["KPI_Value"].median())
         direction = meta.get("direction", "neutral")
 
-        if direction == "lower_is_better":
+        if direction == "neutral":
+            percentile = None
+        elif direction == "lower_is_better":
             ranked = current["KPI_Value"].rank(pct=True, ascending=False) * 100
+            current = current.assign(_pct=ranked)
+            pct_row = current[current["regnr"] == str(target_regnr)]
+            percentile = None if pct_row.empty else float(pct_row["_pct"].iloc[-1])
         else:
             ranked = current["KPI_Value"].rank(pct=True, ascending=True) * 100
-        current = current.assign(_pct=ranked)
-        pct_row = current[current["regnr"] == str(target_regnr)]
-        percentile = None if pct_row.empty else float(pct_row["_pct"].iloc[-1])
+            current = current.assign(_pct=ranked)
+            pct_row = current[current["regnr"] == str(target_regnr)]
+            percentile = None if pct_row.empty else float(pct_row["_pct"].iloc[-1])
 
         previous = kpi[
             (kpi["ÅR"] == previous_year)
