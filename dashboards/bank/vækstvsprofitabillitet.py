@@ -128,6 +128,12 @@ def build_matrix_data(raw, calculate_kpi_fn, profitability_kpi, growth_key, year
     return matrix.dropna(subset=["Growth", "Profitability"])
 
 
+def default_banks_by_assets(matrix: pd.DataFrame, count: int = 5) -> list[str]:
+    """Return the largest available banks for the matrix's selected year."""
+    largest = matrix.dropna(subset=["Assets"]).sort_values("Assets", ascending=False)
+    return largest["navn"].drop_duplicates().head(count).tolist()
+
+
 def render(raw: pd.DataFrame):
     from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY, calculate_kpi
     from ui.components import render_page_intro, render_section_intro
@@ -183,10 +189,11 @@ def render(raw: pd.DataFrame):
         return
 
     bank_options = sorted(matrix["navn"].unique())
+    default_banks = default_banks_by_assets(matrix)
     selected_banks = st.multiselect(
         "Banker",
         bank_options,
-        default=bank_options,
+        default=default_banks,
         key="matrix_banks",
     )
     matrix = matrix[matrix["navn"].isin(selected_banks)].copy()
@@ -201,7 +208,10 @@ def render(raw: pd.DataFrame):
     # Use asset size for bubbles when available; otherwise equal-sized bubbles.
     size_col = "Assets" if matrix["Assets"].notna().any() else None
 
-    render_section_intro("Matrix", "Placerer de valgte banker efter vækst og profitabilitet i det valgte år.")
+    render_section_intro(
+        "Matrix",
+        "Placerer de valgte banker efter vækst og profitabilitet i det valgte år. Referencelinjerne er medianer for de aktuelt valgte banker.",
+    )
     fig = px.scatter(
         matrix,
         x="Growth",

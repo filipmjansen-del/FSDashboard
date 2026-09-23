@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from dashboards.bank.vækstvsprofitabillitet import build_matrix_data
+from dashboards.bank.vækstvsprofitabillitet import build_matrix_data, default_banks_by_assets
 from data_loader import load_raw_data
 from kpis.registry import KPI_REGISTRY, calculate_kpi
 
@@ -28,3 +28,13 @@ class GrowthProfitabilityRegressionTests(unittest.TestCase):
         }
 
         self.assertEqual(eligible, {"Egenkapitalforrentning før skat", "Egenkapitalforrentning efter skat"})
+
+    def test_default_selection_uses_five_largest_available_banks_by_assets(self):
+        matrix = build_matrix_data(
+            self.raw, calculate_kpi, "Egenkapitalforrentning før skat", "Aktivvækst", 2025
+        )
+        selected = default_banks_by_assets(matrix)
+
+        self.assertEqual(len(selected), 5)
+        selected_assets = matrix.set_index("navn").loc[selected, "Assets"].tolist()
+        self.assertEqual(selected_assets, sorted(selected_assets, reverse=True))
