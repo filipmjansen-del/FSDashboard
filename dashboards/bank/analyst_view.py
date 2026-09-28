@@ -12,8 +12,8 @@ from analytics.bank_analyst import (
     build_bank_analyst_view,
 )
 from output.excel import bank_analyst_filename, bank_analyst_workbook
-from ui.components import render_page_intro, render_section_intro
-from ui.formatting import brand_plotly, format_kpi_delta, format_kpi_value
+from ui.components import render_kpi_cards, render_page_intro, render_section_intro
+from ui.formatting import brand_plotly, format_kpi_delta, format_kpi_value, plotly_export_config
 from ui.theme import PURPLE
 
 
@@ -35,11 +35,11 @@ def _metric_meta(row: pd.Series) -> dict:
     return {"display_format": row["display_format"], "decimals": 1 if row["display_format"] == "percentage" else 2}
 
 
-def _history_chart(history: pd.DataFrame, display_name: str, meta: dict):
-    fig = px.line(history, x="fiscal_year", y="value", markers=True, color_discrete_sequence=[PURPLE])
-    brand_plotly(fig)
-    fig.update_layout(showlegend=False, height=260, margin=dict(l=20, r=20, t=20, b=20))
-    fig.update_xaxes(title="År", dtick=1)
+def _history_chart(history: pd.DataFrame, display_name: str, meta: dict, bank_name: str):
+    fig = px.line(history, x="fiscal_year", y="value", markers=True, title=display_name, color_discrete_sequence=[PURPLE])
+    brand_plotly(fig, subtitle=f"{bank_name} · op til fem tilgængelige finansår")
+    fig.update_layout(showlegend=False, height=250)
+    fig.update_xaxes(title=None, dtick=1)
     if meta["display_format"] == "percentage":
         fig.update_yaxes(title=display_name, tickformat=".0%")
     elif meta["display_format"] == "dkk_billion_tdk":
@@ -67,6 +67,7 @@ def render(raw: pd.DataFrame):
     render_page_intro(
         "Bank Analyst View",
         "Forbered et møde med én bank: aktuelle nøgletal, udvikling og dokumenteret benchmark i ét samlet workflow.",
+        context="Bank · Mødeforberedelse",
     )
     years = available_bank_years(raw)
     if not years:
@@ -74,6 +75,7 @@ def render(raw: pd.DataFrame):
         return
     saved_year = st.session_state.get("bank_peer_year")
     default_year = saved_year if saved_year in years else years[-1]
+    render_section_intro("Valg", "Vælg bank, finansår og benchmarkpopulation.")
     year = st.selectbox("År", years, index=years.index(default_year), key="analyst_year")
     entities = bank_entities_for_year(raw, year)
     if entities.empty:
@@ -94,14 +96,12 @@ def render(raw: pd.DataFrame):
     )
 
     render_section_intro("Bankoverblik", "Overblikket bygger på den valgte bank og den aktuelle benchmarkpopulation.")
-    overview_columns = st.columns(4)
-    overview_columns[0].metric("Bank", overview["display_name"])
-    overview_columns[1].metric(
-        "Aktiver i alt",
-        format_kpi_value(overview["total_assets"], {"display_format": "dkk_billion_tdk", "decimals": 1}),
-    )
-    overview_columns[2].metric("Benchmark", f"{overview['benchmark_size']} banker")
-    overview_columns[3].metric("Kernemetrikker med data", overview["metrics_with_data"])
+    render_kpi_cards([
+        (overview["display_name"], "Bank"),
+        (format_kpi_value(overview["total_assets"], {"display_format": "dkk_billion_tdk", "decimals": 1}), "Aktiver i alt"),
+        (f"{overview['benchmark_size']} banker", "Benchmark"),
+        (overview["metrics_with_data"], "Kernemetrikker med data"),
+    ])
 
     for section in SECTION_ORDER:
         section_rows = comparison.loc[comparison["section"].eq(section)].copy()
@@ -114,15 +114,20 @@ def render(raw: pd.DataFrame):
         for _, row in section_rows.iterrows():
             meta = _metric_meta(row)
             st.markdown(f"#### {row['display_name']}")
-            metric_columns = st.columns(3)
-            metric_columns[0].metric("Aktuel værdi", format_kpi_value(row["current_value"], meta))
-            metric_columns[1].metric(f"Ændring vs. {year - 1}", format_kpi_delta(row["yoy_change"], meta))
-            metric_columns[2].metric("Benchmarkmedian", format_kpi_value(row["peer_median"], meta))
+            render_kpi_cards([
+                (format_kpi_value(row["current_value"], meta), "Aktuel værdi"),
+                (format_kpi_delta(row["yoy_change"], meta), f"Ændring vs. {year - 1}"),
+                (format_kpi_value(row["peer_median"], meta), "Benchmarkmedian"),
+            ])
             metric_history = history.loc[history["metric_id"].eq(row["metric_id"])].copy()
             if metric_history.empty:
                 st.caption("Ingen historiske observationer med komplette input er tilgængelige for denne metrik.")
             else:
-                st.plotly_chart(_history_chart(metric_history, row["display_name"], meta), use_container_width=True)
+                st.plotly_chart(
+                    _history_chart(metric_history, row["display_name"], meta, overview["display_name"]),
+                    use_container_width=True,
+                    config=plotly_export_config(f"Databank_Bank_Analyst_{overview['regnr']}_{row['metric_id'].replace('.', '_')}"),
+                )
 
     render_section_intro("Detaljeret sammenligning", "Tabellen viser samme reproducerbare aktuelle værdi, YoY og benchmarkmedian som ovenfor.")
     table = comparison.copy()
@@ -137,7 +142,7 @@ def render(raw: pd.DataFrame):
         hide_index=True,
     )
     st.download_button(
-        "Download Bank Analyst View (Excel)",
+        "Download Excel",
         data=bank_analyst_workbook(comparison, history, overview, year, benchmark_definition),
         file_name=bank_analyst_filename(overview["display_name"], year),
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
