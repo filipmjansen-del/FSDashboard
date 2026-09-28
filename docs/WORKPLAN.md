@@ -249,7 +249,7 @@ Definition of Done:
 ---
 
 ### Phase 6 - Market Structure
-Status: NOT STARTED
+Status: COMPLETE
 
 Initial implementation:
 Insurance

@@ -36,6 +36,20 @@ Definitionerne følger den leverede `Finanstilsynet_noegletal_master.xlsx` og [r
 
 Combined ratio er **ikke nødvendigvis summen af de to viste bruttoprocenter**: nettogenforsikringsprocenten indgår også. Masterfilen angiver, at KPI-datasættet endnu ikke er afstemt én til én mod Finanstilsynets offentlige pivottabel.
 
+## Forsikringsmarkedets struktur
+
+Markedsstrukturen bruger den rapporterede råattribut `Res_BP_BeY` (bruttopræmier) som den første markedsværdibase. Den er ikke en ny KPI og justeres ikke med andre råattributter.
+
+- En juridisk enhed identificeres med `regnr`; navn vises kun som læseetiket.
+- Den årlige population omfatter alene selskaber med en observeret, positiv bruttopræmie. Manglende, nul og negative observationer er eksplicit ekskluderet og behandles aldrig som nul i beregningerne.
+- Markedsstørrelse, selskabsandele, CR1, CR3, CR5 og HHI beregnes fra præcis den samme inkluderede population. Selskabsandelene summerer derfor til 100 % inden for hvert år, bortset fra almindelig afrunding.
+- CR1, CR3 og CR5 er summen af de 1, 3 og 5 største selskabers andele. HHI er summen af kvadrerede andele på skalaen 0-10.000.
+- 2025 er markeret som et kendt databrud. Sammenlign året med forsigtighed, indtil den underliggende forsikringsdækning er afstemt.
+
+Den analytiske kildetabel indeholder pr. år og `regnr`: `market_value`, `market_share`, `rank`, `included_flag` og en eventuel `exclusion_reason`. Rapporterede bruttopræmier og de beregnede strukturmål holdes dermed adskilt.
+
+Kontrol af historiske år bekræftede blandt andet den inkluderede population og andelsafstemning for 2016 (68 enheder, markedsstørrelse 67.424.639), 2020 (53, 69.916.162) og 2024 (46, 83.649.765). Alle årlige inkluderede andele afstemmer til 100 %; 2025 (45, 75.819.299) vises med databrudsmarkering.
+
 ## Sådan læses graferne
 
 | Visning | Sådan læses den |
