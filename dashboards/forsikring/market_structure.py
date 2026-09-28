@@ -80,7 +80,7 @@ def render(raw_data: pd.DataFrame):
         "Historisk udvikling",
         "Udviklingen vises for det valgte årsinterval. Enhedstælling, CR5 og HHI bygger på samme årlige population som markedsstørrelsen.",
     )
-    st.plotly_chart(_line_chart(historical, "entity_count", "Antal juridiske enheder", "Antal"), use_container_width=True)
+    st.plotly_chart(_line_chart(historical, "entity_count", "Enheder med positive bruttopræmier", "Antal"), use_container_width=True)
     st.plotly_chart(_line_chart(historical, "market_size", "Markedsstørrelse", "t.DKK", ",.0f"), use_container_width=True)
     st.plotly_chart(_line_chart(historical, "cr5", "CR5", "Andel", ".0%"), use_container_width=True)
     st.plotly_chart(_line_chart(historical, "hhi", "HHI", "HHI (0-10.000)", ",.0f"), use_container_width=True)
