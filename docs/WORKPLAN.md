@@ -286,7 +286,7 @@ At least three historical years independently validated.
 ---
 
 ### Phase 7 - Bank Analyst View
-Status: NOT STARTED
+Status: COMPLETE
 
 Analytical structure:
 
