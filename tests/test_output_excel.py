@@ -47,18 +47,23 @@ class OutputExcelTests(unittest.TestCase):
         )
         workbook = load_workbook(BytesIO(insurance_market_structure_workbook(summary.head(1), source_table)), data_only=True)
 
-        self.assertEqual(workbook.sheetnames, ["Summary", "Market shares", "Methodology"])
-        summary_sheet = workbook["Summary"]
-        self.assertEqual([cell.value for cell in summary_sheet[1]], [
-            "year", "entity_count", "market_size", "cr1", "cr3", "cr5", "hhi", "known_data_break",
+        self.assertEqual(workbook.sheetnames, ["Overblik", "Markedsandele", "Metode"])
+        summary_sheet = workbook["Overblik"]
+        self.assertEqual([cell.value for cell in summary_sheet[6]], [
+            "År", "Enheder med positive bruttopræmier", "Markedsstørrelse (t.DKK)", "CR1", "CR3", "CR5", "HHI", "Kendt databrud",
         ])
-        self.assertEqual(summary_sheet["C2"].value, summary.iloc[0]["market_size"])
-        shares_sheet = workbook["Market shares"]
-        self.assertEqual([cell.value for cell in shares_sheet[1]], [
-            "year", "entity_id", "display_name", "market_value", "market_share", "rank", "included_flag", "exclusion_reason",
+        self.assertEqual(summary_sheet["C7"].value, summary.iloc[0]["market_size"])
+        self.assertEqual(summary_sheet["A6"].font.name, "Arial")
+        self.assertEqual(summary_sheet["A6"].fill.fgColor.rgb[-6:], "412B48")
+        self.assertFalse(summary_sheet.sheet_view.showGridLines)
+        self.assertEqual(summary_sheet.freeze_panes, "A7")
+        shares_sheet = workbook["Markedsandele"]
+        self.assertEqual([cell.value for cell in shares_sheet[4]], [
+            "År", "Selskab", "Enheds-ID", "Markedsværdi (t.DKK)", "Markedsandel", "Rang", "Indgår", "Eksklusionsårsag",
         ])
-        row_number = source_table.index[source_table["market_value"].isna()][0] + 2
+        row_number = source_table.index[source_table["market_value"].isna()][0] + 5
         self.assertIsNone(shares_sheet.cell(row=row_number, column=4).value)
+        self.assertEqual(shares_sheet["D5"].number_format, '#,##0;[Red](#,##0);-')
 
     def test_bank_export_preserves_exact_analyst_comparison_and_history(self):
         entities = bank_entities_for_year(self.raw, 2025)
@@ -70,19 +75,25 @@ class OutputExcelTests(unittest.TestCase):
             data_only=True,
         )
 
-        self.assertEqual(workbook.sheetnames, ["Overview", "Metric comparison", "History", "Methodology"])
-        comparison_sheet = workbook["Metric comparison"]
-        headers = [cell.value for cell in comparison_sheet[1]]
-        self.assertIn("benchmark_median", headers)
+        self.assertEqual(workbook.sheetnames, ["Overblik", "Metrikker", "Historik", "Metode", "Teknisk"])
+        comparison_sheet = workbook["Metrikker"]
+        headers = [cell.value for cell in comparison_sheet[4]]
+        self.assertEqual(headers, ["Sektion", "Metrik", "Aktuelt år", "Foregående år", "YoY", "Benchmarkmedian", "Enhed"])
+        self.assertNotIn("Metric ID", headers)
         profit_row = comparison.loc[comparison["metric_id"].eq("bank.profit_before_tax")].iloc[0]
         exported_row = next(
-            row for row in comparison_sheet.iter_rows(min_row=2, values_only=True)
-            if row[headers.index("metric_id")] == "bank.profit_before_tax"
+            row for row in comparison_sheet.iter_rows(min_row=5, values_only=True)
+            if row[headers.index("Metrik")] == profit_row["display_name"]
         )
-        self.assertEqual(exported_row[headers.index("current_value")], profit_row["current_value"])
-        self.assertEqual(exported_row[headers.index("peer_median") if "peer_median" in headers else headers.index("benchmark_median")], profit_row["peer_median"])
-        history_sheet = workbook["History"]
-        self.assertEqual(history_sheet.max_row - 1, len(history))
+        self.assertEqual(exported_row[headers.index("Aktuelt år")], profit_row["current_value"])
+        self.assertEqual(exported_row[headers.index("Benchmarkmedian")], profit_row["peer_median"])
+        self.assertEqual(comparison_sheet["C5"].number_format, '#,##0.0;[Red](#,##0.0);-')
+        self.assertEqual(comparison_sheet["A4"].font.name, "Arial")
+        self.assertFalse(comparison_sheet.sheet_view.showGridLines)
+        self.assertEqual(comparison_sheet.freeze_panes, "A5")
+        self.assertIn("Metric ID", [cell.value for cell in workbook["Teknisk"][4]])
+        history_sheet = workbook["Historik"]
+        self.assertEqual(history_sheet.max_row - 4, len(history))
 
     def test_filenames_are_deterministic_and_safe(self):
         self.assertEqual(insurance_market_structure_filename(2016, 2024), "Databank_Insurance_Market_Structure_2016-2024.xlsx")
