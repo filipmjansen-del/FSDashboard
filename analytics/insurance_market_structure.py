@@ -6,6 +6,8 @@ import pandas as pd
 
 
 GROSS_PREMIUM_ATTRIBUTE = "Res_BP_BeY"
+GROSS_PREMIUM_LABEL = "Bruttopræmier"
+MARKET_VALUE_UNIT = "tDKK"
 KNOWN_DATA_BREAK_YEARS = {2025}
 SOURCE_COLUMNS = [
     "year",
@@ -19,16 +21,25 @@ SOURCE_COLUMNS = [
 ]
 
 
-def build_market_structure_table(raw: pd.DataFrame) -> pd.DataFrame:
-    """Build the canonical population and market-share table for insurance."""
-    source = raw.loc[
-        (raw["Branche"] == "Forsikring")
-        & (raw["Attribute"] == GROSS_PREMIUM_ATTRIBUTE),
-        ["ÅR", "regnr", "navn", "Value"],
+def build_market_structure_table(canonical_observations: pd.DataFrame) -> pd.DataFrame:
+    """Build the canonical population and market-share table for insurance FY data."""
+    required_columns = {
+        "market", "entity_id", "display_name", "fiscal_year", "period_type",
+        "period_end_month", "attribute_id", "value",
+    }
+    missing_columns = sorted(required_columns.difference(canonical_observations.columns))
+    if missing_columns:
+        raise ValueError(f"Missing canonical columns: {missing_columns}")
+
+    source = canonical_observations.loc[
+        (canonical_observations["market"] == "Forsikring")
+        & (canonical_observations["attribute_id"] == GROSS_PREMIUM_ATTRIBUTE)
+        & (canonical_observations["period_type"] == "FY")
+        & (canonical_observations["period_end_month"] == 12),
+        ["fiscal_year", "entity_id", "display_name", "value"],
     ].copy()
     source.columns = ["year", "entity_id", "display_name", "market_value"]
     source["year"] = pd.to_numeric(source["year"], errors="coerce").astype("Int64")
-    source["entity_id"] = pd.to_numeric(source["entity_id"], errors="coerce").astype("Int64")
     source["market_value"] = pd.to_numeric(source["market_value"], errors="coerce")
 
     if source.duplicated(["year", "entity_id"]).any():
