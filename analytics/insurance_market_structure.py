@@ -1,85 +1,70 @@
-"""Insurance market-structure calculations based on reported gross premiums."""
+"""Insurance market structure calculated from F&P reported market shares."""
 
 from __future__ import annotations
 
 import pandas as pd
 
 
-GROSS_PREMIUM_ATTRIBUTE = "Res_BP_BeY"
-GROSS_PREMIUM_LABEL = "Bruttopræmier"
-MARKET_VALUE_UNIT = "tDKK"
-KNOWN_DATA_BREAK_YEARS = {2025}
 SOURCE_COLUMNS = [
-    "year",
-    "entity_id",
-    "display_name",
-    "market_value",
-    "market_share",
-    "rank",
-    "included_flag",
-    "exclusion_reason",
+    "year", "quarter", "period_end_month", "entity_name", "market_value",
+    "market_total", "market_share", "source_market_share_pct", "rank",
 ]
 
 
-def build_market_structure_table(canonical_observations: pd.DataFrame) -> pd.DataFrame:
-    """Build the canonical population and market-share table for insurance FY data."""
-    required_columns = {
-        "market", "entity_id", "display_name", "fiscal_year", "period_type",
-        "period_end_month", "attribute_id", "value",
+def build_market_structure_table(fp_source: pd.DataFrame) -> pd.DataFrame:
+    """Validate F&P's market-actor source and calculate ranks only."""
+    required = {
+        "market", "segment", "year", "quarter", "period_end_month", "entity_name",
+        "market_value_t_dkk", "market_total_t_dkk", "market_share", "source_market_share_pct",
     }
-    missing_columns = sorted(required_columns.difference(canonical_observations.columns))
-    if missing_columns:
-        raise ValueError(f"Missing canonical columns: {missing_columns}")
-
-    source = canonical_observations.loc[
-        (canonical_observations["market"] == "Forsikring")
-        & (canonical_observations["attribute_id"] == GROSS_PREMIUM_ATTRIBUTE)
-        & (canonical_observations["period_type"] == "FY")
-        & (canonical_observations["period_end_month"] == 12),
-        ["fiscal_year", "entity_id", "display_name", "value"],
-    ].copy()
-    source.columns = ["year", "entity_id", "display_name", "market_value"]
-    source["year"] = pd.to_numeric(source["year"], errors="coerce").astype("Int64")
-    source["market_value"] = pd.to_numeric(source["market_value"], errors="coerce")
-
-    if source.duplicated(["year", "entity_id"]).any():
-        raise ValueError("Duplicate insurance gross-premium observations per year and regnr.")
-
-    source["included_flag"] = source["market_value"].gt(0)
-    source["exclusion_reason"] = pd.NA
-    source.loc[source["market_value"].isna(), "exclusion_reason"] = "missing_gross_premiums"
-    source.loc[source["market_value"].notna() & source["market_value"].le(0), "exclusion_reason"] = (
-        "non_positive_gross_premiums"
-    )
-
-    included = source["included_flag"]
-    totals = source.loc[included].groupby("year")["market_value"].transform("sum")
-    source.loc[included, "market_share"] = source.loc[included, "market_value"] / totals
-    source["rank"] = pd.NA
-    source.loc[included, "rank"] = source.loc[included].groupby("year")["market_value"].rank(
-        method="first", ascending=False
-    )
-    source["rank"] = source["rank"].astype("Int64")
-    return source[SOURCE_COLUMNS].sort_values(["year", "included_flag", "rank", "entity_id"], ascending=[True, False, True, True]).reset_index(drop=True)
+    missing = sorted(required.difference(fp_source.columns))
+    if missing:
+        raise ValueError(f"Missing F&P market-structure columns: {missing}")
+    source = fp_source.loc[
+        (fp_source["market"] == "Forsikring")
+        & (fp_source["segment"] == "Skadeforsikring i alt")
+    ].copy().rename(columns={"market_value_t_dkk": "market_value", "market_total_t_dkk": "market_total"})
+    for column in ("year", "quarter", "period_end_month", "market_value", "market_total", "market_share", "source_market_share_pct"):
+        source[column] = pd.to_numeric(source[column], errors="coerce")
+    if source.duplicated(["year", "quarter", "entity_name"]).any():
+        raise ValueError("Duplicate F&P market-structure rows per year, quarter and entity_name.")
+    if source[["year", "quarter", "entity_name", "market_total", "market_share"]].isna().any().any():
+        raise ValueError("F&P market-structure rows must retain period, actor, total and reported share.")
+    if source.groupby(["year", "quarter"])["market_total"].nunique().gt(1).any():
+        raise ValueError("Inconsistent F&P market_total_t_dkk within a period.")
+    share_sums = source.groupby(["year", "quarter"])["market_share"].sum()
+    if not share_sums.between(0.99, 1.01).all():
+        raise ValueError("F&P reported market shares must reconcile to approximately 100% per period.")
+    source["rank"] = source.groupby(["year", "quarter"])["market_share"].rank(method="first", ascending=False).astype("Int64")
+    source["year"] = source["year"].astype("Int64")
+    source["quarter"] = source["quarter"].astype("Int64")
+    source["period_end_month"] = source["period_end_month"].astype("Int64")
+    return source[SOURCE_COLUMNS].sort_values(["year", "quarter", "rank", "entity_name"]).reset_index(drop=True)
 
 
 def summarize_market_structure(source_table: pd.DataFrame) -> pd.DataFrame:
-    """Calculate annual concentration metrics from one consistent included population."""
-    included = source_table.loc[source_table["included_flag"]].copy()
+    """Calculate concentration metrics from F&P's reported shares by quarter."""
     summaries = []
-    for year, group in included.groupby("year", sort=True):
-        shares = group.sort_values("rank")["market_share"]
-        summaries.append(
-            {
-                "year": int(year),
-                "entity_count": int(len(group)),
-                "market_size": float(group["market_value"].sum()),
-                "cr1": float(shares.head(1).sum()),
-                "cr3": float(shares.head(3).sum()),
-                "cr5": float(shares.head(5).sum()),
-                "hhi": float((shares.pow(2).sum()) * 10_000),
-                "excluded_entities": int((source_table["year"] == year).sum() - len(group)),
-                "known_data_break": int(year) in KNOWN_DATA_BREAK_YEARS,
-            }
-        )
+    for (year, quarter), group in source_table.groupby(["year", "quarter"], sort=True):
+        positive = group.loc[group["market_share"].gt(0)].sort_values("rank")
+        shares = positive["market_share"]
+        summaries.append({
+            "year": int(year), "quarter": int(quarter), "period_end_month": int(group["period_end_month"].iloc[0]),
+            "entity_count": int(len(positive)), "market_size": float(group["market_total"].iloc[0]),
+            "cr1": float(shares.head(1).sum()), "cr3": float(shares.head(3).sum()),
+            "cr5": float(shares.head(5).sum()), "hhi": float(shares.pow(2).sum() * 10_000),
+        })
     return pd.DataFrame(summaries)
+
+
+def latest_available_period(summary: pd.DataFrame) -> tuple[int, int]:
+    """Return the latest year/quarter in the F&P source."""
+    if summary.empty:
+        raise ValueError("No F&P market-structure periods are available.")
+    latest = summary.sort_values(["year", "quarter"]).iloc[-1]
+    return int(latest["year"]), int(latest["quarter"])
+
+
+def same_quarter_history(summary: pd.DataFrame, quarter: int) -> pd.DataFrame:
+    """Keep cumulative YTD comparisons like-for-like across years."""
+    return summary.loc[summary["quarter"].eq(quarter)].sort_values("year").copy()

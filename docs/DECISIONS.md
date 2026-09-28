@@ -198,7 +198,7 @@ Core calculations and analytical engines should be callable and testable without
 
 ## D017 - Insurance Market Structure methodology
 
-Status: LOCKED FOR INITIAL IMPLEMENTATION
+Status: SUPERSEDED
 
 Initial methodology:
 - legal entity based on `regnr`
@@ -208,7 +208,25 @@ Initial methodology:
 - known 2025 data break explicitly identified
 - source-of-truth table created before visualization
 
-Change only if source validation demonstrates that the methodology must be altered.
+Superseded by D022 after source validation showed that accounting gross-premium
+values could cover a different business or geographic scope from the intended
+market denominator.
+
+---
+
+## D022 - F&P reported Insurance Market Structure source
+
+Status: LOCKED
+
+Decision:
+Use F&P's published *Skadeforsikring i alt* market-actor population and
+reported market shares for Insurance Market Structure. Keep the source as a
+separate CSV; do not map market actors to legal-entity `regnr` identities.
+
+Reason:
+The prior accounting-gross-premium/legal-entity method was not geographically
+or population consistent for market-share analysis. In particular, values such
+as Tryg's can cover a different scope from the intended F&P denominator.
 
 ---
 
