@@ -131,6 +131,7 @@ def render(raw: pd.DataFrame):
 
     render_section_intro("Detaljeret sammenligning", "Tabellen viser samme reproducerbare aktuelle værdi, YoY og benchmarkmedian som ovenfor.")
     table = comparison.copy()
+    table["section"] = table["section"].map(SECTION_LABELS)
     table["Aktuel værdi"] = table.apply(lambda row: format_kpi_value(row["current_value"], _metric_meta(row)), axis=1)
     table[f"Ændring vs. {year - 1}"] = table.apply(lambda row: format_kpi_delta(row["yoy_change"], _metric_meta(row)), axis=1)
     table["Benchmarkmedian"] = table.apply(lambda row: format_kpi_value(row["peer_median"], _metric_meta(row)), axis=1)

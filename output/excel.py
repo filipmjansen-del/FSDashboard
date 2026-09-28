@@ -22,6 +22,12 @@ _HEADER_BORDER = Border(bottom=Side(style="thin", color="FFFFFF"))
 NUMBER_FORMAT = '#,##0;[Red](#,##0);-'
 DECIMAL_FORMAT = '#,##0.0;[Red](#,##0.0);-'
 PERCENTAGE_FORMAT = '0.0%;[Red](0.0%);-'
+_SECTION_LABELS = {
+    "Earnings": "Indtjening",
+    "Profitability": "Profitabilitet",
+    "Efficiency": "Effektivitet",
+    "Growth / balance sheet": "Vækst og balance",
+}
 
 
 def _blank_if_missing(value):
@@ -144,7 +150,9 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
         ("Aktiver i alt (t.DKK)", overview["total_assets"]), ("Kernemetrikker med data", overview["metrics_with_data"]),
         ("Regnr", overview["regnr"]), ("Enheds-ID", overview["entity_id"]),
     ]
-    metrics = comparison.loc[:, ["section", "display_name", "current_value", "previous_value", "yoy_change", "peer_median", "unit"]].rename(
+    metrics = comparison.loc[:, ["section", "display_name", "current_value", "previous_value", "yoy_change", "peer_median", "unit"]].assign(
+        section=lambda frame: frame["section"].map(_SECTION_LABELS)
+    ).rename(
         columns={"section": "Sektion", "display_name": "Metrik", "current_value": "Aktuelt år", "previous_value": "Foregående år", "yoy_change": "YoY", "peer_median": "Benchmarkmedian", "unit": "Enhed"}
     )
     metric_names = comparison.set_index("metric_id")["display_name"]
