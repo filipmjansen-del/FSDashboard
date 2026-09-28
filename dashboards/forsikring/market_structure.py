@@ -12,6 +12,7 @@ from analytics.insurance_market_structure import (
     summarize_market_structure,
 )
 from data.canonical import to_canonical_observations
+from output.excel import insurance_market_structure_filename, insurance_market_structure_workbook
 from ui.components import render_page_intro, render_section_intro
 from ui.formatting import brand_plotly
 from ui.theme import PURPLE
@@ -128,6 +129,12 @@ def render(raw_data: pd.DataFrame):
         use_container_width=True,
         hide_index=True,
     )
+    st.download_button(
+        "Download markedsstruktur (Excel)",
+        data=insurance_market_structure_workbook(historical, source_table.loc[source_table["year"].between(*selected_range)]),
+        file_name=insurance_market_structure_filename(*selected_range),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
     with st.expander("Metode og databegrænsninger"):
         st.markdown(
@@ -136,5 +143,6 @@ def render(raw_data: pd.DataFrame):
             - **Population:** juridiske enheder identificeres med `regnr` via den kanoniske `entity_id`. Kun observerede, positive bruttopræmier indgår; manglende, nul og negative værdier vises som ekskluderede.
             - **Beregninger:** CR1, CR3, CR5 og HHI er beregnet på samme inkluderede population som markedsstørrelsen. HHI vises på skalaen 0-10.000.
             - **Databrud:** 2025 er markeret som et kendt dækningsbrud og bør fortolkes med forsigtighed.
+            - **Output:** Tabellen kan hentes som Excel med metodekontekst. Plotly-diagrammer kan hentes som PNG fra download-knappen i diagrammets værktøjslinje.
             """
         )

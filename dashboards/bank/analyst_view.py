@@ -11,6 +11,7 @@ from analytics.bank_analyst import (
     bank_entities_for_year,
     build_bank_analyst_view,
 )
+from output.excel import bank_analyst_filename, bank_analyst_workbook
 from ui.components import render_page_intro, render_section_intro
 from ui.formatting import brand_plotly, format_kpi_delta, format_kpi_value
 from ui.theme import PURPLE
@@ -88,6 +89,9 @@ def render(raw: pd.DataFrame):
     )
     benchmark_ids, saved_group_used = _benchmark_ids(entity_id, entity_ids, year)
     comparison, history, overview = build_bank_analyst_view(raw, entity_id, year, benchmark_ids)
+    benchmark_definition = (
+        "Gemt peer group" if saved_group_used else "Alle banker med en observation i det valgte år"
+    )
 
     render_section_intro("Bankoverblik", "Overblikket bygger på den valgte bank og den aktuelle benchmarkpopulation.")
     overview_columns = st.columns(4)
@@ -132,6 +136,12 @@ def render(raw: pd.DataFrame):
         use_container_width=True,
         hide_index=True,
     )
+    st.download_button(
+        "Download Bank Analyst View (Excel)",
+        data=bank_analyst_workbook(comparison, history, overview, year, benchmark_definition),
+        file_name=bank_analyst_filename(overview["display_name"], year),
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
     with st.expander("Metode, dækning og afgrænsning"):
         benchmark_text = "den gemte peer group" if saved_group_used else "alle banker med en observation i det valgte år"
@@ -141,5 +151,6 @@ def render(raw: pd.DataFrame):
             - **YoY:** Aktuel værdi minus den samme metriks observerede værdi i det umiddelbart foregående finansår. Manglende data vises som `–` og erstattes ikke med nul.
             - **Proveniens:** Resultat før skat er rapporteret. De øvrige indtjenings- og balancemål er dokumenterede beregninger; ROE, indtjening pr. omkostningskrone og udlån/egenkapital genbruger KPI-registrets validerede beregninger.
             - **Udskudt:** Indlån, selvstændige omkostninger/cost-income, kapitalprocenter og risikomål indgår ikke, fordi deres definitioner endnu ikke er valideret.
+            - **Output:** Tabellen kan hentes som Excel med metodekontekst. Plotly-diagrammer kan hentes som PNG fra download-knappen i diagrammets værktøjslinje.
             """
         )
