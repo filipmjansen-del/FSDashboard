@@ -13,7 +13,7 @@ from analytics.bank_analyst import (
 )
 from output.excel import bank_analyst_filename, bank_analyst_workbook
 from ui.components import render_kpi_cards, render_page_intro, render_section_intro
-from ui.formatting import brand_plotly, format_kpi_delta, format_kpi_value, plotly_export_config
+from ui.formatting import brand_plotly, format_danish_kpi_delta, format_danish_kpi_value, plotly_export_config
 from ui.theme import PURPLE
 
 
@@ -98,7 +98,7 @@ def render(raw: pd.DataFrame):
     render_section_intro("Bankoverblik", "Overblikket bygger på den valgte bank og den aktuelle benchmarkpopulation.")
     render_kpi_cards([
         (overview["display_name"], "Bank"),
-        (format_kpi_value(overview["total_assets"], {"display_format": "dkk_billion_tdk", "decimals": 1}), "Aktiver i alt"),
+        (format_danish_kpi_value(overview["total_assets"], {"display_format": "dkk_billion_tdk", "decimals": 1}), "Aktiver i alt"),
         (f"{overview['benchmark_size']} banker", "Benchmark"),
         (overview["metrics_with_data"], "Kernemetrikker med data"),
     ])
@@ -115,9 +115,9 @@ def render(raw: pd.DataFrame):
             meta = _metric_meta(row)
             st.markdown(f"#### {row['display_name']}")
             render_kpi_cards([
-                (format_kpi_value(row["current_value"], meta), "Aktuel værdi"),
-                (format_kpi_delta(row["yoy_change"], meta), f"Ændring vs. {year - 1}"),
-                (format_kpi_value(row["peer_median"], meta), "Benchmarkmedian"),
+                (format_danish_kpi_value(row["current_value"], meta), "Aktuel værdi"),
+                (format_danish_kpi_delta(row["yoy_change"], meta), f"Ændring vs. {year - 1}"),
+                (format_danish_kpi_value(row["peer_median"], meta), "Benchmarkmedian"),
             ])
             metric_history = history.loc[history["metric_id"].eq(row["metric_id"])].copy()
             if metric_history.empty:
@@ -132,9 +132,9 @@ def render(raw: pd.DataFrame):
     render_section_intro("Detaljeret sammenligning", "Tabellen viser samme reproducerbare aktuelle værdi, YoY og benchmarkmedian som ovenfor.")
     table = comparison.copy()
     table["section"] = table["section"].map(SECTION_LABELS)
-    table["Aktuel værdi"] = table.apply(lambda row: format_kpi_value(row["current_value"], _metric_meta(row)), axis=1)
-    table[f"Ændring vs. {year - 1}"] = table.apply(lambda row: format_kpi_delta(row["yoy_change"], _metric_meta(row)), axis=1)
-    table["Benchmarkmedian"] = table.apply(lambda row: format_kpi_value(row["peer_median"], _metric_meta(row)), axis=1)
+    table["Aktuel værdi"] = table.apply(lambda row: format_danish_kpi_value(row["current_value"], _metric_meta(row)), axis=1)
+    table[f"Ændring vs. {year - 1}"] = table.apply(lambda row: format_danish_kpi_delta(row["yoy_change"], _metric_meta(row)), axis=1)
+    table["Benchmarkmedian"] = table.apply(lambda row: format_danish_kpi_value(row["peer_median"], _metric_meta(row)), axis=1)
     st.dataframe(
         table.rename(columns={"display_name": "Metrik", "section": "Sektion", "validation_status": "Valideringsstatus"})[
             ["Sektion", "Metrik", "Aktuel værdi", f"Ændring vs. {year - 1}", "Benchmarkmedian", "Valideringsstatus"]

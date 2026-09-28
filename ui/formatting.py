@@ -22,6 +22,44 @@ def format_kpi_value(value, meta):
     display_format = meta.get("display_format", "number")
     decimals = meta.get("decimals", 2)
     if display_format == "multiple":
+        return f"{value:.{decimals}f}x"
+    if display_format == "percentage":
+        return f"{value:.{decimals}%}"
+    if display_format == "integer":
+        return f"{value:,.0f}"
+    if display_format == "dkk":
+        return f"DKK {value:,.{decimals}f}"
+    if display_format == "dkk_million":
+        return f"DKK {value / 1_000_000:,.{decimals}f} mio."
+    if display_format == "dkk_billion":
+        return f"DKK {value / 1_000_000_000:,.{decimals}f} mia."
+    if display_format == "dkk_billion_tdk":
+        return f"DKK {value / 1_000_000:,.{decimals}f} mia."
+    return f"{value:,.{decimals}f}"
+
+
+def format_kpi_delta(value, meta):
+    """Format a year-on-year absolute change without treating missing as zero."""
+    if pd.isna(value):
+        return "–"
+    display_format = meta.get("display_format", "number")
+    decimals = meta.get("decimals", 2)
+    if display_format == "percentage":
+        return f"{value * 100:+.{decimals}f} pp"
+    if display_format == "multiple":
+        return f"{value:+.{decimals}f}x"
+    if display_format == "dkk_billion_tdk":
+        return f"DKK {value / 1_000_000:+,.{decimals}f} mia."
+    return f"{value:+,.{decimals}f}"
+
+
+def format_danish_kpi_value(value, meta):
+    """Format flagship analytical values for Danish-facing presentation."""
+    if pd.isna(value):
+        return "–"
+    display_format = meta.get("display_format", "number")
+    decimals = meta.get("decimals", 2)
+    if display_format == "multiple":
         return f"{format_danish_number(value, decimals)}x"
     if display_format == "percentage":
         return f"{format_danish_number(value * 100, decimals)} %"
@@ -38,8 +76,8 @@ def format_kpi_value(value, meta):
     return format_danish_number(value, decimals)
 
 
-def format_kpi_delta(value, meta):
-    """Format a year-on-year absolute change without treating missing as zero."""
+def format_danish_kpi_delta(value, meta):
+    """Format flagship analytical deltas without treating missing values as zero."""
     if pd.isna(value):
         return "–"
     display_format = meta.get("display_format", "number")
