@@ -13,7 +13,15 @@ from analytics.bank_analyst import (
 )
 from output.excel import bank_analyst_filename, bank_analyst_workbook
 from ui.components import render_kpi_cards, render_page_intro, render_section_intro
-from ui.formatting import brand_plotly, format_danish_kpi_delta, format_danish_kpi_value, plotly_export_config
+from ui.formatting import (
+    apply_kpi_axis_format,
+    brand_plotly,
+    chart_axis_title,
+    chart_display_values,
+    format_danish_kpi_delta,
+    format_danish_kpi_value,
+    plotly_export_config,
+)
 from ui.theme import PURPLE
 
 
@@ -36,16 +44,14 @@ def _metric_meta(row: pd.Series) -> dict:
 
 
 def _history_chart(history: pd.DataFrame, display_name: str, meta: dict, bank_name: str):
-    fig = px.line(history, x="fiscal_year", y="value", markers=True, title=display_name, color_discrete_sequence=[PURPLE])
-    brand_plotly(fig, subtitle=f"{bank_name} · op til fem tilgængelige finansår")
-    fig.update_layout(showlegend=False, height=250)
+    chart_data = chart_display_values(history, meta)
+    year_range = f"{int(chart_data['fiscal_year'].min())}-{int(chart_data['fiscal_year'].max())}"
+    fig = px.line(chart_data, x="fiscal_year", y="chart_value", markers=True, title=display_name, color_discrete_sequence=[PURPLE])
+    brand_plotly(fig, subtitle=f"{bank_name} · {year_range}")
+    fig.update_layout(showlegend=False, height=280)
     fig.update_xaxes(title=None, dtick=1)
-    if meta["display_format"] == "percentage":
-        fig.update_yaxes(title=display_name, tickformat=".0%")
-    elif meta["display_format"] == "dkk_billion_tdk":
-        fig.update_yaxes(title=f"{display_name} (t.DKK)", tickformat=",.0f")
-    else:
-        fig.update_yaxes(title=display_name)
+    apply_kpi_axis_format(fig, meta)
+    fig.update_yaxes(title=chart_axis_title(meta))
     return fig
 
 

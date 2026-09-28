@@ -98,6 +98,10 @@ def apply_kpi_axis_format(fig, meta, axis="y"):
         settings = {"tickformat": f".{decimals}f", "ticksuffix": "x"}
     elif display_format == "percentage":
         settings = {"tickformat": f".{decimals}%"}
+    elif display_format == "dkk_billion_tdk":
+        # Chart values are presentation-scaled from t.DKK to DKK mia. by
+        # ``chart_display_values``; keep the axis formatter value-agnostic.
+        settings = {"tickformat": f".{decimals}f"}
     elif display_format == "integer":
         settings = {"tickformat": ",.0f"}
     elif display_format == "dkk":
@@ -108,6 +112,25 @@ def apply_kpi_axis_format(fig, meta, axis="y"):
         settings = {"tickformat": f",.{decimals}f"}
     (fig.update_xaxes if axis == "x" else fig.update_yaxes)(**settings)
     return fig
+
+
+def chart_display_values(history: pd.DataFrame, meta: dict) -> pd.DataFrame:
+    """Return presentation-scaled chart data without changing analytical values."""
+    chart_data = history.copy()
+    chart_data["chart_value"] = chart_data["value"]
+    if meta.get("display_format") == "dkk_billion_tdk":
+        chart_data["chart_value"] = chart_data["chart_value"] / 1_000_000
+    return chart_data
+
+
+def chart_axis_title(meta: dict) -> str:
+    """Return the concise presentation unit for a historical chart axis."""
+    return {
+        "dkk_billion_tdk": "DKK mia.",
+        "multiple": "x",
+        "percentage": "%",
+        "integer": "Antal",
+    }.get(meta.get("display_format"), "")
 
 
 def get_plotly_hover_format(meta):
@@ -143,15 +166,15 @@ def brand_plotly(fig, *, legend_title=None, subtitle: str | None = None):
     fig.update_layout(
         template="plotly_white", paper_bgcolor=WHITE, plot_bgcolor=WHITE,
         font=dict(color=BLACK, family="Arial", size=13), title_font=dict(color=PURPLE, size=18),
-        title=dict(text=title_text, x=0, xanchor="left"),
+        title=dict(text=title_text, x=0, xanchor="left", y=0.98, yanchor="top", pad=dict(b=10)),
         legend_title_text=legend_title,
         legend=dict(bgcolor="rgba(255,255,255,0)", font=dict(color=BLACK)),
-        margin=dict(l=12, r=20, t=58, b=28),
+        margin=dict(l=64, r=28, t=82, b=44),
         hoverlabel=dict(bgcolor=PURPLE, font_color=WHITE, bordercolor=PURPLE),
     )
     fig.update_xaxes(showgrid=False, linecolor=BEIGE, tickfont=dict(color=BLACK),
-                     title_font=dict(color=GREY_DARK), zeroline=False, fixedrange=True)
+                     title_font=dict(color=GREY_DARK), zeroline=False, fixedrange=True, automargin=True)
     fig.update_yaxes(gridcolor=GREY_LIGHT, linecolor=BEIGE, tickfont=dict(color=BLACK),
-                     title_font=dict(color=GREY_DARK), zeroline=False, fixedrange=True)
+                     title_font=dict(color=GREY_DARK), zeroline=False, fixedrange=True, automargin=True)
     fig.update_traces(selector={"type": "scatter"}, line={"width": 2.4}, marker={"size": 6})
     return fig

@@ -39,7 +39,9 @@ def apply_theme(st_module):
                 --brand-black: {BLACK}; --brand-white: {WHITE};
                 --primary-color: {PURPLE}; --secondary-background-color: #FAF9F8;
             }}
-            .stApp, .stApp * {{ font-family: Arial, sans-serif; }}
+            /* Let Streamlit's Material Symbols keep their own icon font. */
+            .stApp {{ font-family: Arial, sans-serif; }}
+            .stApp [data-testid="stIconMaterial"] {{ font-family: "Material Symbols Rounded" !important; }}
             .stApp {{ background-color: {WHITE}; color: {BLACK}; }}
             .block-container {{ padding-top: {SPACING['section']}; padding-bottom: {SPACING['content_bottom']}; max-width: {SPACING['max_width']}; }}
             h1, h2, h3, h4, h5, h6 {{ color: {PURPLE} !important; letter-spacing: {TYPOGRAPHY['heading_letter_spacing']}; }}

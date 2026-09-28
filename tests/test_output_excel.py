@@ -55,6 +55,7 @@ class OutputExcelTests(unittest.TestCase):
         self.assertEqual(summary_sheet["C7"].value, summary.iloc[0]["market_size"])
         self.assertEqual(summary_sheet["A6"].font.name, "Arial")
         self.assertEqual(summary_sheet["A6"].fill.fgColor.rgb[-6:], "412B48")
+        self.assertEqual(summary_sheet["H1"].fill.fgColor.rgb[-6:], "412B48")
         self.assertFalse(summary_sheet.sheet_view.showGridLines)
         self.assertEqual(summary_sheet.freeze_panes, "A7")
         shares_sheet = workbook["Markedsandele"]
@@ -87,13 +88,21 @@ class OutputExcelTests(unittest.TestCase):
         )
         self.assertEqual(exported_row[headers.index("Aktuelt år")], profit_row["current_value"])
         self.assertEqual(exported_row[headers.index("Benchmarkmedian")], profit_row["peer_median"])
-        self.assertEqual(comparison_sheet["C5"].number_format, '#,##0.0;[Red](#,##0.0);-')
+        self.assertEqual(comparison_sheet["C5"].number_format, '0.00,, "DKK mia.";[Red](0.00,, "DKK mia.");-')
+        financial_row = next(
+            row for row in comparison_sheet.iter_rows(min_row=5)
+            if row[headers.index("Metrik")].value == "Netto renteindtægter"
+        )
+        self.assertEqual(financial_row[headers.index("Enhed")].value, "DKK mia.")
+        self.assertEqual(financial_row[headers.index("Aktuelt år")].number_format, '0.00,, "DKK mia.";[Red](0.00,, "DKK mia.");-')
+        self.assertEqual(comparison_sheet["G1"].fill.fgColor.rgb[-6:], "412B48")
         self.assertEqual(comparison_sheet["A4"].font.name, "Arial")
         self.assertFalse(comparison_sheet.sheet_view.showGridLines)
         self.assertEqual(comparison_sheet.freeze_panes, "A5")
         self.assertIn("Metric ID", [cell.value for cell in workbook["Teknisk"][4]])
         history_sheet = workbook["Historik"]
         self.assertEqual(history_sheet.max_row - 4, len(history))
+        self.assertTrue(any(workbook["Metode"].row_dimensions[row].height > 16 for row in range(5, workbook["Metode"].max_row + 1)))
 
     def test_filenames_are_deterministic_and_safe(self):
         self.assertEqual(insurance_market_structure_filename(2016, 2024), "Databank_Insurance_Market_Structure_2016-2024.xlsx")
