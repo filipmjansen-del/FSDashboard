@@ -110,8 +110,8 @@ def _apply_metric_number_formats(worksheet, frame: pd.DataFrame, *, header_row: 
     header_indexes = {header: index + 1 for index, header in enumerate(frame.columns)}
     for offset, (_, row) in enumerate(frame.iterrows(), start=header_row + 1):
         number_format = {
-            "percentage": PERCENTAGE_FORMAT,
-            "multiple": MULTIPLE_FORMAT,
+            "%": PERCENTAGE_FORMAT,
+            "x": MULTIPLE_FORMAT,
             "DKK mia.": DKK_BILLION_TDK_FORMAT,
         }.get(row["Enhed"], DECIMAL_FORMAT)
         for header in value_columns:
@@ -167,7 +167,7 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
     ]
     metrics = comparison.loc[:, ["section", "display_name", "current_value", "previous_value", "yoy_change", "peer_median", "unit", "display_format"]].assign(
         section=lambda frame: frame["section"].map(_SECTION_LABELS),
-        unit=lambda frame: frame["display_format"].map({"dkk_billion_tdk": "DKK mia."}).fillna(frame["unit"]),
+        unit=lambda frame: frame["display_format"].map({"dkk_billion_tdk": "DKK mia.", "percentage": "%", "multiple": "x"}).fillna(frame["unit"]),
     ).rename(
         columns={"section": "Sektion", "display_name": "Metrik", "current_value": "Aktuelt år", "previous_value": "Foregående år", "yoy_change": "YoY", "peer_median": "Benchmarkmedian", "unit": "Enhed"}
     )
@@ -177,7 +177,7 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
     metric_display_formats = comparison.set_index("metric_id")["display_format"]
     history_table = history.loc[:, ["metric_id", "fiscal_year", "value"]].assign(
         Metrik=lambda frame: frame["metric_id"].map(metric_names),
-        Enhed=lambda frame: frame["metric_id"].map(metric_display_formats).map({"dkk_billion_tdk": "DKK mia."}).fillna(frame["metric_id"].map(metric_units)),
+        Enhed=lambda frame: frame["metric_id"].map(metric_display_formats).map({"dkk_billion_tdk": "DKK mia.", "percentage": "%", "multiple": "x"}).fillna(frame["metric_id"].map(metric_units)),
     )[["Metrik", "fiscal_year", "value", "Enhed"]].rename(columns={"fiscal_year": "Finansår", "value": "Værdi"})
     technical = comparison.loc[:, ["metric_id", "display_name", "source_type", "calculation_type", "validation_status", "display_format", "definition"]].rename(
         columns={"metric_id": "Metric ID", "display_name": "Metrik", "source_type": "Kildetype", "calculation_type": "Beregningstype", "validation_status": "Valideringsstatus", "display_format": "Visningsformat", "definition": "Definition"}

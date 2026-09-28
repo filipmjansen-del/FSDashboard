@@ -96,6 +96,11 @@ class OutputExcelTests(unittest.TestCase):
         )
         self.assertEqual(financial_row[headers.index("Enhed")].value, "DKK mia.")
         self.assertEqual(financial_row[headers.index("Aktuelt år")].number_format, '0.00,, "DKK mia.";[Red](0.00,, "DKK mia.");-')
+        unit_values = [row[headers.index("Enhed")].value for row in comparison_sheet.iter_rows(min_row=5)]
+        self.assertIn("%", unit_values)
+        self.assertIn("x", unit_values)
+        self.assertNotIn("percentage", unit_values)
+        self.assertNotIn("multiple", unit_values)
         self.assertEqual(comparison_sheet["G1"].fill.fgColor.rgb[-6:], "412B48")
         self.assertEqual(workbook["Overblik"]["B4"].alignment.horizontal, "left")
         self.assertEqual(workbook["Overblik"]["B5"].alignment.horizontal, "left")

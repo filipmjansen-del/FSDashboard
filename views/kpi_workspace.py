@@ -213,7 +213,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
             )
             st.dataframe(
                 table.style.format(
-                    lambda value: format_kpi_value(value, meta),
+                    lambda value: format_danish_kpi_value(value, meta),
                     na_rep="–",
                 ),
                 use_container_width=True,
@@ -249,8 +249,8 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
 
             c1, c2, c3, c4 = st.columns(4)
             c1.metric("Seneste tilgængelige år", last_year)
-            c2.metric(kpi_name, format_kpi_value(last_row["KPI_Value"], meta))
-            c3.metric("Sektormedian", format_kpi_value(sector_median, meta))
+            c2.metric(kpi_name, format_danish_kpi_value(last_row["KPI_Value"], meta))
+            c3.metric("Sektormedian", format_danish_kpi_value(sector_median, meta))
             c4.metric("År med komplette data", int(entity_valid["ÅR"].nunique()))
 
             fig = px.line(
@@ -288,7 +288,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
             calculation_rows.append(
                 {
                     "Element": kpi_name,
-                    "Værdi": format_kpi_value(last_row["KPI_Value"], meta),
+                    "Værdi": format_danish_kpi_value(last_row["KPI_Value"], meta),
                 }
             )
 
@@ -386,7 +386,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
                 }
             )
 
-            table_formats = {kpi_name: lambda value: format_kpi_value(value, meta)}
+            table_formats = {kpi_name: lambda value: format_danish_kpi_value(value, meta)}
             if has_direction:
                 table_formats["Percentil"] = "{:.0f}"
             st.dataframe(
