@@ -317,19 +317,32 @@ The documented v0.1 workflow materially improves preparation for at least:
 ---
 
 ### Phase 8 - Navigation and application refactor
-Status: NOT STARTED
+Status: COMPLETE
 
-Continue the application refactor after Phase 5.5 has established the foundation.
+Phase 5.5, Insurance Market Structure and Bank Analyst View completed the
+remaining platform foundation incrementally. No broad refactor was required.
 
-Target areas:
-- UI utilities
-- navigation
-- formatting
-- data layer
-- views
-- analytics
+Phase 8 scope assessment:
 
-Navigation should increasingly reflect analytical jobs rather than only data categories.
+- UI utilities and formatting: sufficiently addressed through centralized theme,
+  components and formatting utilities; individual legacy cleanup remains
+  incremental work only when it supports a concrete workflow.
+- Navigation: the left, industry-first sidebar with KPI and Analysis subsections
+  supports discovery of current Bank and Insurance workflows. The homepage also
+  provides direct access. A job-first navigation redesign is deferred until a
+  larger module catalogue demonstrates a material discovery problem.
+- Data layer: the current raw-data facade and canonical adapter serve the
+  existing modules without a demonstrated need for another abstraction.
+- Views and application dispatch: app entrypoint, module registry and workspace
+  views have separated responsibilities.
+- Analytics: Market Structure and Bank Analyst View provide Streamlit-independent
+  engines; existing KPI calculations remain reusable through the registry.
+
+Deliberately deferred:
+
+- navigation redesign beyond the current sidebar and direct-access patterns
+- new data abstraction without a concrete module requirement
+- broad cleanup of legacy analytical modules
 
 ---
 
