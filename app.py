@@ -26,9 +26,6 @@ def get_kpi_data(kpi_name: str):
 
 initialize_navigation_state()
 
-st.title("Finansiel Sektoranalyse")
-st.caption("Analyse og benchmarking af den danske finansielle sektor")
-
 render_sidebar()
 
 dispatch_module(

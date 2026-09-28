@@ -20,7 +20,7 @@ BRAND_SEQUENCE = [
     ROSE, OLIVE, PEACH, STONE,
 ]
 
-SPACING = {"section": "2rem", "content_bottom": "3rem", "max_width": "1180px", "section_gap": "2.5rem"}
+SPACING = {"section": "1.35rem", "content_bottom": "2.5rem", "max_width": "1180px", "section_gap": "1.65rem"}
 TYPOGRAPHY = {"font_family": "Arial", "heading_letter_spacing": "-0.01em"}
 
 
@@ -39,6 +39,7 @@ def apply_theme(st_module):
                 --brand-black: {BLACK}; --brand-white: {WHITE};
                 --primary-color: {PURPLE}; --secondary-background-color: #FAF9F8;
             }}
+            .stApp, .stApp * {{ font-family: Arial, sans-serif; }}
             .stApp {{ background-color: {WHITE}; color: {BLACK}; }}
             .block-container {{ padding-top: {SPACING['section']}; padding-bottom: {SPACING['content_bottom']}; max-width: {SPACING['max_width']}; }}
             h1, h2, h3, h4, h5, h6 {{ color: {PURPLE} !important; letter-spacing: {TYPOGRAPHY['heading_letter_spacing']}; }}
@@ -64,7 +65,7 @@ def apply_theme(st_module):
             [data-testid="stSidebar"] .stButton > button:focus, [data-testid="stSidebar"] .stButton > button:focus-visible {{ outline: none !important; box-shadow: none !important; }}
             [data-testid="stSidebar"] .stButton > button[kind="primary"]:active, [data-testid="stSidebar"] .stButton > button[kind="primary"]:focus, [data-testid="stSidebar"] .stButton > button[kind="primary"]:focus-visible {{ background: {DARK_RED} !important; color: {WHITE} !important; border-color: {DARK_RED} !important; }}
             [data-testid="stSidebar"] .stButton > button[kind="secondary"]:active, [data-testid="stSidebar"] .stButton > button[kind="secondary"]:focus, [data-testid="stSidebar"] .stButton > button[kind="secondary"]:focus-visible {{ background: rgba(255,255,255,0.07) !important; color: {WHITE} !important; border-color: rgba(255,255,255,0.18) !important; }}
-            [data-testid="stMetric"] {{ background: {WHITE}; border: 1px solid {BEIGE}; border-left: 5px solid {PURPLE}; border-radius: 10px; padding: 0.9rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }}
+            [data-testid="stMetric"] {{ background: {WHITE}; border: 1px solid {BEIGE}; border-left: 3px solid {PURPLE}; border-radius: 2px; padding: 0.65rem 0.8rem; box-shadow: none; }}
             [data-testid="stMetricLabel"] {{ color: {GREY_DARK} !important; }}
             [data-testid="stMetricValue"] {{ color: {PURPLE} !important; }}
             section.main .stButton > button {{ background-color: {PURPLE}; color: {WHITE}; border: 1px solid {PURPLE}; border-radius: 8px; }}
@@ -76,22 +77,27 @@ def apply_theme(st_module):
             [data-testid="stSlider"] [role="slider"] {{ background-color: {PURPLE} !important; }}
             [data-testid="stRadio"] [role="radio"][aria-checked="true"] {{ border-color: {PURPLE} !important; background-color: {PURPLE} !important; }}
             [data-testid="stCheckbox"] [data-checked="true"] {{ background-color: {PURPLE} !important; border-color: {PURPLE} !important; }}
-            section.main [data-testid="stExpander"] {{ border: 1px solid {BEIGE}; border-radius: 8px; background: {WHITE}; }}
+            section.main [data-testid="stExpander"] {{ border: 1px solid {BEIGE}; border-radius: 2px; background: {WHITE}; }}
             button[data-baseweb="tab"] {{ color: {GREY_DARK}; }}
             button[data-baseweb="tab"][aria-selected="true"] {{ color: {PURPLE} !important; }}
             button[data-baseweb="tab"][aria-selected="true"]::after {{ background-color: {PURPLE} !important; }}
-            [data-testid="stAlert"] {{ border-radius: 8px; }}
-            [data-testid="stDataFrame"] {{ border: 1px solid {BEIGE}; border-radius: 8px; overflow: hidden; }}
+            [data-testid="stAlert"] {{ border-radius: 2px; }}
+            [data-testid="stDataFrame"] {{ border: 1px solid {BEIGE}; border-radius: 2px; overflow: hidden; }}
             hr {{ border-color: {BEIGE}; }}
             a {{ color: {DARK_RED} !important; }}
             .nav-section-label {{ color: rgba(255,255,255,0.84); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; margin-bottom: 0.2rem; font-weight: 700; }}
             .page-intro {{ margin: 0 0 {SPACING['section_gap']}; max-width: 760px; }}
-            .page-intro h1 {{ margin: 0 0 0.5rem; font-size: 2.1rem; }}
-            .page-intro p, .section-intro p, .orientation-card p {{ color: {GREY_DARK}; line-height: 1.55; margin: 0; }}
-            .section-intro {{ margin: {SPACING['section_gap']} 0 1rem; max-width: 760px; }}
-            .section-intro h2 {{ margin: 0 0 0.35rem; font-size: 1.35rem; }}
+            .page-context {{ color: {GREY_DARK}; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.35rem; }}
+            .page-intro h1 {{ margin: 0 0 0.35rem; font-size: 2rem; line-height: 1.15; }}
+            .page-intro p, .section-intro p, .orientation-card p {{ color: {GREY_DARK}; line-height: 1.45; margin: 0; }}
+            .section-intro {{ margin: {SPACING['section_gap']} 0 0.65rem; max-width: 760px; }}
+            .section-intro h2 {{ margin: 0 0 0.2rem; font-size: 1.2rem; line-height: 1.25; }}
             .orientation-card {{ border: 1px solid {BEIGE}; border-radius: 8px; background: #FAF9F8; padding: 1rem 1.1rem; margin: 0 0 0.7rem; }}
             .orientation-card-title {{ color: {PURPLE}; font-weight: 700; margin-bottom: 0.2rem; }}
+            .kpi-card {{ min-height: 5.8rem; background: {WHITE}; border: 1px solid {BEIGE}; border-top: 3px solid {PURPLE}; padding: 0.65rem 0.8rem; margin: 0 0 0.4rem; }}
+            .kpi-value {{ color: {PURPLE}; font-size: 1.55rem; font-weight: 700; line-height: 1.18; margin-bottom: 0.35rem; }}
+            .kpi-label {{ color: {BLACK}; font-size: 0.83rem; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }}
+            .warning-callout {{ background: #F8EFF2; border-left: 3px solid {DARK_RED}; color: {BLACK}; padding: 0.7rem 0.85rem; margin: 0 0 1rem; line-height: 1.4; }}
         </style>
         """,
         unsafe_allow_html=True,
