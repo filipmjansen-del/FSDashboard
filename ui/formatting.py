@@ -22,7 +22,24 @@ def format_kpi_value(value, meta):
         return f"DKK {value / 1_000_000:,.{decimals}f} mio."
     if display_format == "dkk_billion":
         return f"DKK {value / 1_000_000_000:,.{decimals}f} mia."
+    if display_format == "dkk_billion_tdk":
+        return f"DKK {value / 1_000_000:,.{decimals}f} mia."
     return f"{value:,.{decimals}f}"
+
+
+def format_kpi_delta(value, meta):
+    """Format a year-on-year absolute change without treating missing as zero."""
+    if pd.isna(value):
+        return "–"
+    display_format = meta.get("display_format", "number")
+    decimals = meta.get("decimals", 2)
+    if display_format == "percentage":
+        return f"{value * 100:+.{decimals}f} pp"
+    if display_format == "multiple":
+        return f"{value:+.{decimals}f}x"
+    if display_format == "dkk_billion_tdk":
+        return f"DKK {value / 1_000_000:+,.{decimals}f} mia."
+    return f"{value:+,.{decimals}f}"
 
 
 def apply_kpi_axis_format(fig, meta, axis="y"):
