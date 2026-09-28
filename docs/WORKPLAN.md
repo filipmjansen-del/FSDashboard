@@ -347,13 +347,13 @@ Deliberately deferred:
 ---
 
 ### Phase 9 - Output layer
-Status: NOT STARTED
+Status: COMPLETE
 
-Add:
-- table export
-- chart export
-- source and methodology visibility
-- slide-ready analytical output where valuable
+Delivered v0.1:
+- XLSX exports based directly on the Insurance Market Structure and Bank Analyst View analytical tables
+- source and methodology context included with each export
+- deterministic, human-readable filenames
+- presentation-ready PNG chart download through Plotly's existing chart toolbar
 
 Definition of Done:
 A Databank analysis can be reused in consulting work without reconstructing the analysis manually.
