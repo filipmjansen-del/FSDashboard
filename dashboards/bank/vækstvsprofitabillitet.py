@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from ui.formatting import apply_kpi_axis_format, brand_plotly, format_danish_kpi_value, plotly_export_config
+from ui.theme import BEIGE, BLUE_GREY, COGNAC, DARK_RED, PURPLE
 
 
 DASHBOARD_META = {
@@ -9,12 +11,6 @@ DASHBOARD_META = {
     "slug": "growth_profitability_matrix",
     "description": "Positionerer banker på vækst og profitabilitet med balance som boblestørrelse.",
 }
-
-PURPLE = "#412B48"
-DARK_RED = "#842044"
-COGNAC = "#B25F4D"
-BEIGE = "#DBD4CF"
-BLUE_GREY = "#B8CACE"
 
 GROWTH_METRICS = {
     "Aktivvækst": {
@@ -245,28 +241,22 @@ def render(raw: pd.DataFrame):
     fig.add_hline(y=y_median, line_dash="dash", line_color=DARK_RED)
     fig.update_traces(textposition="top center", marker=dict(opacity=0.78))
     fig.update_layout(
-        template="plotly_white",
         height=700,
-        margin=dict(l=20, r=20, t=20, b=20),
         coloraxis_colorbar=dict(title=profitability_kpi),
     )
     fig.update_xaxes(tickformat=".1%")
-    if meta.get("display_format") == "percentage":
-        fig.update_yaxes(tickformat=f".{meta.get('decimals', 1)}%")
-    elif meta.get("display_format") == "multiple":
-        fig.update_yaxes(ticksuffix="x", tickformat=f".{meta.get('decimals', 2)}f")
+    apply_kpi_axis_format(fig, meta)
+    brand_plotly(fig)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_Bank_Growth_Profitability_{year}"))
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Banker i matrix", len(matrix))
     c2.metric("Median vækst", f"{x_median:.1%}")
     if meta.get("display_format") == "percentage":
-        c3.metric("Median profitabilitet", f"{y_median:.{meta.get('decimals', 1)}%}")
-    elif meta.get("display_format") == "multiple":
-        c3.metric("Median profitabilitet", f"{y_median:.{meta.get('decimals', 2)}f}x")
+        c3.metric("Median profitabilitet", format_danish_kpi_value(y_median, meta))
     else:
-        c3.metric("Median profitabilitet", f"{y_median:,.2f}")
+        c3.metric("Median profitabilitet", format_danish_kpi_value(y_median, meta))
 
     st.caption(
         "Bemærk: 'Udlånsvækst (balanceudlån, ikke repo-justeret)' er en analytisk vækst i "

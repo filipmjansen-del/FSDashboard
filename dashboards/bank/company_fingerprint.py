@@ -4,6 +4,8 @@ import streamlit as st
 
 from kpis.registry import KPI_REGISTRY, calculate_kpi
 from ui.components import render_page_intro, render_section_intro
+from ui.formatting import brand_plotly, format_danish_kpi_delta, format_danish_kpi_value, plotly_export_config
+from ui.theme import COGNAC, PURPLE
 
 
 DASHBOARD_META = {
@@ -14,60 +16,12 @@ DASHBOARD_META = {
 }
 
 
-PURPLE = "#412B48"
-DARK_RED = "#842044"
-COGNAC = "#B25F4D"
-BEIGE = "#DBD4CF"
-GREY_LIGHT = "#EEEEEE"
-GREY_DARK = "#A1A1A1"
-WHITE = "#FFFFFF"
-BLACK = "#000000"
-
-
 def _format_kpi_value(value, meta):
-    if pd.isna(value):
-        return "–"
-
-    display_format = meta.get("display_format", "number")
-    decimals = meta.get("decimals", 2)
-
-    if display_format == "multiple":
-        return f"{value:.{decimals}f}x"
-    if display_format == "percentage":
-        return f"{value:.{decimals}%}"
-    if display_format == "integer":
-        return f"{value:,.0f}"
-    if display_format == "dkk":
-        return f"DKK {value:,.{decimals}f}"
-    if display_format == "dkk_million":
-        return f"DKK {value / 1_000_000:,.{decimals}f}m"
-    if display_format == "dkk_billion":
-        return f"DKK {value / 1_000_000_000:,.{decimals}f}bn"
-
-    return f"{value:,.{decimals}f}"
+    return format_danish_kpi_value(value, meta)
 
 
 def _format_delta(value, meta):
-    if pd.isna(value):
-        return "–"
-
-    display_format = meta.get("display_format", "number")
-    decimals = meta.get("decimals", 2)
-
-    if display_format == "percentage":
-        return f"{value * 100:+.{decimals}f} pp"
-    if display_format == "multiple":
-        return f"{value:+.{decimals}f}x"
-    if display_format == "integer":
-        return f"{value:+,.0f}"
-    if display_format == "dkk":
-        return f"DKK {value:+,.{decimals}f}"
-    if display_format == "dkk_million":
-        return f"DKK {value / 1_000_000:+,.{decimals}f}m"
-    if display_format == "dkk_billion":
-        return f"DKK {value / 1_000_000_000:+,.{decimals}f}bn"
-
-    return f"{value:+,.{decimals}f}"
+    return format_danish_kpi_delta(value, meta)
 
 
 def _bank_kpis():
@@ -328,13 +282,10 @@ def render(raw):
             height=max(420, 55 * len(chart_df)),
             yaxis_title=None,
             xaxis_title="Relativ placering i benchmarkgruppen",
-            paper_bgcolor=WHITE,
-            plot_bgcolor=WHITE,
-            margin=dict(l=20, r=20, t=20, b=20),
             showlegend=False,
-            font=dict(color=BLACK),
         )
-        st.plotly_chart(fig, use_container_width=True)
+        brand_plotly(fig)
+        st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_Bank_Fingerprint_{year}"))
         st.caption(
             "50% svarer omtrent til midten af benchmarkgruppen. For KPI'er markeret som lower_is_better "
             "vendes percentilen, så en lavere KPI-værdi giver en højere relativ placering. Neutrale KPI'er "

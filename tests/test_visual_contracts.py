@@ -37,6 +37,7 @@ class VisualContractTests(unittest.TestCase):
         self.assertEqual(displayed["chart_value"].tolist(), [2.0, 4.0])
         self.assertEqual(figure.layout.yaxis.title.text, "DKK mia.")
         self.assertIn("AL Sydbank · 2021-2025", figure.layout.title.text)
+        self.assertGreaterEqual(figure.layout.margin.t, 100)
 
     def test_bank_multiple_chart_uses_x_axis_unit(self):
         history = pd.DataFrame({"fiscal_year": [2021, 2025], "value": [4.5, 5.0]})

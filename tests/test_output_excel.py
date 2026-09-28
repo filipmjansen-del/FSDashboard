@@ -58,6 +58,7 @@ class OutputExcelTests(unittest.TestCase):
         self.assertEqual(summary_sheet["H1"].fill.fgColor.rgb[-6:], "412B48")
         self.assertFalse(summary_sheet.sheet_view.showGridLines)
         self.assertEqual(summary_sheet.freeze_panes, "A7")
+        self.assertEqual(summary_sheet["A7"].number_format, "0")
         shares_sheet = workbook["Markedsandele"]
         self.assertEqual([cell.value for cell in shares_sheet[4]], [
             "År", "Selskab", "Enheds-ID", "Markedsværdi (t.DKK)", "Markedsandel", "Rang", "Indgår", "Eksklusionsårsag",
@@ -96,13 +97,19 @@ class OutputExcelTests(unittest.TestCase):
         self.assertEqual(financial_row[headers.index("Enhed")].value, "DKK mia.")
         self.assertEqual(financial_row[headers.index("Aktuelt år")].number_format, '0.00,, "DKK mia.";[Red](0.00,, "DKK mia.");-')
         self.assertEqual(comparison_sheet["G1"].fill.fgColor.rgb[-6:], "412B48")
+        self.assertEqual(workbook["Overblik"]["B4"].alignment.horizontal, "left")
+        self.assertEqual(workbook["Overblik"]["B5"].alignment.horizontal, "left")
         self.assertEqual(comparison_sheet["A4"].font.name, "Arial")
         self.assertFalse(comparison_sheet.sheet_view.showGridLines)
         self.assertEqual(comparison_sheet.freeze_panes, "A5")
         self.assertIn("Metric ID", [cell.value for cell in workbook["Teknisk"][4]])
         history_sheet = workbook["Historik"]
         self.assertEqual(history_sheet.max_row - 4, len(history))
-        self.assertTrue(any(workbook["Metode"].row_dimensions[row].height > 16 for row in range(5, workbook["Metode"].max_row + 1)))
+        self.assertEqual(history_sheet["B5"].number_format, "0")
+        self.assertTrue(all(workbook["Metode"].row_dimensions[row].height == 16 for row in range(5, workbook["Metode"].max_row + 1)))
+        self.assertTrue(all(workbook["Teknisk"].row_dimensions[row].height == 16 for row in range(5, workbook["Teknisk"].max_row + 1)))
+        self.assertGreater(workbook["Metode"].column_dimensions["B"].width, 100)
+        self.assertGreater(workbook["Teknisk"].column_dimensions["G"].width, 100)
 
     def test_filenames_are_deterministic_and_safe(self):
         self.assertEqual(insurance_market_structure_filename(2016, 2024), "Databank_Insurance_Market_Structure_2016-2024.xlsx")

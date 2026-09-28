@@ -3,6 +3,9 @@ import plotly.express as px
 import streamlit as st
 
 from analytics.bank_income import INCOME_COMPONENTS as COMPONENTS, calculate_accounting_income_mix
+from ui.components import render_page_intro, render_section_intro
+from ui.formatting import brand_plotly, plotly_export_config
+from ui.theme import BRAND_SEQUENCE, DARK_RED, PURPLE
 
 
 DASHBOARD_META = {
@@ -13,73 +16,20 @@ DASHBOARD_META = {
 }
 
 
-# Thursday palette
-PURPLE = "#412B48"
-DARK_RED = "#842044"
-COGNAC = "#B25F4D"
-BLUE_GREY = "#B8CACE"
-PURPLE_LIGHT = "#8C8AF8"
-ROSE = "#DCB9CA"
-PEACH = "#F5C1AE"
-STONE = "#A9A69F"
-OLIVE = "#877470"
-WHITE = "#FFFFFF"
-GREY_LIGHT = "#EEEEEE"
-BLACK = "#000000"
-
-
 COLOR_MAP = {
     "Netto renteindtægter": PURPLE,
-    "Udbytte af aktier mv.": BLUE_GREY,
+    "Udbytte af aktier mv.": BRAND_SEQUENCE[4],
     "Netto gebyr- og provisionsindtægter": DARK_RED,
-    "Kursreguleringer": COGNAC,
-    "Andre driftsindtægter": PURPLE_LIGHT,
-    "Resultat af kapitalandele": ROSE,
+    "Kursreguleringer": BRAND_SEQUENCE[2],
+    "Andre driftsindtægter": BRAND_SEQUENCE[3],
+    "Resultat af kapitalandele": BRAND_SEQUENCE[5],
 }
 
 
 _calculate_income_mix = calculate_accounting_income_mix
 
 
-def _brand_chart(fig):
-    fig.update_layout(
-        template="plotly_white",
-        paper_bgcolor=WHITE,
-        plot_bgcolor=WHITE,
-        font=dict(color=BLACK, family="Arial"),
-        margin=dict(l=20, r=20, t=55, b=20),
-        legend_title_text="Indtægtskilde",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="left",
-            x=0,
-        ),
-        hoverlabel=dict(
-            bgcolor=PURPLE,
-            font_color=WHITE,
-            bordercolor=PURPLE,
-        ),
-    )
-    fig.update_xaxes(
-        showgrid=False,
-        linecolor=GREY_LIGHT,
-        title=None,
-    )
-    fig.update_yaxes(
-        gridcolor=GREY_LIGHT,
-        linecolor=GREY_LIGHT,
-        title="Andel af indtægter",
-        ticksuffix="%",
-    )
-    return fig
-
-
 def render(raw: pd.DataFrame):
-    from ui.components import render_page_intro, render_section_intro
-
-    st.caption("Bank  /  Analyse")
     render_page_intro(
         "Regnskabsmæssigt indtjeningsmix",
         "Hver bank normaliseres til sin egen samlede indtjening, så store og små banker kan sammenlignes direkte.",
@@ -161,8 +111,9 @@ def render(raw: pd.DataFrame):
         )
     )
 
-    _brand_chart(fig)
-    st.plotly_chart(fig, use_container_width=True)
+    brand_plotly(fig, legend_title="Indtægtskilde")
+    fig.update_yaxes(title="Andel af indtægter", ticksuffix="%")
+    st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_Bank_Income_Mix_{selected_year}"))
 
     has_negative = (chart_df["SharePct"] < 0).any()
     if has_negative:

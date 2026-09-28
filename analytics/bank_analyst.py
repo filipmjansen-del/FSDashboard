@@ -28,6 +28,12 @@ ANALYST_METRICS = (
         "required_attributes": tuple(INCOME_COMPONENTS["Netto renteindtægter"]["required"]),
         "formula": INCOME_COMPONENTS["Netto renteindtægter"]["formula"],
         "definition": "Res_Rind_RY minus Res_Rudg_RY.",
+        "formula_label": "Res_Rind_RY − Res_Rudg_RY",
+        "description": "Netto renteindtægter er renteindtægter fratrukket renteudgifter.",
+        "interpretation": "Målet er et absolut indtjeningsmål og påvirkes stærkt af bankens størrelse.",
+        "reading_guide": "Ændringer kan afspejle renter, udlåns- og indlånsvolumen, funding samt balancesammensætning; det er ikke en margin.",
+        "direction": "neutral",
+        "caveat": "Sammenligninger bør ses sammen med bankens størrelse og forretningsmodel.",
     },
     {
         "metric_id": "bank.net_fee_commission_income",
@@ -41,6 +47,12 @@ ANALYST_METRICS = (
         "required_attributes": tuple(INCOME_COMPONENTS["Netto gebyr- og provisionsindtægter"]["required"]),
         "formula": INCOME_COMPONENTS["Netto gebyr- og provisionsindtægter"]["formula"],
         "definition": "Res_GPi_RY minus Res_GPu_RY.",
+        "formula_label": "Res_GPi_RY − Res_GPu_RY",
+        "description": "Netto gebyr- og provisionsindtægter er gebyr- og provisionsindtægter fratrukket udgifter.",
+        "interpretation": "Målet viser det absolutte indtjeningsbidrag fra gebyrbaserede aktiviteter.",
+        "reading_guide": "Værdien er stærkt påvirket af bankens størrelse og forretningsmix.",
+        "direction": "neutral",
+        "caveat": "Målet er ikke en direkte sammenligning af effektivitet eller margin.",
     },
     {
         "metric_id": "bank.profit_before_tax",
@@ -54,6 +66,12 @@ ANALYST_METRICS = (
         "required_attributes": (PROFIT_ATTRIBUTE,),
         "formula": lambda frame: frame[PROFIT_ATTRIBUTE],
         "definition": f"Rapporteret {PROFIT_ATTRIBUTE}.",
+        "formula_label": f"Rapporteret {PROFIT_ATTRIBUTE}",
+        "description": "Resultat før skat er det rapporterede resultat før beskatning.",
+        "interpretation": "Målet er et bredt, absolut indtjeningsmål, som er størrelsesafhængigt.",
+        "reading_guide": "Ekstraordinære eller volatile poster kan påvirke sammenligneligheden mellem år og banker.",
+        "direction": "neutral",
+        "caveat": "Resultatet er rapporteret og ikke beregnet af Databank.",
     },
     {
         "metric_id": "bank.roe_pre_tax",
@@ -79,6 +97,12 @@ ANALYST_METRICS = (
         "required_attributes": tuple(LOAN_ATTRIBUTES),
         "formula": lambda frame: frame[list(LOAN_ATTRIBUTES)].sum(axis=1, min_count=len(LOAN_ATTRIBUTES)),
         "definition": "Bal_BO_Autd plus Bal_BO_Auta.",
+        "formula_label": "Bal_BO_Autd + Bal_BO_Auta",
+        "description": "Udlån i alt er et dokumenteret balancemål baseret på de aktuelt validerede udlånsattributter.",
+        "interpretation": "Målet beskriver balance- og eksponeringsstørrelse, ikke performance.",
+        "reading_guide": "Absolutte værdier er størrelsesafhængige.",
+        "direction": "neutral",
+        "caveat": "Målet omfatter alene de validerede udlånsattributter i definitionen.",
     },
     {
         "metric_id": "bank.loans_to_equity",
@@ -103,6 +127,13 @@ def _metric_metadata(spec: dict) -> dict:
         "unit": registry_meta["unit"],
         "display_format": registry_meta["unit"],
         "definition": registry_meta["formula_label"],
+        "formula_label": registry_meta["formula_label"],
+        "description": registry_meta.get("description"),
+        "interpretation": registry_meta.get("interpretation"),
+        "reading_guide": registry_meta.get("reading_guide"),
+        "direction": registry_meta.get("direction", "neutral"),
+        "direction_explanation": registry_meta.get("direction_explanation"),
+        "caveat": registry_meta.get("caveat"),
     }
 
 
@@ -226,6 +257,7 @@ def build_bank_analyst_view(
                 "source_type": meta["source_type"],
                 "calculation_type": meta["calculation_type"],
                 "definition": meta["definition"],
+                "definition_meta": meta,
             }
         )
         history = metric_values.loc[

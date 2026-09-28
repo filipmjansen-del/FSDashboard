@@ -166,10 +166,10 @@ def brand_plotly(fig, *, legend_title=None, subtitle: str | None = None):
     fig.update_layout(
         template="plotly_white", paper_bgcolor=WHITE, plot_bgcolor=WHITE,
         font=dict(color=BLACK, family="Arial", size=13), title_font=dict(color=PURPLE, size=18),
-        title=dict(text=title_text, x=0, xanchor="left", y=0.98, yanchor="top", pad=dict(b=10)),
+        title=dict(text=title_text, x=0, xanchor="left", y=0.99, yanchor="top", pad=dict(b=12)),
         legend_title_text=legend_title,
         legend=dict(bgcolor="rgba(255,255,255,0)", font=dict(color=BLACK)),
-        margin=dict(l=64, r=28, t=82, b=44),
+        margin=dict(l=64, r=28, t=100, b=44),
         hoverlabel=dict(bgcolor=PURPLE, font_color=WHITE, bordercolor=PURPLE),
     )
     fig.update_xaxes(showgrid=False, linecolor=BEIGE, tickfont=dict(color=BLACK),

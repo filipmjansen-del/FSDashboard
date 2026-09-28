@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from io import BytesIO
 import re
-from math import ceil
 
 import pandas as pd
 from openpyxl import Workbook
@@ -21,6 +20,7 @@ _TITLE_FONT = Font(name="Arial", size=16, bold=True, color=WHITE.removeprefix("#
 _HEADER_BORDER = Border(bottom=Side(style="thin", color="FFFFFF"))
 
 NUMBER_FORMAT = '#,##0;[Red](#,##0);-'
+YEAR_FORMAT = '0'
 DECIMAL_FORMAT = '#,##0.0;[Red](#,##0.0);-'
 PERCENTAGE_FORMAT = '0.0%;[Red](0.0%);-'
 MULTIPLE_FORMAT = '0.0x;[Red](0.0x);-'
@@ -59,20 +59,13 @@ def _apply_title_band(worksheet, end_column: int) -> None:
         cell.font = _TITLE_FONT
 
 
-def _wrapped_row_height(value: object, width: float) -> float:
-    if value is None:
-        return 16
-    return max(16, 15 * ceil(len(str(value)) / max(width * 1.15, 1)))
-
-
 def _write_key_values(worksheet, values: list[tuple[str, object]], start_row: int = 4):
     for offset, (label, value) in enumerate(values):
         row = start_row + offset
         worksheet.cell(row=row, column=1, value=label).font = Font(name="Arial", size=10, bold=True)
         cell = worksheet.cell(row=row, column=2, value=_blank_if_missing(value))
         cell.font = _BODY_FONT
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
-            cell.alignment = Alignment(horizontal="right")
+        cell.alignment = Alignment(horizontal="left", vertical="center")
     return start_row + len(values) + 1
 
 
@@ -89,20 +82,17 @@ def _write_table(worksheet, frame: pd.DataFrame, *, start_row: int, number_forma
     worksheet.row_dimensions[start_row].height = 20
 
     for row_index, row in enumerate(frame.itertuples(index=False, name=None), start=start_row + 1):
-        wrapped_height = 16
+        worksheet.row_dimensions[row_index].height = 16
         for column_index, (header, value) in enumerate(zip(frame.columns, row), start=1):
             cell = worksheet.cell(row=row_index, column=column_index, value=_blank_if_missing(value))
             cell.font = _BODY_FONT
             cell.alignment = Alignment(
                 horizontal="right" if header in number_formats else "left",
-                vertical="top",
-                wrap_text=header in {"Beskrivelse", "Definition", "Eksklusionsårsag"},
+                vertical="center",
+                wrap_text=False,
             )
             if header in number_formats:
                 cell.number_format = number_formats[header]
-            if header in {"Beskrivelse", "Definition", "Eksklusionsårsag"}:
-                wrapped_height = max(wrapped_height, _wrapped_row_height(value, worksheet.column_dimensions[cell.column_letter].width))
-        worksheet.row_dimensions[row_index].height = wrapped_height
     worksheet.freeze_panes = f"A{start_row + 1}"
 
 
@@ -156,13 +146,13 @@ def insurance_market_structure_workbook(summary: pd.DataFrame, source_table: pd.
     def build(workbook):
         overview = _new_sheet(workbook, "Overblik", "Insurance Market Structure")
         _write_key_values(overview, [("Periode", period.removeprefix("Valgt periode: "))])
-        _write_table(overview, summary_table, start_row=6, number_formats={"År": NUMBER_FORMAT, "Enheder med positive bruttopræmier": NUMBER_FORMAT, "Markedsstørrelse (t.DKK)": NUMBER_FORMAT, "CR1": PERCENTAGE_FORMAT, "CR3": PERCENTAGE_FORMAT, "CR5": PERCENTAGE_FORMAT, "HHI": NUMBER_FORMAT}, widths={"Enheder med positive bruttopræmier": 34, "Markedsstørrelse (t.DKK)": 25, "Kendt databrud": 18})
+        _write_table(overview, summary_table, start_row=6, number_formats={"År": YEAR_FORMAT, "Enheder med positive bruttopræmier": NUMBER_FORMAT, "Markedsstørrelse (t.DKK)": NUMBER_FORMAT, "CR1": PERCENTAGE_FORMAT, "CR3": PERCENTAGE_FORMAT, "CR5": PERCENTAGE_FORMAT, "HHI": NUMBER_FORMAT}, widths={"Enheder med positive bruttopræmier": 34, "Markedsstørrelse (t.DKK)": 25, "Kendt databrud": 18})
         _apply_title_band(overview, len(summary_table.columns))
         shares = _new_sheet(workbook, "Markedsandele", period)
         _write_table(shares, shares_table, start_row=4, number_formats={"År": NUMBER_FORMAT, "Markedsværdi (t.DKK)": NUMBER_FORMAT, "Markedsandel": PERCENTAGE_FORMAT, "Rang": NUMBER_FORMAT}, widths={"Selskab": 34, "Enheds-ID": 20, "Markedsværdi (t.DKK)": 24, "Eksklusionsårsag": 30})
         _apply_title_band(shares, len(shares_table.columns))
         method = _new_sheet(workbook, "Metode", "Kilde og afgrænsning")
-        _write_table(method, methodology, start_row=4, widths={"Emne": 22, "Beskrivelse": 70})
+        _write_table(method, methodology, start_row=4, widths={"Emne": 22, "Beskrivelse": 120})
         _apply_title_band(method, len(methodology.columns))
 
     return _workbook_bytes(build)
@@ -207,6 +197,7 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
     def build(workbook):
         overview_sheet = _new_sheet(workbook, "Overblik", "Bank Analyst View")
         _write_key_values(overview_sheet, overview_values)
+        overview_sheet["B5"].number_format = YEAR_FORMAT
         overview_sheet["B7"].number_format = DKK_BILLION_TDK_ONE_DECIMAL_FORMAT
         overview_sheet["B8"].number_format = NUMBER_FORMAT
         overview_sheet.column_dimensions["A"].width = 28
@@ -217,14 +208,14 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
         _apply_metric_number_formats(metrics_sheet, metrics, header_row=4, value_columns=["Aktuelt år", "Foregående år", "YoY", "Benchmarkmedian"])
         _apply_title_band(metrics_sheet, len(metrics.columns))
         history_sheet = _new_sheet(workbook, "Historik", f"{overview['display_name']} · op til fem tilgængelige finansår")
-        _write_table(history_sheet, history_table, start_row=4, number_formats={"Finansår": NUMBER_FORMAT, "Værdi": DECIMAL_FORMAT}, widths={"Metrik": 36, "Finansår": 14, "Værdi": 20, "Enhed": 14})
+        _write_table(history_sheet, history_table, start_row=4, number_formats={"Finansår": YEAR_FORMAT, "Værdi": DECIMAL_FORMAT}, widths={"Metrik": 36, "Finansår": 14, "Værdi": 20, "Enhed": 14})
         _apply_metric_number_formats(history_sheet, history_table, header_row=4, value_columns=["Værdi"])
         _apply_title_band(history_sheet, len(history_table.columns))
         method_sheet = _new_sheet(workbook, "Metode", "Kilde og afgrænsning")
-        _write_table(method_sheet, methodology, start_row=4, widths={"Emne": 22, "Beskrivelse": 70})
+        _write_table(method_sheet, methodology, start_row=4, widths={"Emne": 22, "Beskrivelse": 120})
         _apply_title_band(method_sheet, len(methodology.columns))
         technical_sheet = _new_sheet(workbook, "Teknisk", "Teknisk metadata til reproducerbarhed")
-        _write_table(technical_sheet, technical, start_row=4, widths={"Metric ID": 32, "Metrik": 36, "Valideringsstatus": 32, "Definition": 72})
+        _write_table(technical_sheet, technical, start_row=4, widths={"Metric ID": 32, "Metrik": 36, "Kildetype": 26, "Beregningstype": 22, "Valideringsstatus": 36, "Visningsformat": 22, "Definition": 120})
         _apply_title_band(technical_sheet, len(technical.columns))
 
     return _workbook_bytes(build)

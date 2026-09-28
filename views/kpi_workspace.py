@@ -5,8 +5,8 @@ import plotly.express as px
 import streamlit as st
 
 from kpis.registry import get_metric_metadata
-from ui.formatting import apply_kpi_axis_format, brand_plotly, format_kpi_value, get_plotly_hover_format
-from ui.components import render_page_intro, render_section_intro
+from ui.formatting import apply_kpi_axis_format, brand_plotly, format_danish_kpi_value, get_plotly_hover_format, plotly_export_config
+from ui.components import render_metric_definition, render_page_intro, render_section_intro
 from ui.theme import BEIGE, BLUE_GREY, BRAND_SEQUENCE, COGNAC, PURPLE, WHITE
 
 
@@ -42,60 +42,6 @@ def get_entity_labels(meta, industry):
     )
 
 
-def show_kpi_definition(meta):
-    formula_label = meta.get("formula_label", "Formeldefinition ikke angivet.")
-    description = meta.get("description")
-    interpretation = meta.get("interpretation")
-    direction = meta.get("direction", "neutral")
-    direction_explanation = meta.get("direction_explanation")
-    caveat = meta.get("caveat")
-    reading_guide = meta.get("reading_guide")
-
-    direction_labels = {
-        "higher_is_better": "Højere er som udgangspunkt bedre",
-        "lower_is_better": "Lavere er som udgangspunkt bedre",
-        "neutral": "Ingen entydig retning",
-    }
-
-    with st.expander("KPI-definition"):
-        st.markdown("**Formel**")
-        st.code(formula_label, language=None)
-
-        if description:
-            st.markdown("**Hvad måler KPI'en?**")
-            st.write(description)
-
-        if interpretation:
-            st.markdown("**Hvordan skal den fortolkes?**")
-            st.write(interpretation)
-
-        if reading_guide:
-            st.markdown("**Sådan læses værdien**")
-            st.write(reading_guide)
-
-        st.markdown("**Retning**")
-        st.write(direction_labels.get(direction, "Ingen entydig retning"))
-
-        if direction_explanation:
-            st.caption(direction_explanation)
-
-        if caveat:
-            st.markdown("**Vigtigt at være opmærksom på**")
-            st.write(caveat)
-
-        if meta.get("source_type") == "reported":
-            st.caption(
-                "Værdien er rapporteret i kildedatasættet. Manglende KPI-værdier "
-                "behandles ikke som nul. Kildens 1:1-afstemning mod Finanstilsynets "
-                "offentlige pivottabel er endnu ikke verificeret."
-            )
-        else:
-            st.caption(
-                "Manglende nødvendige input behandles ikke som nul. "
-                "KPI-værdien beregnes efter reglerne i den tilhørende KPI-fil."
-            )
-
-
 def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
     # The UI still displays legacy names, while the workspace accepts stable metric IDs.
     meta = get_metric_metadata(kpi_name)
@@ -115,15 +61,12 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
     entity_singular, entity_plural = get_entity_labels(meta, industry)
     direction = meta.get("direction", "neutral")
 
-    st.caption(f"{industry}  /  KPI  /  {kpi_name}")
     render_page_intro(
         kpi_name,
         meta.get("description", "Udforsk KPI'en på tværs af selskaber og over tid."),
+        context=f"{industry} · KPI",
     )
-    if meta.get("reading_guide"):
-        st.info(meta["reading_guide"])
-
-    show_kpi_definition(meta)
+    render_metric_definition(meta)
 
     overview_tab, explorer_tab, profile_tab, comparison_tab, quality_tab = st.tabs(
         [
@@ -152,8 +95,8 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
         c1, c2, c3, c4 = st.columns(4)
         c1.metric(f"{entity_plural} repræsenteret", represented)
         c2.metric(f"{entity_plural} med komplet KPI", complete)
-        c3.metric("Sektormedian", format_kpi_value(median, meta))
-        c4.metric("Sektorgennemsnit", format_kpi_value(mean, meta))
+        c3.metric("Sektormedian", format_danish_kpi_value(median, meta))
+        c4.metric("Sektorgennemsnit", format_danish_kpi_value(mean, meta))
 
         render_section_intro(f"Fordeling på tværs af {entity_plural.lower()}",
             "Den vandrette akse viser KPI-værdien; søjlehøjden viser antal "
@@ -175,7 +118,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
         )
         brand_plotly(fig)
         apply_kpi_axis_format(fig, meta, axis="x")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_KPI_Distribution_{meta['metric_id']}"))
 
         render_section_intro("Sektorudvikling",
             "Hvert punkt er medianen eller gennemsnittet blandt selskaber med en "
@@ -211,7 +154,7 @@ def render_kpi_workspace(industry: str, kpi_name: str, get_kpi_data):
         fig2.update_layout(yaxis_title=kpi_name, xaxis_title=None)
         brand_plotly(fig2, legend_title="Serie")
         apply_kpi_axis_format(fig2, meta, axis="y")
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, use_container_width=True, config=plotly_export_config(f"Databank_KPI_Trend_{meta['metric_id']}"))
 
     with explorer_tab:
         st.caption(

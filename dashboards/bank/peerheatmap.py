@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from ui.components import render_page_intro, render_section_intro
+from ui.formatting import brand_plotly, format_danish_kpi_value, plotly_export_config
+from ui.theme import BEIGE, BLUE_GREY, PURPLE
 
 
 DASHBOARD_META = {
@@ -14,31 +16,8 @@ DASHBOARD_META = {
     "description": "Sammenlign banker på tværs af de KPI'er, der allerede ligger i Bank-KPI-registret.",
 }
 
-PURPLE = "#412B48"
-BEIGE = "#DBD4CF"
-BLUE_GREY = "#B8CACE"
-WHITE = "#FFFFFF"
-BLACK = "#000000"
-
-
 def _format_value(value, meta):
-    if pd.isna(value):
-        return "–"
-    fmt = meta.get("display_format", "number")
-    decimals = meta.get("decimals", 2)
-    if fmt == "percentage":
-        return f"{value:.{decimals}%}"
-    if fmt == "multiple":
-        return f"{value:.{decimals}f}x"
-    if fmt == "integer":
-        return f"{value:,.0f}"
-    if fmt == "dkk_million":
-        return f"DKK {value / 1_000_000:,.{decimals}f}m"
-    if fmt == "dkk_billion":
-        return f"DKK {value / 1_000_000_000:,.{decimals}f}bn"
-    if fmt == "dkk":
-        return f"DKK {value:,.{decimals}f}"
-    return f"{value:,.{decimals}f}"
+    return format_danish_kpi_value(value, meta)
 
 
 def _relative_percentile(series: pd.Series, direction: str) -> pd.Series:
@@ -187,24 +166,22 @@ def render(raw: pd.DataFrame):
                 [0.5, BLUE_GREY],
                 [1.0, PURPLE],
             ],
-            colorbar=dict(title="Peer percentile"),
+            colorbar=dict(title="Peerpercentil"),
             hovertemplate=(
                 "<b>%{y}</b><br>"
                 "%{x}<br>"
                 "Værdi: %{text}<br>"
-                "Peer percentile: %{z:.0f}<extra></extra>"
+                "Peerpercentil: %{z:.0f}<extra></extra>"
             ),
         )
     )
     fig.update_layout(
-        template="plotly_white",
         height=max(560, 46 * len(pct_view.index)),
-        margin=dict(l=20, r=20, t=20, b=20),
         xaxis=dict(side="top", tickangle=-25, automargin=True, tickfont=dict(size=12)),
         yaxis=dict(automargin=True, tickfont=dict(size=13)),
-        font=dict(color=BLACK),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    brand_plotly(fig)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_Bank_Peer_Heatmap_{year}"))
 
     st.caption(
         "For KPI'er markeret som `lower_is_better` vendes percentilen. Neutrale KPI'er "

@@ -12,7 +12,7 @@ from analytics.bank_analyst import (
     build_bank_analyst_view,
 )
 from output.excel import bank_analyst_filename, bank_analyst_workbook
-from ui.components import render_kpi_cards, render_page_intro, render_section_intro
+from ui.components import render_kpi_cards, render_metric_definition, render_page_intro, render_section_intro
 from ui.formatting import (
     apply_kpi_axis_format,
     brand_plotly,
@@ -125,6 +125,7 @@ def render(raw: pd.DataFrame):
                 (format_danish_kpi_delta(row["yoy_change"], meta), f"Ændring vs. {year - 1}"),
                 (format_danish_kpi_value(row["peer_median"], meta), "Benchmarkmedian"),
             ])
+            render_metric_definition(row["definition_meta"], title=f"Om nøgletallet · {row['display_name']}")
             metric_history = history.loc[history["metric_id"].eq(row["metric_id"])].copy()
             if metric_history.empty:
                 st.caption("Ingen historiske observationer med komplette input er tilgængelige for denne metrik.")

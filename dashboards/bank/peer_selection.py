@@ -6,6 +6,8 @@ import streamlit as st
 
 from kpis.registry import KPI_REGISTRY, calculate_kpi
 from ui.components import render_page_intro, render_section_intro
+from ui.formatting import brand_plotly, format_danish_kpi_value, plotly_export_config
+from ui.theme import DARK_RED, PURPLE
 
 
 DASHBOARD_META = {
@@ -16,38 +18,11 @@ DASHBOARD_META = {
 }
 
 
-PURPLE = "#412B48"
-DARK_RED = "#842044"
-COGNAC = "#B25F4D"
-BEIGE = "#DBD4CF"
-GREY_LIGHT = "#EEEEEE"
-WHITE = "#FFFFFF"
-BLACK = "#000000"
-
 ASSET_ATTRIBUTE = "Bal_BO_ATot"
 
 
 def _format_kpi_value(value, meta):
-    if pd.isna(value):
-        return "–"
-
-    display_format = meta.get("display_format", "number")
-    decimals = meta.get("decimals", 2)
-
-    if display_format == "multiple":
-        return f"{value:.{decimals}f}x"
-    if display_format == "percentage":
-        return f"{value:.{decimals}%}"
-    if display_format == "integer":
-        return f"{value:,.0f}"
-    if display_format == "dkk":
-        return f"DKK {value:,.{decimals}f}"
-    if display_format == "dkk_million":
-        return f"DKK {value / 1_000_000:,.{decimals}f}m"
-    if display_format == "dkk_billion":
-        return f"DKK {value / 1_000_000_000:,.{decimals}f}bn"
-
-    return f"{value:,.{decimals}f}"
+    return format_danish_kpi_value(value, meta)
 
 
 def _asset_table(raw, year):
@@ -242,12 +217,9 @@ def render(raw):
         height=max(420, 36 * len(chart)),
         yaxis_title=None,
         legend_title_text=None,
-        paper_bgcolor=WHITE,
-        plot_bgcolor=WHITE,
-        margin=dict(l=20, r=20, t=20, b=20),
-        font=dict(color=BLACK),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    brand_plotly(fig)
+    st.plotly_chart(fig, use_container_width=True, config=plotly_export_config(f"Databank_Bank_Peer_Selection_{year}"))
 
     display = selected[["Role", "navn", "TotalAssets", "SizeDiffPct"]].copy()
     display["Aktiver i alt"] = display["TotalAssets"].apply(

@@ -6,7 +6,7 @@ import streamlit as st
 
 from dashboards.registry import INDUSTRY_DASHBOARD_CATALOG
 from kpis.registry import INDUSTRY_KPI_CATALOG, KPI_REGISTRY
-from ui.formatting import brand_plotly, format_kpi_value
+from ui.formatting import brand_plotly, format_danish_kpi_value, plotly_export_config
 from ui.components import render_orientation_card, render_page_intro, render_section_intro
 from ui.theme import BRAND_SEQUENCE
 
@@ -74,7 +74,7 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
                             kpi_year_data = valid_kpi[valid_kpi["ÅR"] == kpi_year].copy()
                             median_value = kpi_year_data["KPI_Value"].median()
                             company_count = kpi_year_data["regnr"].nunique()
-                            st.metric("Sektormedian", format_kpi_value(median_value, meta))
+                            st.metric("Sektormedian", format_danish_kpi_value(median_value, meta))
                             st.caption(f"{kpi_year} · {company_count} selskaber")
                         if st.button("Åbn KPI", key=f"home_open_kpi_{pulse_industry}_{kpi_name}",
                                      use_container_width=True):
@@ -135,7 +135,7 @@ def render_home(raw, get_kpi_data, navigate_to, industries):
             fig.update_traces(line_width=2.5, marker_size=6)
             fig.update_layout(xaxis_title=None, yaxis_title="Antal selskaber")
             brand_plotly(fig, legend_title="Marked")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, config=plotly_export_config("Databank_Data_Coverage"))
         else:
             st.info("Der er ikke nok data til at vise udviklingen i datadækningen.")
     with right:
