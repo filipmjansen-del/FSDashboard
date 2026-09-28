@@ -16,7 +16,7 @@ join keys. No continuity is inferred across different legal entities.
 
 The default benchmark is all banks observed in the selected FY. A saved peer
 group is available only when its saved target bank and year match the current
-selection; the target bank is included in that benchmark. The peer median is
+selection; the target bank is included in that benchmark. The Benchmarkmedian is
 calculated only from benchmark entities with an observed value for that metric.
 
 YoY is the current value minus the same metric's value in the immediately
@@ -39,7 +39,7 @@ billions where shown. “Reported” identifies a direct source observation;
 | Profitability | Egenkapitalforrentning efter skat | Calculated `bank.roe_after_tax`; stable registry metric, baseline tested. |
 | Efficiency | Indtjening pr. omkostningskrone | Calculated `bank.income_per_cost`; stable registry metric, baseline tested. |
 | Growth / balance sheet | Udlån i alt | Calculated `Bal_BO_Autd + Bal_BO_Auta`, reusing the validated inputs of `bank.loans_to_equity`. |
-| Capital & risk | Udlån i forhold til egenkapital | Calculated `bank.loans_to_equity`; stable registry metric, baseline tested and neutral. |
+| Growth / balance sheet | Udlån i forhold til egenkapital | Calculated `bank.loans_to_equity`; stable registry metric, baseline tested and neutral. |
 
 `Aktiver i alt` (`Bal_BO_ATot`) is included in the overview as an existing
 validated size measure used by Peer Selection. It is not a performance metric.
@@ -63,7 +63,7 @@ The workflow was validated for 2025 canonical entities `bank:3000` (Danske
 Bank), `bank:8079` (AL Sydbank) and `bank:7858` (Jyske Bank, a mid-sized
 Danish bank). For each case, the selected entity resolved through `regnr`, all
 eight metric rows were produced, and historical observations were available.
-For Danske Bank, current value, prior-year value, YoY and all-bank peer median
+For Danske Bank, current value, prior-year value, YoY and all-bank Benchmarkmedian
 for reported `Res_RfS_RY` reconcile directly to the source observations.
 
 Missing loan inputs were also checked for `bank:13290`; the current loans and

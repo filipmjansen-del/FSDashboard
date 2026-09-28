@@ -288,38 +288,28 @@ At least three historical years independently validated.
 ### Phase 7 - Bank Analyst View
 Status: COMPLETE
 
-Analytical structure:
+Implemented v0.1 metric set:
 
-Earnings:
-- net interest income
-- fee income
+- Earnings: net interest income, net fee and commission income, profit before tax
+- Profitability: ROE before tax, ROE after tax
+- Efficiency: income per cost krone
+- Growth / balance sheet: loans and loans to equity
+- Overview: total assets
+
+Deferred pending validated definitions and source mappings:
+
 - other income
-- profit before tax
-
-Efficiency:
-- operating expenses
-- cost/income
-- income per cost krone
-
-Profitability:
-- ROE before tax
-- ROE after tax
-
-Growth:
-- loans
-- deposits
-- income growth
-
-Capital and risk:
-- only validated metrics
+- operating expenses and cost/income
+- deposits and income-growth measures
+- capital ratios and risk metrics
 
 For each core metric show:
 - current value
 - YoY development
-- peer comparison
+- benchmark comparison
 
 Definition of Done:
-Workflow materially improves preparation for at least:
+The documented v0.1 workflow materially improves preparation for at least:
 - Danske Bank
 - AL Sydbank
 - one mid-sized bank

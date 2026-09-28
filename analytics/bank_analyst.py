@@ -82,7 +82,7 @@ ANALYST_METRICS = (
     },
     {
         "metric_id": "bank.loans_to_equity",
-        "section": "Capital & risk",
+        "section": "Growth / balance sheet",
     },
 )
 

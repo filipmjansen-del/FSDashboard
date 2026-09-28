@@ -21,13 +21,12 @@ DASHBOARD_META = {
     "description": "Forbered et bankmøde med dokumenterede nøgletal, udvikling og peer-benchmark.",
 }
 
-SECTION_ORDER = ("Earnings", "Profitability", "Efficiency", "Growth / balance sheet", "Capital & risk")
+SECTION_ORDER = ("Earnings", "Profitability", "Efficiency", "Growth / balance sheet")
 SECTION_LABELS = {
     "Earnings": "Indtjening",
     "Profitability": "Profitabilitet",
     "Efficiency": "Effektivitet",
     "Growth / balance sheet": "Vækst og balance",
-    "Capital & risk": "Kapital og risiko",
 }
 
 
@@ -106,7 +105,7 @@ def render(raw: pd.DataFrame):
             continue
         render_section_intro(
             SECTION_LABELS[section],
-            "Aktuel værdi, ændring fra foregående finansår, peer-median og op til fem tilgængelige finansår.",
+            "Aktuel værdi, ændring fra foregående finansår, benchmarkmedian og op til fem tilgængelige finansår.",
         )
         for _, row in section_rows.iterrows():
             meta = _metric_meta(row)
@@ -114,21 +113,21 @@ def render(raw: pd.DataFrame):
             metric_columns = st.columns(3)
             metric_columns[0].metric("Aktuel værdi", format_kpi_value(row["current_value"], meta))
             metric_columns[1].metric(f"Ændring vs. {year - 1}", format_kpi_delta(row["yoy_change"], meta))
-            metric_columns[2].metric("Peer-median", format_kpi_value(row["peer_median"], meta))
+            metric_columns[2].metric("Benchmarkmedian", format_kpi_value(row["peer_median"], meta))
             metric_history = history.loc[history["metric_id"].eq(row["metric_id"])].copy()
             if metric_history.empty:
                 st.caption("Ingen historiske observationer med komplette input er tilgængelige for denne metrik.")
             else:
                 st.plotly_chart(_history_chart(metric_history, row["display_name"], meta), use_container_width=True)
 
-    render_section_intro("Detaljeret sammenligning", "Tabellen viser samme reproducerbare aktuelle værdi, YoY og peer-median som ovenfor.")
+    render_section_intro("Detaljeret sammenligning", "Tabellen viser samme reproducerbare aktuelle værdi, YoY og benchmarkmedian som ovenfor.")
     table = comparison.copy()
     table["Aktuel værdi"] = table.apply(lambda row: format_kpi_value(row["current_value"], _metric_meta(row)), axis=1)
     table[f"Ændring vs. {year - 1}"] = table.apply(lambda row: format_kpi_delta(row["yoy_change"], _metric_meta(row)), axis=1)
-    table["Peer-median"] = table.apply(lambda row: format_kpi_value(row["peer_median"], _metric_meta(row)), axis=1)
+    table["Benchmarkmedian"] = table.apply(lambda row: format_kpi_value(row["peer_median"], _metric_meta(row)), axis=1)
     st.dataframe(
         table.rename(columns={"display_name": "Metrik", "section": "Sektion", "validation_status": "Valideringsstatus"})[
-            ["Sektion", "Metrik", "Aktuel værdi", f"Ændring vs. {year - 1}", "Peer-median", "Valideringsstatus"]
+            ["Sektion", "Metrik", "Aktuel værdi", f"Ændring vs. {year - 1}", "Benchmarkmedian", "Valideringsstatus"]
         ],
         use_container_width=True,
         hide_index=True,
@@ -138,7 +137,7 @@ def render(raw: pd.DataFrame):
         benchmark_text = "den gemte peer group" if saved_group_used else "alle banker med en observation i det valgte år"
         st.markdown(
             f"""
-            - **Benchmark:** Peer-medianen beregnes blandt {benchmark_text}; målbanken indgår, når den har data.
+            - **Benchmark:** Benchmarkmedianen beregnes blandt {benchmark_text}; målbanken indgår, når den har data.
             - **YoY:** Aktuel værdi minus den samme metriks observerede værdi i det umiddelbart foregående finansår. Manglende data vises som `–` og erstattes ikke med nul.
             - **Proveniens:** Resultat før skat er rapporteret. De øvrige indtjenings- og balancemål er dokumenterede beregninger; ROE, indtjening pr. omkostningskrone og udlån/egenkapital genbruger KPI-registrets validerede beregninger.
             - **Udskudt:** Indlån, selvstændige omkostninger/cost-income, kapitalprocenter og risikomål indgår ikke, fordi deres definitioner endnu ikke er valideret.
