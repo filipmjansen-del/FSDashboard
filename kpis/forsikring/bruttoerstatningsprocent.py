@@ -5,6 +5,8 @@ KPI_META = {
     "name": "Bruttoerstatningsprocent",
     "industry": "Forsikring",
     "source_type": "reported",
+    "source_code": "SA2803",
+    "official_definition": "Forholdet mellem bruttoerstatningsudgifter og bruttopræmieindtægter efter bonus og præmierabatter.",
     "slug": "bruttoerstatningsprocent",
     "display_format": "percentage",
     "decimals": 1,

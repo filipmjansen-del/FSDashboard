@@ -1,4 +1,4 @@
-"""Read the reported insurance KPIs from the checked-in source extract."""
+"""Read Finanstilsynet-reported insurance KPIs from the checked-in extract."""
 
 from functools import lru_cache
 from pathlib import Path

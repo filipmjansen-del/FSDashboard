@@ -23,18 +23,18 @@ Bank-KPI'erne beregnes fra råregnskabets kontofelter. Se **KPI-definition** på
 
 ## Forsikring
 
-Definitionerne følger den leverede `Finanstilsynet_noegletal_master.xlsx` og [reglerne om femårsoversigt for skadesforsikringsselskaber, bilag 10](https://www.retsinformation.dk/api/pdf/249994). Dashboardet viser rapporterede selskabsværdier fra det medfølgende KPI-datasæt. Disse værdier genberegnes ikke fra råregnskabets kontokoder.
+Definitionerne følger Finanstilsynets rapporterede KPI-kilde. Dashboardet viser rapporterede selskabsværdier fra KPI-ekstraktet; de genberegnes ikke fra råregnskabets kontokoder.
 
 | KPI | Definition og læsning | Retning |
 | --- | --- | --- |
 | Bruttoerstatningsprocent | Bruttoerstatningsudgifter divideret med bruttopræmieindtægter efter bonus og præmierabatter. 70 % betyder 70 kr. erstatninger pr. 100 kr. præmier før genforsikring. Over 100 % overstiger erstatningerne alene præmierne. | Lavere er normalt bedre. |
-| Bruttoomkostningsprocent | Forsikringsmæssige driftsomkostninger divideret med bruttopræmieindtægter efter bonus og præmierabatter. 17 % betyder 17 kr. drift pr. 100 kr. præmier. Det officielle omkostningsbegreb omfatter en justering for domicilejendomme. | Lavere er normalt bedre. |
+| Bruttoomkostningsprocent | Forsikringsmæssige driftsomkostninger divideret med bruttopræmieindtægter efter bonus og præmierabatter. 17 % betyder 17 kr. drift pr. 100 kr. præmier. | Lavere er normalt bedre. |
 | Combined ratio | Summen af erstatningsprocent, omkostningsprocent og nettogenforsikringsprocent. 95 % betyder, at disse komponenter svarer til 95 kr. pr. 100 kr. præmier. Under 100 % peger på overskud i forsikringsdriften før investeringsafkast; over 100 % peger på underskud. | Lavere er normalt bedre. |
-| Operating ratio | Som combined ratio, men med allokeret investeringsafkast svarende til forsikringsteknisk rente lagt til præmiegrundlaget. 95 % betyder 95 kr. af de samlede komponenter pr. 100 kr. af dette udvidede grundlag. | Lavere er normalt bedre. |
+| Operating ratio | Som combined ratio, men med allokeret investeringsafkast lagt til præmieindtægterne i nævneren. 95 % betyder 95 kr. af de samlede komponenter pr. 100 kr. af dette udvidede grundlag. | Lavere er normalt bedre. |
 | Relativt afløbsresultat | Afløbsresultat for tidligere års skader divideret med de primohensættelser, det vedrører. Positivt tal kan afspejle, at tidligere reserver oversteg senere omkostninger; negativt tal kan afspejle det modsatte. Begge skal ses i sammenhæng med reservepraksis. | Neutral. |
-| Egenkapitalforrentning i procent | Årets resultat divideret med tidsvægtet gennemsnitlig egenkapital. 10 % er 10 kr. resultat pr. 100 kr. egenkapital. Negativ værdi betyder underskud. | Højere er normalt bedre, når risiko og kapitalisering er sammenlignelige. |
+| Egenkapitalforrentning i procent | Årets resultat divideret med årets gennemsnitlige egenkapital. 10 % er 10 kr. resultat pr. 100 kr. egenkapital. Negativ værdi betyder underskud. | Højere er normalt bedre, når risiko og kapitalisering er sammenlignelige. |
 
-Combined ratio er **ikke nødvendigvis summen af de to viste bruttoprocenter**: nettogenforsikringsprocenten indgår også. Masterfilen angiver, at KPI-datasættet endnu ikke er afstemt én til én mod Finanstilsynets offentlige pivottabel.
+Combined ratio er **ikke nødvendigvis summen af de to viste bruttoprocenter**: nettogenforsikringsprocenten indgår også.
 
 ## Forsikringsmarkedets struktur
 

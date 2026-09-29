@@ -281,3 +281,28 @@ Reason:
 The platform should support new analytical products without repeatedly
 modifying core application dispatch or duplicating styling, while keeping the
 foundation proportional to current needs.
+
+---
+
+## D023 - Analytical Contract
+
+Status: LOCKED
+
+Decision:
+Every important reported, calculated or modelled analytical metric or module
+must explicitly retain, where applicable: entity level, population, geography,
+period, unit, accounting/regulatory/market definition, source status
+(reported/calculated/modelled), coverage, source/definition version and
+comparability status. Source status remains visible in downstream output where
+analytically material.
+
+---
+
+## D024 - Reported Insurance KPI source
+
+Status: LOCKED
+
+Decision:
+The six active Insurance KPIs use the Finanstilsynet-reported KPI source
+extract. Use Finanstilsynet REGNR identities when available; do not create
+synthetic negative REGNR values. Missing observations remain missing.
