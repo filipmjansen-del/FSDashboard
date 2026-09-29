@@ -38,7 +38,7 @@ Combined ratio er **ikke nødvendigvis summen af de to viste bruttoprocenter**: 
 
 ## Forsikringsmarkedets struktur
 
-Markedsstrukturen er en beregnet analyse baseret på rapporterede bruttopræmier, ikke en KPI. Se [metodedokumentationen](MARKET_STRUCTURE_METHOD.md) for kilde, population, koncentrationsmål, enheder og databegrænsninger.
+Markedsstrukturen bruger F&P's *Skadeforsikring i alt*: markedsandele og bruttopræmieindtægter rapporteres direkte af F&P og genberegnes ikke af Databank. Databank beregner rank, CR1/CR3/CR5, HHI og antal markedsaktører. Kvartalsvise præmieindtægter er kumulative YTD; historiske sammenligninger bruger derfor samme kvartal, hvor relevant. Se [metodedokumentationen](MARKET_STRUCTURE_METHOD.md).
 
 ## Sådan læses graferne
 

@@ -255,7 +255,7 @@ Initial implementation:
 Insurance
 
 Metrics:
-- number of legal entities
+- number of market actors
 - market size
 - market shares
 - CR1
@@ -270,13 +270,14 @@ Method:
 
 Required source-of-truth table:
 - year
-- entity_id
-- display_name
+- quarter
+- period_end_month
+- entity_name
 - market_value
+- market_total
 - market_share
+- source_market_share_pct
 - rank
-- included_flag
-- exclusion_reason
 
 Definition of Done:
 At least three historical years independently validated.
@@ -359,13 +360,16 @@ A Databank analysis can be reused in consulting work without reconstructing the 
 ---
 
 ### Phase 10 - Analytical robustness and source governance
-Status: NOT STARTED
+Status: IN PROGRESS
 
-Tasks:
+Completed work:
 - Insurance KPI source QA
+- initial Analytical Contract decision
+- regression validation for Insurance KPIs
+
+Remaining tasks:
 - Data Source Register
-- Analytical Contract
-- regression validation
+- broader implementation of the Analytical Contract
 
 Definition of Done:
 Important analytical sources, definitions, provenance and comparability are
