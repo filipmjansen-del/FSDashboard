@@ -11,6 +11,11 @@ from dashboards.client_intelligence import (
     strategy_signals,
     thursday_footprint,
 )
+from dashboards.client_intelligence.content import (
+    COMMERCIAL_HYPOTHESES,
+    MERGER_FACTS,
+    THURSDAY_PERSPECTIVES,
+)
 from dashboards.registry import (
     CROSS_CUTTING_DASHBOARD_CATALOG,
     DASHBOARD_REGISTRY,
@@ -63,10 +68,15 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_section_intro"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
-            patch("dashboards.client_intelligence.overview.render_orientation_card"),
+            patch("dashboards.client_intelligence.overview.render_items"),
+            patch("dashboards.client_intelligence.overview.render_not_connected"),
+            patch("dashboards.client_intelligence.overview.render_item"),
+            patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence._shared.render_page_intro"),
             patch("dashboards.client_intelligence._shared.render_pilot_notice"),
             patch("dashboards.client_intelligence._shared.render_orientation_card"),
+            patch("dashboards.client_intelligence._shared.st"),
+            patch("dashboards.client_intelligence.opportunities.st"),
         ):
             for renderer in renderers:
                 renderer(None)
@@ -76,7 +86,10 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_page_intro"),
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
-            patch("dashboards.client_intelligence.overview.render_orientation_card"),
+            patch("dashboards.client_intelligence.overview.render_items"),
+            patch("dashboards.client_intelligence.overview.render_not_connected"),
+            patch("dashboards.client_intelligence.overview.render_item"),
+            patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence.overview.render_section_intro") as section_intro,
         ):
             overview.render(None)
@@ -92,6 +105,44 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
                 "Commercial hypotheses",
             ],
         )
+
+    def test_manual_content_keeps_facts_perspectives_and_hypotheses_distinct(self):
+        self.assertTrue(MERGER_FACTS)
+        self.assertTrue(THURSDAY_PERSPECTIVES)
+        self.assertTrue(COMMERCIAL_HYPOTHESES)
+        for fact in MERGER_FACTS:
+            self.assertEqual(fact.information_type, "Fact")
+            self.assertTrue(fact.source_label)
+            self.assertTrue(fact.period)
+        for perspective in THURSDAY_PERSPECTIVES:
+            self.assertEqual(perspective.information_type, "Thursday perspective")
+            self.assertTrue(perspective.source_label)
+            self.assertTrue(perspective.period)
+        for hypothesis in COMMERCIAL_HYPOTHESES:
+            self.assertTrue(hypothesis.evidence)
+            self.assertTrue(hypothesis.observation)
+            self.assertTrue(hypothesis.potential_need)
+            self.assertTrue(hypothesis.thursday_relevance)
+            self.assertTrue(hypothesis.source_label)
+            self.assertTrue(hypothesis.period)
+
+    def test_overview_renders_manual_evidence_and_thursday_content(self):
+        with (
+            patch("dashboards.client_intelligence.overview.render_page_intro"),
+            patch("dashboards.client_intelligence.overview.render_pilot_notice"),
+            patch("dashboards.client_intelligence.overview.render_kpi_cards"),
+            patch("dashboards.client_intelligence.overview.render_section_intro"),
+            patch("dashboards.client_intelligence.overview.render_not_connected") as not_connected,
+            patch("dashboards.client_intelligence.overview.render_item"),
+            patch("dashboards.client_intelligence.overview.st"),
+            patch("dashboards.client_intelligence.overview.render_items") as render_items,
+        ):
+            overview.render(None)
+        self.assertEqual(
+            [call.args[0] for call in render_items.call_args_list],
+            [MERGER_FACTS, THURSDAY_PERSPECTIVES],
+        )
+        self.assertEqual(not_connected.call_count, 3)
 
 
 if __name__ == "__main__":
