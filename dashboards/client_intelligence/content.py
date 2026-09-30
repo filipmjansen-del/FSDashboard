@@ -35,12 +35,14 @@ class CommercialHypothesis:
 
 PILOT_ENTITY = "AL Sydbank"
 H1_2026_SOURCE_TITLE = "Delårsrapport - 1. halvår 2026"
+H1_2026_SOURCE_URL = "https://ml-eu.globenewswire.com/Resource/Download/c2791f30-e63c-466a-93a8-ec58739d267e"
 H1_2026_PAGE_30_SOURCE = SourceMetadata(
     publisher="AL Sydbank A/S",
     title=H1_2026_SOURCE_TITLE,
     publication_date="26 August 2026",
     source_type="Official company reporting",
     page_reference="Page 30",
+    url=H1_2026_SOURCE_URL,
 )
 H1_2026_PAGE_46_SOURCE = SourceMetadata(
     publisher="AL Sydbank A/S",
@@ -48,6 +50,7 @@ H1_2026_PAGE_46_SOURCE = SourceMetadata(
     publication_date="26 August 2026",
     source_type="Official company reporting",
     page_reference="Page 46",
+    url=H1_2026_SOURCE_URL,
 )
 THURSDAY_SEPTEMBER_2026_SOURCE = SourceMetadata(
     publisher="Thursday",

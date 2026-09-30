@@ -14,6 +14,7 @@ from dashboards.client_intelligence import (
 )
 from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
+    H1_2026_SOURCE_URL,
     MERGER_FACTS,
     THURSDAY_PERSPECTIVES,
 )
@@ -118,7 +119,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             self.assertEqual(fact.source.publication_date, "26 August 2026")
             self.assertEqual(fact.source.source_type, "Official company reporting")
             self.assertIn(fact.source.page_reference, {"Page 30", "Page 46"})
-            self.assertIsNone(fact.source.url)
+            self.assertEqual(fact.source.url, H1_2026_SOURCE_URL)
             self.assertTrue(fact.period)
         for perspective in THURSDAY_PERSPECTIVES:
             self.assertEqual(perspective.information_type, "Thursday perspective")
@@ -140,7 +141,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
         self.assertIn("Source title: Delårsrapport - 1. halvår 2026", captions)
         self.assertIn("Publisher: AL Sydbank A/S · Publication date: 26 August 2026", captions)
         self.assertIn("Page reference: Page 30 · Source type: Official company reporting", captions)
-        self.assertIn("Source URL: Unresolved — no official public URL has been verified yet.", captions)
+        streamlit_stub.markdown.assert_any_call(f"[Open source]({H1_2026_SOURCE_URL})")
 
     def test_overview_renders_manual_evidence_and_thursday_content(self):
         with (
