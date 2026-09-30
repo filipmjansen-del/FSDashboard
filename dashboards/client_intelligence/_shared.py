@@ -6,8 +6,7 @@ from dashboards.client_intelligence.content import PILOT_CONTEXT
 from ui.components import render_orientation_card, render_page_intro, render_warning_callout
 
 PILOT_NOTICE = (
-    f"{PILOT_CONTEXT.pilot_label}. Content is manually curated; facts, Thursday perspectives, "
-    "and hypotheses are shown separately. It is not connected to production data or research systems."
+    "Prototype view · Documented facts, Thursday perspectives, and hypotheses are shown separately."
 )
 
 
@@ -64,8 +63,7 @@ def render_items(items):
 def render_not_connected(subject: str):
     render_orientation_card(
         "Not yet connected",
-        f"{subject} is not yet available in the manual {PILOT_CONTEXT.display_name} MVP content. "
-        "No value has been invented to fill this state.",
+        f"{subject} will appear here when connected. No value is shown until then.",
     )
 
 
@@ -75,12 +73,18 @@ def render_shell(title: str, description: str):
 
 def render_hypothesis(hypothesis):
     st.markdown(f"**{hypothesis.title}**")
-    st.caption("Hypothesis - requires client validation")
-    st.write(f"**Evidence:** {hypothesis.evidence}")
-    st.write(f"**Observation:** {hypothesis.observation}")
-    st.write(f"**Potential need:** {hypothesis.potential_need}")
-    st.write(f"**Thursday relevance:** {hypothesis.thursday_relevance}")
-    st.caption(f"Hypothesis · {hypothesis.period}")
+    render_status_label("Hypothesis - requires client validation")
+    chain = (
+        ("Evidence", hypothesis.evidence),
+        ("Observation", hypothesis.observation),
+        ("Potential need", hypothesis.potential_need),
+        ("Thursday relevance", hypothesis.thursday_relevance),
+    )
+    columns = st.columns(len(chain))
+    for column, (title, detail) in zip(columns, chain):
+        with column:
+            render_compact_card(title, detail)
+    render_status_label(f"Hypothesis · {hypothesis.period}")
     with st.expander("Source details", expanded=False):
         for source in hypothesis.sources:
             render_source_metadata(source)

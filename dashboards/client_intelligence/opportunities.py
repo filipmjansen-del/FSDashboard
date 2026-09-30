@@ -8,6 +8,6 @@ DASHBOARD_META = {"name": "Opportunities", "description": "Qualified AL Sydbank 
 
 
 def render(_raw_data):
-    render_shell("Opportunities", "Three hypotheses for validation; none is a confirmed client need.")
+    render_shell("Opportunities", "Evidence-led hypotheses for client validation.")
     for hypothesis in COMMERCIAL_HYPOTHESES:
         render_hypothesis(hypothesis)

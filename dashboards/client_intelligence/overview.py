@@ -10,9 +10,6 @@ from ui.components import (
 
 from dashboards.client_intelligence._shared import (
     render_compact_card,
-    render_hypothesis,
-    render_item,
-    render_items,
     render_metadata_line,
     render_pilot_notice,
     render_status_label,
@@ -40,18 +37,18 @@ DASHBOARD_META = {
 def render(_raw_data):
     render_page_intro(
         "Client Intelligence",
-        "A fixed-pilot meeting-preparation workspace combining documented evidence, Thursday perspectives, and clearly qualified hypotheses.",
+        "A concise brief for the next AL Sydbank management conversation.",
         context=f"Client Intelligence · {PILOT_CONTEXT.display_name}",
     )
     render_pilot_notice()
 
     render_section_intro("Company snapshot", "Management meeting-preparation context.")
     render_kpi_cards([
-        (PILOT_CONTEXT.display_name, PILOT_CONTEXT.pilot_label),
+        (PILOT_CONTEXT.display_name, "Client overview"),
         (PILOT_CONTEXT.latest_reporting_label, "Latest public reporting"),
     ])
 
-    render_section_intro("Performance snapshot", "Use the existing Bank Analyst View for financial metrics and benchmark context.")
+    render_section_intro("Performance", "Existing financial analysis and peer benchmarking.")
     render_compact_card(
         "Bank Analyst View",
         "Existing Databank financial performance and peer benchmarking for the pilot entity.",
@@ -67,17 +64,17 @@ def render(_raw_data):
             render_compact_card(item.title, item.detail, label=item.information_type)
             render_metadata_line(item)
 
-    render_section_intro("People & relations", "Public leadership view with a safe internal account-mapping indicator.")
+    render_section_intro("Key people", "Public leadership and current account coverage.")
     people_columns = st.columns(4)
     for column, person in zip(people_columns, PUBLIC_EXECUTIVES[:4]):
         with column:
             render_compact_card(person.title, person.detail, label="Public executive")
-            render_status_label("Mapped internally")
-    st.caption("Account mapping is available; relationship strength is not shown.")
+            render_status_label("Account mapping available")
+    st.caption("Internal mapping status only; relationship strength is not shown.")
 
-    render_section_intro("Thursday footprint", "Documented Thursday perspectives and relevant capability areas.")
-    perspective_columns = st.columns(len(THURSDAY_PERSPECTIVES))
-    for column, perspective in zip(perspective_columns, THURSDAY_PERSPECTIVES):
+    render_section_intro("Thursday footprint", "Recent perspective and potentially relevant capabilities.")
+    perspective_columns = st.columns(2)
+    for column, perspective in zip(perspective_columns, THURSDAY_PERSPECTIVES[:2]):
         with column:
             render_compact_card(perspective.title, perspective.detail, label=perspective.information_type)
             render_metadata_line(perspective)
@@ -86,7 +83,7 @@ def render(_raw_data):
         with column:
             render_compact_card(capability, "Potentially relevant capability")
 
-    render_section_intro("Opportunities", "Hypotheses only; not confirmed client needs.")
+    render_section_intro("Opportunities", "Three hypotheses for client validation.")
     opportunity_columns = st.columns(len(COMMERCIAL_HYPOTHESES))
     for column, hypothesis in zip(opportunity_columns, COMMERCIAL_HYPOTHESES):
         with column:
@@ -95,4 +92,4 @@ def render(_raw_data):
                 hypothesis.potential_need,
                 label="Hypothesis - requires client validation",
             )
-            render_status_label(f"{hypothesis.period} · {len(hypothesis.sources)} source records")
+            render_status_label(f"{hypothesis.period} · source details in Opportunities")

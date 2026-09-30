@@ -1,6 +1,12 @@
 """Client Intelligence strategy and signals shell."""
 
-from dashboards.client_intelligence._shared import render_item, render_items, render_shell
+import streamlit as st
+
+from dashboards.client_intelligence._shared import (
+    render_compact_card,
+    render_metadata_line,
+    render_shell,
+)
 from dashboards.client_intelligence.content import (
     CUSTOMER_PROPOSITION_SIGNAL,
     MERGER_FACTS,
@@ -13,10 +19,17 @@ DASHBOARD_META = {"name": "Strategy & Signals", "description": "Public AL Sydban
 
 
 def render(_raw_data):
-    render_shell("Strategy & Signals", "Three concise public signals for the AL Sydbank management conversation.")
-    render_section_intro("Integration & synergies", "Public H1 2026 merger and integration evidence.")
-    render_items(MERGER_FACTS)
-    render_section_intro("Customer proposition", "Public September 2026 customer proposition signal.")
-    render_item(CUSTOMER_PROPOSITION_SIGNAL)
-    render_section_intro("Strategic positioning", "Public merger communication.")
-    render_item(STRATEGIC_POSITIONING_SIGNAL)
+    render_shell("Strategy & Signals", "Public signals relevant to the management conversation.")
+    render_section_intro("Integration & synergies", "Reported H1 2026 merger evidence.")
+    merger_columns = st.columns(2)
+    for index, item in enumerate(MERGER_FACTS):
+        with merger_columns[index % len(merger_columns)]:
+            render_compact_card(item.title, item.detail, label=item.information_type)
+            render_metadata_line(item)
+
+    render_section_intro("Customer proposition & strategic positioning", "Public signals on proposition and direction.")
+    signal_columns = st.columns(2)
+    for column, item in zip(signal_columns, (CUSTOMER_PROPOSITION_SIGNAL, STRATEGIC_POSITIONING_SIGNAL)):
+        with column:
+            render_compact_card(item.title, item.detail, label=item.information_type)
+            render_metadata_line(item)

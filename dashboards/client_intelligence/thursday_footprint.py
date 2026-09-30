@@ -1,17 +1,34 @@
 """Client Intelligence Thursday footprint shell."""
 
-from dashboards.client_intelligence._shared import render_items, render_not_connected, render_shell
+import streamlit as st
+
+from dashboards.client_intelligence._shared import (
+    render_compact_card,
+    render_metadata_line,
+    render_not_connected,
+    render_shell,
+    render_status_label,
+)
 from dashboards.client_intelligence.content import THURSDAY_CAPABILITIES, THURSDAY_PERSPECTIVES
-from ui.components import render_kpi_cards, render_section_intro
+from ui.components import render_section_intro
 
 
 DASHBOARD_META = {"name": "Thursday Footprint", "description": "Safe Thursday activity and capability view.", "order": 50}
 
 
 def render(_raw_data):
-    render_shell("Thursday Footprint", "Safe representation of recent activity and potential capability relevance.")
-    render_section_intro("Recent activity", "Documented Thursday material.")
-    render_items(THURSDAY_PERSPECTIVES)
-    render_section_intro("Relevant Thursday capabilities", "Examples of potentially relevant capabilities, not confirmed AL Sydbank needs.")
-    render_kpi_cards([(capability, "Potentially relevant") for capability in THURSDAY_CAPABILITIES])
+    render_shell("Thursday Footprint", "Recent perspectives and potentially relevant Thursday capabilities.")
+    render_section_intro("Recent activity", "Existing Thursday material for the AL Sydbank discussion.")
+    activity_columns = st.columns(len(THURSDAY_PERSPECTIVES))
+    for column, perspective in zip(activity_columns, THURSDAY_PERSPECTIVES):
+        with column:
+            render_compact_card(perspective.title, perspective.detail, label=perspective.information_type)
+            render_metadata_line(perspective)
+
+    render_section_intro("Relevant Thursday capabilities", "Potentially relevant capabilities, not confirmed client needs.")
+    capability_columns = st.columns(2)
+    for index, capability in enumerate(THURSDAY_CAPABILITIES):
+        with capability_columns[index % len(capability_columns)]:
+            render_compact_card(capability, "Potentially relevant capability")
+            render_status_label("Not a confirmed client need")
     render_not_connected("Previous projects, cases, experts and reusable assets")

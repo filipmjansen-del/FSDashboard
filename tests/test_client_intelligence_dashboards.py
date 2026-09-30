@@ -82,15 +82,14 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_compact_card"),
             patch("dashboards.client_intelligence.overview.render_metadata_line"),
             patch("dashboards.client_intelligence.overview.render_status_label"),
-            patch("dashboards.client_intelligence.overview.render_items"),
-            patch("dashboards.client_intelligence.overview.render_item"),
-            patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence._shared.render_page_intro"),
             patch("dashboards.client_intelligence._shared.render_pilot_notice"),
             patch("dashboards.client_intelligence._shared.render_orientation_card"),
             patch("dashboards.client_intelligence._shared.st"),
+            patch("dashboards.client_intelligence.strategy_signals.st"),
             patch("dashboards.client_intelligence.people_relations.st"),
+            patch("dashboards.client_intelligence.thursday_footprint.st"),
         ):
             for renderer in renderers:
                 renderer(None)
@@ -103,8 +102,6 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_compact_card"),
             patch("dashboards.client_intelligence.overview.render_metadata_line"),
             patch("dashboards.client_intelligence.overview.render_status_label"),
-            patch("dashboards.client_intelligence.overview.render_items"),
-            patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence.overview.render_section_intro") as section_intro,
         ):
@@ -164,10 +161,20 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
         streamlit_stub.markdown.assert_any_call(f"[Open source]({H1_2026_SOURCE_URL})")
 
     def test_hypothesis_renderer_shows_observation_and_structured_sources(self):
-        with patch("dashboards.client_intelligence._shared.st") as streamlit_stub:
+        with (
+            patch("dashboards.client_intelligence._shared.st") as streamlit_stub,
+            patch("dashboards.client_intelligence._shared.render_compact_card") as compact_card,
+        ):
             _shared.render_hypothesis(COMMERCIAL_HYPOTHESES[0])
-        writes = [call.args[0] for call in streamlit_stub.write.call_args_list]
-        self.assertIn(f"**Observation:** {COMMERCIAL_HYPOTHESES[0].observation}", writes)
+        self.assertEqual(
+            [call.args[:2] for call in compact_card.call_args_list],
+            [
+                ("Evidence", COMMERCIAL_HYPOTHESES[0].evidence),
+                ("Observation", COMMERCIAL_HYPOTHESES[0].observation),
+                ("Potential need", COMMERCIAL_HYPOTHESES[0].potential_need),
+                ("Thursday relevance", COMMERCIAL_HYPOTHESES[0].thursday_relevance),
+            ],
+        )
         captions = [call.args[0] for call in streamlit_stub.caption.call_args_list]
         self.assertIn("Hypothesis - requires client validation", captions)
         streamlit_stub.markdown.assert_any_call(f"[Open source]({H1_2026_SOURCE_URL})")
@@ -181,16 +188,9 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_compact_card"),
             patch("dashboards.client_intelligence.overview.render_metadata_line"),
             patch("dashboards.client_intelligence.overview.render_status_label"),
-            patch("dashboards.client_intelligence.overview.render_item"),
-            patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
-            patch("dashboards.client_intelligence.overview.render_items") as render_items,
         ):
             overview.render(None)
-        self.assertEqual(
-            [call.args[0] for call in render_items.call_args_list],
-            [],
-        )
 
     def test_demo_content_uses_public_sources_and_safe_internal_labels(self):
         self.assertEqual(
