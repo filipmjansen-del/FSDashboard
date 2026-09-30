@@ -8,7 +8,7 @@ from dashboards.client_intelligence._shared import (
     render_shell,
     render_status_label,
 )
-from dashboards.client_intelligence.content import THURSDAY_CAPABILITIES, THURSDAY_PERSPECTIVES
+from dashboards.client_intelligence.content import THURSDAY_CAPABILITY_MAPPINGS, THURSDAY_FOOTPRINT
 from ui.components import render_section_intro
 
 
@@ -16,18 +16,17 @@ DASHBOARD_META = {"name": "Thursday Footprint", "description": "Safe Thursday ac
 
 
 def render(_raw_data):
-    render_shell("Thursday Footprint", "Recent perspectives and potentially relevant Thursday capabilities.")
-    render_section_intro("Recent activity", "Existing Thursday material for the AL Sydbank discussion.")
-    activity_columns = st.columns(len(THURSDAY_PERSPECTIVES))
-    for column, perspective in zip(activity_columns, THURSDAY_PERSPECTIVES):
-        with column:
-            render_compact_card(perspective.title, perspective.detail, label=perspective.information_type)
-            render_metadata_line(perspective)
+    render_shell("Thursday Footprint", "Client-specific Thursday material and potentially relevant capabilities.")
+    render_section_intro("Client-specific Thursday footprint", "Existing Thursday material and account activity for AL Sydbank.")
+    activity_columns = st.columns(2)
+    for index, item in enumerate(THURSDAY_FOOTPRINT):
+        with activity_columns[index % 2]:
+            render_compact_card(item.title, item.detail, label=item.information_type)
+            render_metadata_line(item)
 
-    render_section_intro("Relevant Thursday capabilities", "Potentially relevant capabilities, not confirmed client needs.")
+    render_section_intro("Potentially relevant Thursday capabilities", "Thursday perspective · not confirmed AL Sydbank needs.")
     capability_columns = st.columns(2)
-    for index, capability in enumerate(THURSDAY_CAPABILITIES):
+    for index, capability in enumerate(THURSDAY_CAPABILITY_MAPPINGS):
         with capability_columns[index % 2]:
-            render_compact_card(capability, "Potentially relevant capability")
+            render_compact_card(capability.title, capability.detail, label=capability.information_type)
             render_status_label("Not a confirmed client need")
-    render_status_label("Experience & proof: Previous projects, cases, experts, and reusable assets will appear here when available.")

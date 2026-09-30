@@ -8,9 +8,8 @@ from dashboards.client_intelligence._shared import (
     render_shell,
 )
 from dashboards.client_intelligence.content import (
-    CUSTOMER_PROPOSITION_SIGNAL,
-    MERGER_FACTS,
-    STRATEGIC_POSITIONING_SIGNAL,
+    DOCUMENTED_AL_SYDBANK_SIGNALS,
+    THURSDAY_PERSPECTIVES,
 )
 from ui.components import render_section_intro
 
@@ -19,17 +18,17 @@ DASHBOARD_META = {"name": "Strategy & Signals", "description": "Public AL Sydban
 
 
 def render(_raw_data):
-    render_shell("Strategy & Signals", "Public signals relevant to the management conversation.")
-    render_section_intro("Integration & synergies", "Reported H1 2026 merger evidence.")
-    merger_columns = st.columns(2)
-    for index, item in enumerate(MERGER_FACTS):
-        with merger_columns[index % 2]:
+    render_shell("Strategy & Signals", "What is changing at AL Sydbank and which signals matter for the next conversation.")
+    render_section_intro("Documented AL Sydbank signals", "Public fact · reported merger, strategy and commercial signals.")
+    signal_columns = st.columns(2)
+    for index, item in enumerate(DOCUMENTED_AL_SYDBANK_SIGNALS):
+        with signal_columns[index % 2]:
             render_compact_card(item.title, item.detail, label=item.information_type)
             render_metadata_line(item)
 
-    render_section_intro("Customer proposition & strategic positioning", "Public signals on proposition and direction.")
-    signal_columns = st.columns(2)
-    for column, item in zip(signal_columns, (CUSTOMER_PROPOSITION_SIGNAL, STRATEGIC_POSITIONING_SIGNAL)):
-        with column:
+    render_section_intro("Thursday benchmark perspective", "Internal Thursday perspective · benchmark inspirations, not statements about AL Sydbank's current model.")
+    benchmark_columns = st.columns(2)
+    for index, item in enumerate(THURSDAY_PERSPECTIVES):
+        with benchmark_columns[index % 2]:
             render_compact_card(item.title, item.detail, label=item.information_type)
             render_metadata_line(item)

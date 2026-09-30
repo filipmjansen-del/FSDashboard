@@ -16,13 +16,13 @@ from dashboards.client_intelligence._shared import (
 )
 from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
-    CUSTOMER_PROPOSITION_SIGNAL,
-    MERGER_FACTS,
+    H1_2026_SNAPSHOT,
+    INTERNAL_ACCOUNT_MAPPING,
     PILOT_CONTEXT,
     PUBLIC_EXECUTIVES,
-    STRATEGIC_POSITIONING_SIGNAL,
-    THURSDAY_CAPABILITIES,
-    THURSDAY_PERSPECTIVES,
+    THURSDAY_CAPABILITY_MAPPINGS,
+    THURSDAY_FOOTPRINT,
+    WHAT_MATTERS_NOW,
 )
 
 
@@ -41,11 +41,10 @@ def render(_raw_data):
     )
     render_pilot_notice()
 
-    render_section_intro("Company snapshot", "Management meeting-preparation context.")
-    render_kpi_cards([
-        (PILOT_CONTEXT.display_name, "Client overview"),
-        (PILOT_CONTEXT.latest_reporting_label, "Latest public reporting"),
-    ])
+    render_section_intro("Company snapshot", "Reported H1 2026 headline indicators.")
+    render_kpi_cards([(item.detail, item.title) for item in H1_2026_SNAPSHOT[:3]])
+    render_kpi_cards([(item.detail, item.title) for item in H1_2026_SNAPSHOT[3:]])
+    render_status_label("Public fact · H1 2026 · Official company reporting")
 
     render_section_intro("Performance", "Existing financial analysis and peer benchmarking.")
     render_compact_card(
@@ -55,32 +54,32 @@ def render(_raw_data):
     )
     render_status_label("Available in Databank · Bank → Bank Analyst View")
 
-    render_section_intro("Key signals", "Three public signals for the meeting agenda.")
-    signal_items = (MERGER_FACTS[0], CUSTOMER_PROPOSITION_SIGNAL, STRATEGIC_POSITIONING_SIGNAL)
-    signal_columns = st.columns(len(signal_items))
-    for column, item in zip(signal_columns, signal_items):
+    render_section_intro("What matters now", "Three documented signals for the next conversation.")
+    signal_columns = st.columns(len(WHAT_MATTERS_NOW))
+    for column, item in zip(signal_columns, WHAT_MATTERS_NOW):
         with column:
             render_compact_card(item.title, item.detail, label=item.information_type)
             render_metadata_line(item)
 
-    render_section_intro("Key people", "Public leadership and current account coverage.")
+    render_section_intro("Key people", "Public leadership and existing Thursday relationship mapping.")
     people_columns = st.columns(4)
     for column, person in zip(people_columns, PUBLIC_EXECUTIVES[:4]):
         with column:
             render_compact_card(person.title, person.detail, label="Public executive")
-            render_status_label("Account mapping available")
-    st.caption("Internal mapping status only; relationship strength is not shown.")
+            mapping_label = "Existing Thursday relationship mapping" if person.title in INTERNAL_ACCOUNT_MAPPING else "No mapping evidenced in current source set"
+            render_status_label(mapping_label)
+    st.caption("Mapping status only; no relationship strength is shown.")
 
-    render_section_intro("Thursday footprint", "Recent perspective and potentially relevant capabilities.")
+    render_section_intro("Thursday footprint", "Client-specific material and potentially relevant capabilities.")
     perspective_columns = st.columns(2)
-    for column, perspective in zip(perspective_columns, THURSDAY_PERSPECTIVES[:2]):
+    for column, perspective in zip(perspective_columns, THURSDAY_FOOTPRINT[:2]):
         with column:
             render_compact_card(perspective.title, perspective.detail, label=perspective.information_type)
             render_metadata_line(perspective)
-    capability_columns = st.columns(len(THURSDAY_CAPABILITIES))
-    for column, capability in zip(capability_columns, THURSDAY_CAPABILITIES):
+    capability_columns = st.columns(2)
+    for column, capability in zip(capability_columns, THURSDAY_CAPABILITY_MAPPINGS[:2]):
         with column:
-            render_compact_card(capability, "Potentially relevant capability")
+            render_compact_card(capability.title, "Potentially relevant Thursday capability", label="Thursday perspective")
 
     render_section_intro("Opportunities", "Three hypotheses for client validation.")
     opportunity_columns = st.columns(len(COMMERCIAL_HYPOTHESES))

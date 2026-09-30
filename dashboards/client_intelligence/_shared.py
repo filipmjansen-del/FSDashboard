@@ -85,6 +85,9 @@ def render_hypothesis(hypothesis):
         column = columns[index % 2]
         with column:
             render_compact_card(title, detail)
+    st.markdown("**Validation questions**")
+    for question in hypothesis.validation_questions:
+        st.write(f"• {question}")
     render_status_label(f"Hypothesis · {hypothesis.period}")
     with st.expander("Source details", expanded=False):
         for source in hypothesis.sources:

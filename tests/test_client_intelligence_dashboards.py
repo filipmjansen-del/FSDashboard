@@ -111,7 +111,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             [
                 "Company snapshot",
                 "Performance",
-                "Key signals",
+                "What matters now",
                 "Key people",
                 "Thursday footprint",
                 "Opportunities",
@@ -142,6 +142,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             self.assertTrue(hypothesis.thursday_relevance)
             self.assertTrue(hypothesis.period)
             self.assertTrue(hypothesis.sources)
+            self.assertTrue(hypothesis.validation_questions)
             self.assertTrue(all(source.title for source in hypothesis.sources))
 
     def test_pilot_context_uses_the_existing_validated_bank_identity(self):
@@ -201,13 +202,13 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             STRATEGIC_POSITIONING_SIGNAL.source.url,
             "https://www.al-sydbank.dk/nyt/fusionen-til-al-sydbank-er-nu-en-realitet",
         )
-        self.assertEqual(len(PUBLIC_EXECUTIVES), 5)
-        self.assertTrue(all("Account mapping available" in item for item in INTERNAL_ACCOUNT_MAPPING))
+        self.assertEqual(len(PUBLIC_EXECUTIVES), 7)
+        self.assertEqual(INTERNAL_ACCOUNT_MAPPING, ("Frank Mortensen", "Svend Randers", "Gry Bandholm", "Jørn Adam Møller"))
         self.assertEqual(
             [hypothesis.title for hypothesis in COMMERCIAL_HYPOTHESES],
             [
-                "Merger integration and synergy realisation",
-                "Customer and service model",
+                "Integration & synergy realisation",
+                "Customer & service model",
                 "Digital & platform enablement",
             ],
         )
