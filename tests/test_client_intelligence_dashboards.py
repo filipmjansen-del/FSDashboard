@@ -110,9 +110,9 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             [call.args[0] for call in section_intro.call_args_list],
             [
                 "Company snapshot",
-                "Performance snapshot",
+                "Performance",
                 "Key signals",
-                "People & relations",
+                "Key people",
                 "Thursday footprint",
                 "Opportunities",
             ],

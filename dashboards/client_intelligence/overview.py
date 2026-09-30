@@ -18,7 +18,6 @@ from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
     CUSTOMER_PROPOSITION_SIGNAL,
     MERGER_FACTS,
-    PERFORMANCE_GUIDANCE,
     PILOT_CONTEXT,
     PUBLIC_EXECUTIVES,
     STRATEGIC_POSITIONING_SIGNAL,
@@ -51,10 +50,10 @@ def render(_raw_data):
     render_section_intro("Performance", "Existing financial analysis and peer benchmarking.")
     render_compact_card(
         "Bank Analyst View",
-        "Existing Databank financial performance and peer benchmarking for the pilot entity.",
+        "Explore validated financial performance, peer benchmarking, and historical development.",
         label="Existing capability",
     )
-    render_metadata_line(PERFORMANCE_GUIDANCE)
+    render_status_label("Available in Databank · Bank → Bank Analyst View")
 
     render_section_intro("Key signals", "Three public signals for the meeting agenda.")
     signal_items = (MERGER_FACTS[0], CUSTOMER_PROPOSITION_SIGNAL, STRATEGIC_POSITIONING_SIGNAL)
@@ -92,4 +91,4 @@ def render(_raw_data):
                 hypothesis.potential_need,
                 label="Hypothesis - requires client validation",
             )
-            render_status_label(f"{hypothesis.period} · source details in Opportunities")
+            render_status_label(f"{hypothesis.period} · evidence chain in Opportunities")

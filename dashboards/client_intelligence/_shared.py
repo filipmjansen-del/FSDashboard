@@ -6,7 +6,7 @@ from dashboards.client_intelligence.content import PILOT_CONTEXT
 from ui.components import render_orientation_card, render_page_intro, render_warning_callout
 
 PILOT_NOTICE = (
-    "Prototype view · Documented facts, Thursday perspectives, and hypotheses are shown separately."
+    "Documented facts, Thursday perspectives, and hypotheses are shown separately."
 )
 
 
@@ -29,11 +29,11 @@ def render_metadata_line(item):
     """Render compact source metadata while retaining a clickable URL when available."""
     source = item.source
     page = f" · {source.page_reference}" if source.page_reference else ""
-    metadata = f"{item.information_type} · {item.period} · {source.title}{page}"
+    st.caption(f"{item.information_type} · {item.period} · {source.source_type}{page}")
     if source.url:
-        st.markdown(f"[{metadata}]({source.url})")
+        st.markdown(f"[{source.title}]({source.url})")
     else:
-        st.caption(metadata)
+        st.caption(source.title)
 
 
 def render_item(item):
@@ -80,8 +80,9 @@ def render_hypothesis(hypothesis):
         ("Potential need", hypothesis.potential_need),
         ("Thursday relevance", hypothesis.thursday_relevance),
     )
-    columns = st.columns(len(chain))
-    for column, (title, detail) in zip(columns, chain):
+    columns = st.columns(2)
+    for index, (title, detail) in enumerate(chain):
+        column = columns[index % 2]
         with column:
             render_compact_card(title, detail)
     render_status_label(f"Hypothesis · {hypothesis.period}")

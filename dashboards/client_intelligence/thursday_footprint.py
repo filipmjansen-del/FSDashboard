@@ -5,7 +5,6 @@ import streamlit as st
 from dashboards.client_intelligence._shared import (
     render_compact_card,
     render_metadata_line,
-    render_not_connected,
     render_shell,
     render_status_label,
 )
@@ -28,7 +27,7 @@ def render(_raw_data):
     render_section_intro("Relevant Thursday capabilities", "Potentially relevant capabilities, not confirmed client needs.")
     capability_columns = st.columns(2)
     for index, capability in enumerate(THURSDAY_CAPABILITIES):
-        with capability_columns[index % len(capability_columns)]:
+        with capability_columns[index % 2]:
             render_compact_card(capability, "Potentially relevant capability")
             render_status_label("Not a confirmed client need")
-    render_not_connected("Previous projects, cases, experts and reusable assets")
+    render_status_label("Experience & proof: Previous projects, cases, experts, and reusable assets will appear here when available.")

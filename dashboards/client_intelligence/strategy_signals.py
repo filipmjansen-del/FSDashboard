@@ -23,7 +23,7 @@ def render(_raw_data):
     render_section_intro("Integration & synergies", "Reported H1 2026 merger evidence.")
     merger_columns = st.columns(2)
     for index, item in enumerate(MERGER_FACTS):
-        with merger_columns[index % len(merger_columns)]:
+        with merger_columns[index % 2]:
             render_compact_card(item.title, item.detail, label=item.information_type)
             render_metadata_line(item)
 

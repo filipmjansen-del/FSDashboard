@@ -5,6 +5,8 @@ from dashboards.client_intelligence._shared import (
     render_shell,
     render_status_label,
 )
+import streamlit as st
+from ui.components import render_section_intro
 
 
 DASHBOARD_META = {"name": "Performance", "description": "Existing Databank performance analysis entry point.", "order": 20}
@@ -12,9 +14,14 @@ DASHBOARD_META = {"name": "Performance", "description": "Existing Databank perfo
 
 def render(_raw_data):
     render_shell("Performance", "Existing Databank financial analysis for AL Sydbank.")
-    render_compact_card(
-        "Bank Analyst View",
-        "Inspect validated financial KPIs, peer benchmarking, and historical development in Bank → Bank Analyst View.",
-        label="Existing Databank analysis",
+    render_section_intro("Explore existing performance analysis", "Bank Analyst View provides the financial context for the client conversation.")
+    performance_cards = (
+        ("Financial performance", "Inspect validated financial KPIs."),
+        ("Peer benchmarking", "Compare AL Sydbank with relevant bank peers."),
+        ("Historical development", "Review performance trends over time."),
     )
-    render_status_label("No Client Intelligence financial calculation is duplicated here.")
+    columns = st.columns(len(performance_cards))
+    for column, (title, detail) in zip(columns, performance_cards):
+        with column:
+            render_compact_card(title, detail, label="Bank Analyst View")
+    render_status_label("Available in Databank · Bank → Bank Analyst View")
