@@ -17,6 +17,7 @@ from dashboards.client_intelligence.content import (
     CUSTOMER_PROPOSITION_SIGNAL,
     H1_2026_SOURCE_URL,
     INTERNAL_ACCOUNT_MAPPING,
+    PILOT_CONTEXT,
     PUBLIC_EXECUTIVES,
     STRATEGIC_POSITIONING_SIGNAL,
     MERGER_FACTS,
@@ -79,7 +80,6 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_section_intro"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
             patch("dashboards.client_intelligence.overview.render_items"),
-            patch("dashboards.client_intelligence.overview.render_not_connected"),
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
@@ -87,7 +87,6 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence._shared.render_pilot_notice"),
             patch("dashboards.client_intelligence._shared.render_orientation_card"),
             patch("dashboards.client_intelligence._shared.st"),
-            patch("dashboards.client_intelligence.strategy_signals.st"),
             patch("dashboards.client_intelligence.people_relations.st"),
         ):
             for renderer in renderers:
@@ -99,7 +98,6 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
             patch("dashboards.client_intelligence.overview.render_items"),
-            patch("dashboards.client_intelligence.overview.render_not_connected"),
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence.overview.render_section_intro") as section_intro,
@@ -139,8 +137,15 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             self.assertTrue(hypothesis.observation)
             self.assertTrue(hypothesis.potential_need)
             self.assertTrue(hypothesis.thursday_relevance)
-            self.assertTrue(hypothesis.source_label)
             self.assertTrue(hypothesis.period)
+            self.assertTrue(hypothesis.sources)
+            self.assertTrue(all(source.title for source in hypothesis.sources))
+
+    def test_pilot_context_uses_the_existing_validated_bank_identity(self):
+        self.assertEqual(PILOT_CONTEXT.display_name, "AL Sydbank")
+        self.assertEqual(PILOT_CONTEXT.latest_reporting_label, "H1 2026")
+        self.assertEqual(PILOT_CONTEXT.legal_entity_reference, "bank:8079")
+        self.assertEqual(PILOT_CONTEXT.regnr, "8079")
 
     def test_evidence_renderer_exposes_official_source_metadata(self):
         with patch("dashboards.client_intelligence._shared.st") as streamlit_stub:
@@ -152,13 +157,21 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
         self.assertIn("Page reference: Page 30 · Source type: Official company reporting", captions)
         streamlit_stub.markdown.assert_any_call(f"[Open source]({H1_2026_SOURCE_URL})")
 
+    def test_hypothesis_renderer_shows_observation_and_structured_sources(self):
+        with patch("dashboards.client_intelligence._shared.st") as streamlit_stub:
+            _shared.render_hypothesis(COMMERCIAL_HYPOTHESES[0])
+        writes = [call.args[0] for call in streamlit_stub.write.call_args_list]
+        self.assertIn(f"**Observation:** {COMMERCIAL_HYPOTHESES[0].observation}", writes)
+        captions = [call.args[0] for call in streamlit_stub.caption.call_args_list]
+        self.assertIn("Hypothesis - requires client validation", captions)
+        streamlit_stub.markdown.assert_any_call(f"[Open source]({H1_2026_SOURCE_URL})")
+
     def test_overview_renders_manual_evidence_and_thursday_content(self):
         with (
             patch("dashboards.client_intelligence.overview.render_page_intro"),
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
             patch("dashboards.client_intelligence.overview.render_section_intro"),
-            patch("dashboards.client_intelligence.overview.render_not_connected") as not_connected,
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
@@ -167,9 +180,8 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             overview.render(None)
         self.assertEqual(
             [call.args[0] for call in render_items.call_args_list],
-            [],
+            [THURSDAY_PERSPECTIVES],
         )
-        self.assertEqual(not_connected.call_count, 0)
 
     def test_demo_content_uses_public_sources_and_safe_internal_labels(self):
         self.assertEqual(
@@ -190,7 +202,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
                 "Digital & platform enablement",
             ],
         )
-        self.assertTrue(all(hypothesis.source_urls for hypothesis in COMMERCIAL_HYPOTHESES))
+        self.assertTrue(all(hypothesis.sources for hypothesis in COMMERCIAL_HYPOTHESES))
 
 
 if __name__ == "__main__":

@@ -14,6 +14,15 @@ class SourceMetadata:
 
 
 @dataclass(frozen=True)
+class PilotContext:
+    display_name: str
+    pilot_label: str
+    latest_reporting_label: str
+    legal_entity_reference: str | None = None
+    regnr: str | None = None
+
+
+@dataclass(frozen=True)
 class PilotItem:
     title: str
     detail: str
@@ -29,12 +38,17 @@ class CommercialHypothesis:
     observation: str
     potential_need: str
     thursday_relevance: str
-    source_label: str
     period: str
-    source_urls: tuple[str, ...]
+    sources: tuple[SourceMetadata, ...]
 
 
-PILOT_ENTITY = "AL Sydbank"
+PILOT_CONTEXT = PilotContext(
+    display_name="AL Sydbank",
+    pilot_label="AL Sydbank MVP pilot",
+    latest_reporting_label="H1 2026",
+    legal_entity_reference="bank:8079",
+    regnr="8079",
+)
 H1_2026_SOURCE_TITLE = "Delårsrapport - 1. halvår 2026"
 H1_2026_SOURCE_URL = "https://ml-eu.globenewswire.com/Resource/Download/c2791f30-e63c-466a-93a8-ec58739d267e"
 H1_2026_PAGE_30_SOURCE = SourceMetadata(
@@ -180,9 +194,8 @@ COMMERCIAL_HYPOTHESES = (
         "Thursday's existing material includes IT and operating-model considerations.",
         "Potential need to structure discussion of integration progress and the realisation of cost and capital synergies.",
         "Thursday could bring a capability-benchmarking lens to the discussion.",
-        f"{H1_2026_SOURCE_TITLE}; {THURSDAY_SEPTEMBER_2026_SOURCE.title}",
         "H1 2026 / September 2026",
-        (H1_2026_SOURCE_URL,),
+        (H1_2026_PAGE_30_SOURCE, H1_2026_PAGE_46_SOURCE, THURSDAY_SEPTEMBER_2026_SOURCE),
     ),
     CommercialHypothesis(
         "Customer and service model",
@@ -190,9 +203,8 @@ COMMERCIAL_HYPOTHESES = (
         "Thursday's client-specific material covers customer and service model and emphasises relationships as a perspective.",
         "Potential need to structure discussion of future service model, segmentation, and channel or branch choices.",
         "Thursday relevance: Customer & service model.",
-        f"{CUSTOMER_PROPOSITION_SOURCE.title}; {MERGER_POSITIONING_SOURCE.title}",
         "2026",
-        (CUSTOMER_PROPOSITION_SOURCE.url, MERGER_POSITIONING_SOURCE.url),
+        (CUSTOMER_PROPOSITION_SOURCE, MERGER_POSITIONING_SOURCE, THURSDAY_SEPTEMBER_2026_SOURCE),
     ),
     CommercialHypothesis(
         "Digital & platform enablement",
@@ -200,8 +212,7 @@ COMMERCIAL_HYPOTHESES = (
         "Thursday's benchmarking material covers technology and platform / operating-model considerations.",
         "Potential need to translate a future service model into platform and technology requirements.",
         "Thursday relevance: Technology & architecture.",
-        f"{MERGER_POSITIONING_SOURCE.title}; {LARGER_BANK_SOURCE.title}",
         "2026",
-        (MERGER_POSITIONING_SOURCE.url, LARGER_BANK_SOURCE.url),
+        (MERGER_POSITIONING_SOURCE, LARGER_BANK_SOURCE, THURSDAY_SEPTEMBER_2026_SOURCE),
     ),
 )
