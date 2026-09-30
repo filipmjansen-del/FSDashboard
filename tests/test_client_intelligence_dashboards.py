@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from dashboards.client_intelligence import overview
+from dashboards.client_intelligence import _shared
 from dashboards.client_intelligence import (
     chat,
     opportunities,
@@ -112,11 +113,16 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
         self.assertTrue(COMMERCIAL_HYPOTHESES)
         for fact in MERGER_FACTS:
             self.assertEqual(fact.information_type, "Fact")
-            self.assertTrue(fact.source_label)
+            self.assertEqual(fact.source.publisher, "AL Sydbank A/S")
+            self.assertEqual(fact.source.title, "Delårsrapport - 1. halvår 2026")
+            self.assertEqual(fact.source.publication_date, "26 August 2026")
+            self.assertEqual(fact.source.source_type, "Official company reporting")
+            self.assertIn(fact.source.page_reference, {"Page 30", "Page 46"})
+            self.assertIsNone(fact.source.url)
             self.assertTrue(fact.period)
         for perspective in THURSDAY_PERSPECTIVES:
             self.assertEqual(perspective.information_type, "Thursday perspective")
-            self.assertTrue(perspective.source_label)
+            self.assertTrue(perspective.source.title)
             self.assertTrue(perspective.period)
         for hypothesis in COMMERCIAL_HYPOTHESES:
             self.assertTrue(hypothesis.evidence)
@@ -125,6 +131,16 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             self.assertTrue(hypothesis.thursday_relevance)
             self.assertTrue(hypothesis.source_label)
             self.assertTrue(hypothesis.period)
+
+    def test_evidence_renderer_exposes_official_source_metadata(self):
+        with patch("dashboards.client_intelligence._shared.st") as streamlit_stub:
+            _shared.render_item(MERGER_FACTS[0])
+        captions = [call.args[0] for call in streamlit_stub.caption.call_args_list]
+        self.assertIn("Fact · H1 2026", captions)
+        self.assertIn("Source title: Delårsrapport - 1. halvår 2026", captions)
+        self.assertIn("Publisher: AL Sydbank A/S · Publication date: 26 August 2026", captions)
+        self.assertIn("Page reference: Page 30 · Source type: Official company reporting", captions)
+        self.assertIn("Source URL: Unresolved — no official public URL has been verified yet.", captions)
 
     def test_overview_renders_manual_evidence_and_thursday_content(self):
         with (

@@ -19,8 +19,18 @@ def render_item(item):
     st.markdown(f"**{item.title}**")
     st.write(item.detail)
     st.caption(
-        f"{item.information_type} · {item.period} · Source: {item.source_label}"
+        f"{item.information_type} · {item.period}"
     )
+    st.caption(f"Source title: {item.source.title}")
+    st.caption(
+        f"Publisher: {item.source.publisher} · Publication date: {item.source.publication_date}"
+    )
+    page_reference = item.source.page_reference or "Not applicable"
+    st.caption(f"Page reference: {page_reference} · Source type: {item.source.source_type}")
+    if item.source.url:
+        st.markdown(f"[Open source]({item.source.url})")
+    else:
+        st.caption("Source URL: Unresolved — no official public URL has been verified yet.")
 
 
 def render_items(items):
