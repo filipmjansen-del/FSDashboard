@@ -2,7 +2,10 @@
 
 import streamlit as st
 
-from dashboards.registry import INDUSTRY_DASHBOARD_CATALOG
+from dashboards.registry import (
+    CROSS_CUTTING_DASHBOARD_CATALOG,
+    INDUSTRY_DASHBOARD_CATALOG,
+)
 from kpis.registry import INDUSTRY_KPI_CATALOG
 
 
@@ -72,6 +75,26 @@ def render_sidebar():
                             navigate_to(industry, "dashboard", dashboard_name)
                 else:
                     st.caption("Ingen analyser tilføjet endnu")
+
+        for section, dashboards in CROSS_CUTTING_DASHBOARD_CATALOG.items():
+            is_active_section = (
+                st.session_state.selected_view_type == "dashboard"
+                and st.session_state.selected_view_name in dashboards
+            )
+            with st.expander(section, expanded=is_active_section):
+                st.markdown('<div class="nav-section-label">Views</div>', unsafe_allow_html=True)
+                for dashboard_name in dashboards:
+                    is_active = (
+                        st.session_state.selected_view_type == "dashboard"
+                        and st.session_state.selected_view_name == dashboard_name
+                    )
+                    if st.button(
+                        dashboard_name,
+                        key=f"nav_cross_cutting_{section}_{dashboard_name}",
+                        use_container_width=True,
+                        type="primary" if is_active else "secondary",
+                    ):
+                        navigate_to(None, "dashboard", dashboard_name)
 
         if st.session_state.selected_view_name:
             st.divider()
