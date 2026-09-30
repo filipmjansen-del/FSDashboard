@@ -10,6 +10,7 @@ from ui.components import (
 
 from dashboards.client_intelligence._shared import (
     PILOT_ENTITY,
+    render_hypothesis,
     render_item,
     render_items,
     render_not_connected,
@@ -17,15 +18,18 @@ from dashboards.client_intelligence._shared import (
 )
 from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
-    MERGER_FACTS,
+    CUSTOMER_PROPOSITION_SIGNAL,
     PERFORMANCE_GUIDANCE,
-    THURSDAY_PERSPECTIVES,
+    PUBLIC_EXECUTIVES,
+    STRATEGIC_POSITIONING_SIGNAL,
+    THURSDAY_CAPABILITIES,
 )
 
 
 DASHBOARD_META = {
     "name": "Overview",
     "description": "Manually curated client-intelligence overview for the AL Sydbank pilot.",
+    "order": 10,
 }
 
 
@@ -37,36 +41,33 @@ def render(_raw_data):
     )
     render_pilot_notice()
 
-    render_section_intro("Company snapshot", "Fixed MVP pilot entity and manual-content scope.")
+    render_section_intro("Company snapshot", "Management meeting-preparation context.")
     render_kpi_cards([
         (PILOT_ENTITY, "Pilot entity"),
-        ("Manual", "Content source"),
-        ("MVP", "Workspace status"),
+        ("Integration phase", "Merged bank"),
+        ("H1 2026", "Latest public reporting"),
     ])
 
-    render_section_intro("What changed?", "Documented merger and integration evidence from the H1 2026 interim-report material.")
-    render_items(MERGER_FACTS)
-
     render_section_intro("Performance snapshot", "Use the existing Bank Analyst View for financial metrics and benchmark context.")
-    render_not_connected("A performance snapshot in Client Intelligence")
     render_item(PERFORMANCE_GUIDANCE)
 
-    render_section_intro("Strategic priorities", "No documented AL Sydbank strategic-priority content is connected yet.")
-    render_not_connected("Strategic priorities")
+    render_section_intro("Key signals", "Three public signals for the meeting agenda.")
+    render_kpi_cards([
+        ("DKK 32m", "H1 2026 integration costs"),
+        ("Fees removed", "Relevant private customers · Sep. 2026"),
+        ("Broader offer", "Public strategic positioning"),
+    ])
+    render_item(CUSTOMER_PROPOSITION_SIGNAL)
+    render_item(STRATEGIC_POSITIONING_SIGNAL)
 
-    render_section_intro("Key people & relations", "No people, relationship, LinkedIn, or CRM content is connected yet.")
-    render_not_connected("Key people and relations")
+    render_section_intro("People & relations", "Public leadership view with a safe internal account-mapping indicator.")
+    render_kpi_cards([(item.title, item.detail) for item in PUBLIC_EXECUTIVES[:4]])
+    st.caption("Internal account mapping available for the public leadership list. Relationship strength is not shown.")
 
-    render_section_intro("Thursday footprint", "Thursday perspectives are distinct from AL Sydbank statements.")
-    render_items(THURSDAY_PERSPECTIVES)
+    render_section_intro("Thursday footprint", "September 2026 benchmarking activity and relevant capability areas.")
+    render_kpi_cards([(capability, "Potentially relevant capability") for capability in THURSDAY_CAPABILITIES])
+    st.caption("Thursday perspective · September 2026 · Not a statement of confirmed AL Sydbank need.")
 
-    render_section_intro("Commercial hypotheses", "Potential needs are hypotheses only; they are not confirmed client needs.")
+    render_section_intro("Opportunities", "Hypotheses only; not confirmed client needs.")
     for hypothesis in COMMERCIAL_HYPOTHESES:
-        st.markdown(f"**{hypothesis.title}**")
-        st.markdown(f"**Evidence:** {hypothesis.evidence}")
-        st.markdown(f"**Observation:** {hypothesis.observation}")
-        st.markdown(f"**Potential need (hypothesis):** {hypothesis.potential_need}")
-        st.markdown(f"**Thursday relevance:** {hypothesis.thursday_relevance}")
-        st.caption(
-            f"Hypothesis · {hypothesis.period} · Source: {hypothesis.source_label}"
-        )
+        render_hypothesis(hypothesis)

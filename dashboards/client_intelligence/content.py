@@ -31,6 +31,7 @@ class CommercialHypothesis:
     thursday_relevance: str
     source_label: str
     period: str
+    source_urls: tuple[str, ...]
 
 
 PILOT_ENTITY = "AL Sydbank"
@@ -57,6 +58,22 @@ THURSDAY_SEPTEMBER_2026_SOURCE = SourceMetadata(
     title="Thursday material for AL Sydbank benchmarking Danske Bank",
     publication_date="September 2026",
     source_type="Thursday material",
+)
+CUSTOMER_PROPOSITION_SOURCE = SourceMetadata(
+    publisher="AL Sydbank A/S", title="Farvel til gebyr", publication_date="September 2026",
+    source_type="Official company news", url="https://www.al-sydbank.dk/nyt/farvel-til-gebyr",
+)
+MERGER_POSITIONING_SOURCE = SourceMetadata(
+    publisher="AL Sydbank A/S", title="Fusionen til AL Sydbank er nu en realitet", publication_date="2026",
+    source_type="Official company news", url="https://www.al-sydbank.dk/nyt/fusionen-til-al-sydbank-er-nu-en-realitet",
+)
+LARGER_BANK_SOURCE = SourceMetadata(
+    publisher="AL Sydbank A/S", title="Vi vil skabe en større bank", publication_date="2026",
+    source_type="Official company news", url="https://www.al-sydbank.dk/nyt/vi-vil-skabe-en-stoerre-bank",
+)
+ORGANISATION_SOURCE = SourceMetadata(
+    publisher="AL Sydbank A/S", title="Organisation", publication_date="Current public organisation page",
+    source_type="Official company information", url="https://www.al-sydbank.dk/om-os/organisation",
 )
 
 MERGER_FACTS = (
@@ -100,7 +117,7 @@ MERGER_FACTS = (
 THURSDAY_PERSPECTIVES = (
     PilotItem(
         "Benchmarking coverage",
-        "Thursday has developed client-specific material covering scale and footprint, customer and service model, AI and technology, and IT / operating-model considerations.",
+        "Thursday has developed client-specific benchmarking material covering customer and service model, technology, and platform / operating-model considerations.",
         "Thursday perspective",
         THURSDAY_SEPTEMBER_2026_SOURCE,
         "September 2026",
@@ -119,6 +136,28 @@ THURSDAY_PERSPECTIVES = (
         THURSDAY_SEPTEMBER_2026_SOURCE,
         "September 2026",
     ),
+)
+
+CUSTOMER_PROPOSITION_SIGNAL = PilotItem(
+    "Customer proposition", "AL Sydbank removed account and netbank fees for relevant private customers.",
+    "Fact", CUSTOMER_PROPOSITION_SOURCE, "September 2026",
+)
+STRATEGIC_POSITIONING_SIGNAL = PilotItem(
+    "Strategic positioning", "Public merger communication describes a broader offering, more specialist capabilities, stronger digital solutions, and a national/local distribution footprint.",
+    "Fact", MERGER_POSITIONING_SOURCE, "2026",
+)
+PUBLIC_EXECUTIVES = (
+    PilotItem("Mark Luscombe", "CEO", "Fact", ORGANISATION_SOURCE, "Current public organisation page"),
+    PilotItem("Frank Mortensen", "Vice CEO", "Fact", ORGANISATION_SOURCE, "Current public organisation page"),
+    PilotItem("Jørn Adam Møller", "CFO", "Fact", ORGANISATION_SOURCE, "Current public organisation page"),
+    PilotItem("Svend Randers", "Bankdirektør", "Fact", ORGANISATION_SOURCE, "Current public organisation page"),
+    PilotItem("Gry Bandholm", "Bankdirektør", "Fact", ORGANISATION_SOURCE, "Current public organisation page"),
+)
+INTERNAL_ACCOUNT_MAPPING = tuple(
+    f"{person.title} — Account mapping available" for person in PUBLIC_EXECUTIVES
+)
+THURSDAY_CAPABILITIES = (
+    "Integration & programme execution", "Customer & service model", "Technology & architecture", "Operating model & governance",
 )
 
 PERFORMANCE_GUIDANCE = PilotItem(
@@ -143,23 +182,26 @@ COMMERCIAL_HYPOTHESES = (
         "Thursday could bring a capability-benchmarking lens to the discussion.",
         f"{H1_2026_SOURCE_TITLE}; {THURSDAY_SEPTEMBER_2026_SOURCE.title}",
         "H1 2026 / September 2026",
+        (H1_2026_SOURCE_URL,),
     ),
     CommercialHypothesis(
         "Customer and service model",
-        "No AL Sydbank customer-model fact is connected in this MVP.",
+        "Public merger positioning and the September 2026 private-customer fee change.",
         "Thursday's client-specific material covers customer and service model and emphasises relationships as a perspective.",
-        "Potential need to explore how customer and service capabilities should be benchmarked during integration.",
-        "Thursday could frame a comparison around capabilities rather than copying Danske Bank's model.",
-        THURSDAY_SEPTEMBER_2026_SOURCE.title,
-        "September 2026",
+        "Potential need to structure discussion of future service model, segmentation, and channel or branch choices.",
+        "Thursday relevance: Customer & service model.",
+        f"{CUSTOMER_PROPOSITION_SOURCE.title}; {MERGER_POSITIONING_SOURCE.title}",
+        "2026",
+        (CUSTOMER_PROPOSITION_SOURCE.url, MERGER_POSITIONING_SOURCE.url),
     ),
     CommercialHypothesis(
-        "Selective AI and technology",
-        "No AL Sydbank AI or technology fact is connected in this MVP.",
-        "Thursday's client-specific material covers AI and technology and highlights selective technology as a perspective.",
-        "Potential need to identify where selective technology capabilities warrant a focused benchmark discussion.",
-        "Thursday could support a capability-based benchmark without implying a confirmed client requirement.",
-        THURSDAY_SEPTEMBER_2026_SOURCE.title,
-        "September 2026",
+        "Digital & platform enablement",
+        "Public ambition for stronger digital solutions.",
+        "Thursday's benchmarking material covers technology and platform / operating-model considerations.",
+        "Potential need to translate a future service model into platform and technology requirements.",
+        "Thursday relevance: Technology & architecture.",
+        f"{MERGER_POSITIONING_SOURCE.title}; {LARGER_BANK_SOURCE.title}",
+        "2026",
+        (MERGER_POSITIONING_SOURCE.url, LARGER_BANK_SOURCE.url),
     ),
 )

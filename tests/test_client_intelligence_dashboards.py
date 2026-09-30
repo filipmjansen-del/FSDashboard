@@ -14,7 +14,11 @@ from dashboards.client_intelligence import (
 )
 from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
+    CUSTOMER_PROPOSITION_SIGNAL,
     H1_2026_SOURCE_URL,
+    INTERNAL_ACCOUNT_MAPPING,
+    PUBLIC_EXECUTIVES,
+    STRATEGIC_POSITIONING_SIGNAL,
     MERGER_FACTS,
     THURSDAY_PERSPECTIVES,
 )
@@ -40,6 +44,10 @@ VIEW_NAMES = {
 class ClientIntelligenceDashboardTests(unittest.TestCase):
     def test_seven_views_are_discovered_as_a_cross_cutting_section(self):
         self.assertEqual(set(CROSS_CUTTING_DASHBOARD_CATALOG["Client Intelligence"]), VIEW_NAMES)
+        self.assertEqual(
+            CROSS_CUTTING_DASHBOARD_CATALOG["Client Intelligence"],
+            ["Overview", "Performance", "Strategy & Signals", "People & Relations", "Thursday Footprint", "Opportunities", "Chat"],
+        )
         self.assertTrue(VIEW_NAMES.isdisjoint(INDUSTRY_DASHBOARD_CATALOG))
         for name in VIEW_NAMES:
             self.assertTrue(callable(DASHBOARD_REGISTRY[name]["render"]))
@@ -73,12 +81,14 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_items"),
             patch("dashboards.client_intelligence.overview.render_not_connected"),
             patch("dashboards.client_intelligence.overview.render_item"),
+            patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence._shared.render_page_intro"),
             patch("dashboards.client_intelligence._shared.render_pilot_notice"),
             patch("dashboards.client_intelligence._shared.render_orientation_card"),
             patch("dashboards.client_intelligence._shared.st"),
-            patch("dashboards.client_intelligence.opportunities.st"),
+            patch("dashboards.client_intelligence.strategy_signals.st"),
+            patch("dashboards.client_intelligence.people_relations.st"),
         ):
             for renderer in renderers:
                 renderer(None)
@@ -99,12 +109,11 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             [call.args[0] for call in section_intro.call_args_list],
             [
                 "Company snapshot",
-                "What changed?",
                 "Performance snapshot",
-                "Strategic priorities",
-                "Key people & relations",
+                "Key signals",
+                "People & relations",
                 "Thursday footprint",
-                "Commercial hypotheses",
+                "Opportunities",
             ],
         )
 
@@ -151,15 +160,37 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_section_intro"),
             patch("dashboards.client_intelligence.overview.render_not_connected") as not_connected,
             patch("dashboards.client_intelligence.overview.render_item"),
+            patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
             patch("dashboards.client_intelligence.overview.render_items") as render_items,
         ):
             overview.render(None)
         self.assertEqual(
             [call.args[0] for call in render_items.call_args_list],
-            [MERGER_FACTS, THURSDAY_PERSPECTIVES],
+            [],
         )
-        self.assertEqual(not_connected.call_count, 3)
+        self.assertEqual(not_connected.call_count, 0)
+
+    def test_demo_content_uses_public_sources_and_safe_internal_labels(self):
+        self.assertEqual(
+            CUSTOMER_PROPOSITION_SIGNAL.source.url,
+            "https://www.al-sydbank.dk/nyt/farvel-til-gebyr",
+        )
+        self.assertEqual(
+            STRATEGIC_POSITIONING_SIGNAL.source.url,
+            "https://www.al-sydbank.dk/nyt/fusionen-til-al-sydbank-er-nu-en-realitet",
+        )
+        self.assertEqual(len(PUBLIC_EXECUTIVES), 5)
+        self.assertTrue(all("Account mapping available" in item for item in INTERNAL_ACCOUNT_MAPPING))
+        self.assertEqual(
+            [hypothesis.title for hypothesis in COMMERCIAL_HYPOTHESES],
+            [
+                "Merger integration and synergy realisation",
+                "Customer and service model",
+                "Digital & platform enablement",
+            ],
+        )
+        self.assertTrue(all(hypothesis.source_urls for hypothesis in COMMERCIAL_HYPOTHESES))
 
 
 if __name__ == "__main__":

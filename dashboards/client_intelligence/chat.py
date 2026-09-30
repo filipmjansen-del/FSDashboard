@@ -3,7 +3,7 @@
 from dashboards.client_intelligence._shared import render_not_connected, render_shell
 
 
-DASHBOARD_META = {"name": "Chat", "description": "Mock chat workspace."}
+DASHBOARD_META = {"name": "Chat", "description": "Future chat workspace.", "order": 70}
 
 
 def render(_raw_data):

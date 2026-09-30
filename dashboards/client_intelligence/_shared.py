@@ -12,25 +12,22 @@ PILOT_NOTICE = (
 
 
 def render_pilot_notice():
-    render_warning_callout(PILOT_NOTICE)
+    st.caption(PILOT_NOTICE)
 
 
 def render_item(item):
     st.markdown(f"**{item.title}**")
     st.write(item.detail)
-    st.caption(
-        f"{item.information_type} · {item.period}"
-    )
-    st.caption(f"Source title: {item.source.title}")
-    st.caption(
-        f"Publisher: {item.source.publisher} · Publication date: {item.source.publication_date}"
-    )
-    page_reference = item.source.page_reference or "Not applicable"
-    st.caption(f"Page reference: {page_reference} · Source type: {item.source.source_type}")
-    if item.source.url:
-        st.markdown(f"[Open source]({item.source.url})")
-    else:
-        st.caption("Source URL: Unresolved — no official public URL has been verified yet.")
+    st.caption(f"{item.information_type} · {item.period}")
+    with st.expander("Source details", expanded=False):
+        st.caption(f"Source title: {item.source.title}")
+        st.caption(f"Publisher: {item.source.publisher} · Publication date: {item.source.publication_date}")
+        page_reference = item.source.page_reference or "Not applicable"
+        st.caption(f"Page reference: {page_reference} · Source type: {item.source.source_type}")
+        if item.source.url:
+            st.markdown(f"[Open source]({item.source.url})")
+        else:
+            st.caption("Source URL: Unresolved — no official public URL has been verified yet.")
 
 
 def render_items(items):
@@ -48,9 +45,14 @@ def render_not_connected(subject: str):
 
 def render_shell(title: str, description: str):
     render_page_intro(title, description, context=f"Client Intelligence · {PILOT_ENTITY}")
-    render_pilot_notice()
-    render_orientation_card(
-        "MVP scope",
-        "This lightweight view uses only manually curated pilot content. No data integration, "
-        "research automation, matching logic, or chat capability is implemented.",
-    )
+
+
+def render_hypothesis(hypothesis):
+    st.markdown(f"**{hypothesis.title}**")
+    st.caption("Hypothesis - requires client validation")
+    st.write(f"**Evidence:** {hypothesis.evidence}")
+    st.write(f"**Potential need:** {hypothesis.potential_need}")
+    st.write(f"**Thursday relevance:** {hypothesis.thursday_relevance}")
+    st.caption(f"Hypothesis · {hypothesis.period} · Sources: {hypothesis.source_label}")
+    for source_url in hypothesis.source_urls:
+        st.markdown(f"[Open public source]({source_url})")

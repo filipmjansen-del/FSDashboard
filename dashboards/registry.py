@@ -70,11 +70,13 @@ def _discover_dashboards():
                     dashboard_name
                 )
 
-    for catalog in (INDUSTRY_DASHBOARD_CATALOG, CROSS_CUTTING_DASHBOARD_CATALOG):
-        for section in catalog:
-            catalog[section] = sorted(
-                catalog[section]
-            )
+    for section in INDUSTRY_DASHBOARD_CATALOG:
+        INDUSTRY_DASHBOARD_CATALOG[section] = sorted(INDUSTRY_DASHBOARD_CATALOG[section])
+    for section in CROSS_CUTTING_DASHBOARD_CATALOG:
+        CROSS_CUTTING_DASHBOARD_CATALOG[section] = sorted(
+            CROSS_CUTTING_DASHBOARD_CATALOG[section],
+            key=lambda name: DASHBOARD_REGISTRY[name].get("order", 999),
+        )
 
 
 _discover_dashboards()
