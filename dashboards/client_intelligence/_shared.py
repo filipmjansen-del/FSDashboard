@@ -15,6 +15,28 @@ def render_pilot_notice():
     st.caption(PILOT_NOTICE)
 
 
+def render_compact_card(title: str, detail: str, *, label: str | None = None):
+    """Render a compact content card using the existing orientation-card theme."""
+    heading = f"{label} · {title}" if label else title
+    render_orientation_card(heading, detail)
+
+
+def render_status_label(label: str):
+    """Render a compact, secondary status or information-type label."""
+    st.caption(label)
+
+
+def render_metadata_line(item):
+    """Render compact source metadata while retaining a clickable URL when available."""
+    source = item.source
+    page = f" · {source.page_reference}" if source.page_reference else ""
+    metadata = f"{item.information_type} · {item.period} · {source.title}{page}"
+    if source.url:
+        st.markdown(f"[{metadata}]({source.url})")
+    else:
+        st.caption(metadata)
+
+
 def render_item(item):
     st.markdown(f"**{item.title}**")
     st.write(item.detail)

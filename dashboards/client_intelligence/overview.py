@@ -9,10 +9,13 @@ from ui.components import (
 )
 
 from dashboards.client_intelligence._shared import (
+    render_compact_card,
     render_hypothesis,
     render_item,
     render_items,
+    render_metadata_line,
     render_pilot_notice,
+    render_status_label,
 )
 from dashboards.client_intelligence.content import (
     COMMERCIAL_HYPOTHESES,
@@ -49,21 +52,47 @@ def render(_raw_data):
     ])
 
     render_section_intro("Performance snapshot", "Use the existing Bank Analyst View for financial metrics and benchmark context.")
-    render_item(PERFORMANCE_GUIDANCE)
+    render_compact_card(
+        "Bank Analyst View",
+        "Existing Databank financial performance and peer benchmarking for the pilot entity.",
+        label="Existing capability",
+    )
+    render_metadata_line(PERFORMANCE_GUIDANCE)
 
     render_section_intro("Key signals", "Three public signals for the meeting agenda.")
-    render_item(MERGER_FACTS[0])
-    render_item(CUSTOMER_PROPOSITION_SIGNAL)
-    render_item(STRATEGIC_POSITIONING_SIGNAL)
+    signal_items = (MERGER_FACTS[0], CUSTOMER_PROPOSITION_SIGNAL, STRATEGIC_POSITIONING_SIGNAL)
+    signal_columns = st.columns(len(signal_items))
+    for column, item in zip(signal_columns, signal_items):
+        with column:
+            render_compact_card(item.title, item.detail, label=item.information_type)
+            render_metadata_line(item)
 
     render_section_intro("People & relations", "Public leadership view with a safe internal account-mapping indicator.")
-    render_kpi_cards([(item.title, item.detail) for item in PUBLIC_EXECUTIVES[:4]])
-    st.caption("Internal account mapping available for the public leadership list. Relationship strength is not shown.")
+    people_columns = st.columns(4)
+    for column, person in zip(people_columns, PUBLIC_EXECUTIVES[:4]):
+        with column:
+            render_compact_card(person.title, person.detail, label="Public executive")
+            render_status_label("Mapped internally")
+    st.caption("Account mapping is available; relationship strength is not shown.")
 
     render_section_intro("Thursday footprint", "Documented Thursday perspectives and relevant capability areas.")
-    render_items(THURSDAY_PERSPECTIVES)
-    render_kpi_cards([(capability, "Potentially relevant capability") for capability in THURSDAY_CAPABILITIES])
+    perspective_columns = st.columns(len(THURSDAY_PERSPECTIVES))
+    for column, perspective in zip(perspective_columns, THURSDAY_PERSPECTIVES):
+        with column:
+            render_compact_card(perspective.title, perspective.detail, label=perspective.information_type)
+            render_metadata_line(perspective)
+    capability_columns = st.columns(len(THURSDAY_CAPABILITIES))
+    for column, capability in zip(capability_columns, THURSDAY_CAPABILITIES):
+        with column:
+            render_compact_card(capability, "Potentially relevant capability")
 
     render_section_intro("Opportunities", "Hypotheses only; not confirmed client needs.")
-    for hypothesis in COMMERCIAL_HYPOTHESES:
-        render_hypothesis(hypothesis)
+    opportunity_columns = st.columns(len(COMMERCIAL_HYPOTHESES))
+    for column, hypothesis in zip(opportunity_columns, COMMERCIAL_HYPOTHESES):
+        with column:
+            render_compact_card(
+                hypothesis.title,
+                hypothesis.potential_need,
+                label="Hypothesis - requires client validation",
+            )
+            render_status_label(f"{hypothesis.period} · {len(hypothesis.sources)} source records")

@@ -79,6 +79,9 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_section_intro"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
+            patch("dashboards.client_intelligence.overview.render_compact_card"),
+            patch("dashboards.client_intelligence.overview.render_metadata_line"),
+            patch("dashboards.client_intelligence.overview.render_status_label"),
             patch("dashboards.client_intelligence.overview.render_items"),
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.render_hypothesis"),
@@ -97,6 +100,9 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_page_intro"),
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
+            patch("dashboards.client_intelligence.overview.render_compact_card"),
+            patch("dashboards.client_intelligence.overview.render_metadata_line"),
+            patch("dashboards.client_intelligence.overview.render_status_label"),
             patch("dashboards.client_intelligence.overview.render_items"),
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.st"),
@@ -172,6 +178,9 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             patch("dashboards.client_intelligence.overview.render_pilot_notice"),
             patch("dashboards.client_intelligence.overview.render_kpi_cards"),
             patch("dashboards.client_intelligence.overview.render_section_intro"),
+            patch("dashboards.client_intelligence.overview.render_compact_card"),
+            patch("dashboards.client_intelligence.overview.render_metadata_line"),
+            patch("dashboards.client_intelligence.overview.render_status_label"),
             patch("dashboards.client_intelligence.overview.render_item"),
             patch("dashboards.client_intelligence.overview.render_hypothesis"),
             patch("dashboards.client_intelligence.overview.st"),
@@ -180,7 +189,7 @@ class ClientIntelligenceDashboardTests(unittest.TestCase):
             overview.render(None)
         self.assertEqual(
             [call.args[0] for call in render_items.call_args_list],
-            [THURSDAY_PERSPECTIVES],
+            [],
         )
 
     def test_demo_content_uses_public_sources_and_safe_internal_labels(self):
