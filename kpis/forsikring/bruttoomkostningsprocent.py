@@ -5,6 +5,8 @@ KPI_META = {
     "name": "Bruttoomkostningsprocent",
     "industry": "Forsikring",
     "source_type": "reported",
+    "source_code": "SA2804",
+    "official_definition": "Forholdet mellem forsikringsmæssige driftsomkostninger og bruttopræmieindtægter efter bonus og præmierabatter.",
     "slug": "bruttoomkostningsprocent",
     "display_format": "percentage",
     "decimals": 1,
@@ -14,7 +16,7 @@ KPI_META = {
     "description": "Andelen af bruttopræmier, som går til forsikringsmæssig drift.",
     "interpretation": "17 % betyder, at driftsomkostningerne svarer til 17 % af præmieindtægterne efter bonus og præmierabatter.",
     "direction_explanation": "Lavere er som udgangspunkt bedre for omkostningseffektiviteten.",
-    "caveat": "Definitionen omfatter justering for domicilejendomme. Værdien er rapporteret i kildedatasættet og genberegnes ikke fra råregnskabets kontokoder.",
+    "caveat": "Værdien er rapporteret i Finanstilsynets kildedatasæt og genberegnes ikke fra råregnskabets kontokoder.",
 }
 
 

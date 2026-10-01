@@ -5,6 +5,8 @@ KPI_META = {
     "name": "Combined ratio",
     "industry": "Forsikring",
     "source_type": "reported",
+    "source_code": "SA2805",
+    "official_definition": "Summen af erstatningsprocenten, omkostningsprocenten og nettogenforsikringsprocenten.",
     "slug": "combined_ratio",
     "display_format": "percentage",
     "decimals": 1,

@@ -2,70 +2,42 @@
 
 ## Scope and source
 
-This module measures the structure of the Danish insurance market from the FY
-observations in `financial_services_long.xlsx`. The source attribute is
-`Res_BP_BeY`, the extract's gross-premium field. Its source definition is
-**Bruttopræmier** (result statement row 1.1). For non-life insurance, the
-regulatory definition covers premiums due in the year for direct and indirect
-insurance, net of cancelled premiums, specified bonus/premium rebates and
-public charges collected with premiums. The related `Res_BoPr_BeY` field is the
-separate bonus and premium-rebate result line, and is not an alternative market
-value basis.
+This module measures the published F&P non-life market, segment **Skadeforsikring
+i alt**, from `data/forsikring_market_structure_fp.csv`. The extract originates
+from F&P's `kvartalsvise-markedsandele-1-2026.xlsx`, sheet *Skadeforsikring i alt*.
+It is deliberately source-specific and is not merged into the financial-statement
+workbook.
 
-The reported values are in **t.DKK** (thousands of DKK). Consequently, the
-application displays a total of 83,649,765 t.DKK as DKK 83.6 mia.; the table
-and historical market-size axis retain the reported t.DKK unit. The source row
-definition follows the [Danish financial-reporting regulation, §35 and Annex
-4](https://www.retsinformation.dk/eli/lta/2025/943).
+## Reported by F&P
 
-## Canonical input and population
+- Gross premium income by market actor, in t.DKK.
+- Market share by market actor. F&P's reported `market_share` is used directly
+  and is **not recalculated by Databank**.
 
-The analytical engine accepts only canonical observations. It selects
-`market = Forsikring`, `attribute_id = Res_BP_BeY`, `period_type = FY` and
-`period_end_month = 12`; interim periods cannot be combined with FY data.
+The share basis is **Bruttopræmieindtægter**. Market size is F&P's reported
+period total, not a sum reconstructed by Databank.
 
-`entity_id` is the canonical market-scoped identity (`forsikring:<regnr>`).
-`regnr` remains the legal identifier behind that identity; `display_name` is a
-display attribute only. One source-of-truth row is produced for each reported
-FY entity observation:
+## Calculated by Databank
 
-| Column | Meaning |
-| --- | --- |
-| `year` | FY fiscal year. |
-| `entity_id` | Canonical identity based on `regnr`. |
-| `display_name` | Source display name only. |
-| `market_value` | Reported gross premiums in t.DKK. |
-| `market_share` | Calculated included-population share. |
-| `rank` | Descending included-population rank. |
-| `included_flag` | True only for an observed, positive market value. |
-| `exclusion_reason` | `missing_gross_premiums` or `non_positive_gross_premiums` where excluded. |
+For every year and quarter, Databank calculates rank, CR1, CR3, CR5, HHI and
+the count of market actors with a positive reported market share. Rank and CR
+metrics use descending F&P-reported shares. HHI is `10,000 × sum(s_i²)` using
+those reported shares.
 
-The annual population is exactly the rows with `included_flag = True`. Therefore
-the entity count means **entities with observed positive gross premiums**, not
-all licensed or otherwise known insurance entities. Missing observations are
-never converted to zero.
+## Population, identity and time
 
-## Calculations
+The population follows F&P's published *Skadeforsikring i alt* population and
+market-actor grouping. Source entity names are market actors/groups, not
+necessarily individual legal entities. This is analytically different from the
+`regnr` identity used for Databank financial-statement analysis; the dataset is
+neither mapped to nor consolidated into that model.
 
-For each year, market size is the sum of included `market_value` values and an
-entity's market share is its market value divided by that total. CR1, CR3 and
-CR5 are the cumulative shares of the largest 1, 3 and 5 included entities.
-HHI is `10,000 × sum(market_share²)`, so it is reported on the 0--10,000 scale.
-All measures use the same population; included annual shares reconcile to 100%
-apart from rounding.
+Gross premium income is cumulative YTD. A selected Q2 is therefore compared
+only with Q2 observations in earlier years; it is not compared with Q4 totals.
+Missing source values remain missing and are never interpreted as zero.
 
-## Historical validation and limitations
+## Validation
 
-The following independent FY checks were made directly against the reported
-gross-premium observations. Market size is t.DKK; CR values are proportions.
-
-| Year | Included entities | Market size | Shares | CR1 | CR3 | CR5 | HHI |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2016 | 68 | 67,424,639 | 100.0% | 0.264043 | 0.617540 | 0.734881 | 1,504.191 |
-| 2020 | 53 | 69,916,162 | 100.0% | 0.332851 | 0.672143 | 0.798312 | 1,837.018 |
-| 2024 | 46 | 83,649,765 | 100.0% | 0.464567 | 0.721005 | 0.814028 | 2,561.684 |
-
-2025 has 45 included entities and a market size of 75,819,299 t.DKK. It remains
-explicitly marked as the known insurance coverage/data break required by D017;
-it must not be treated as a like-for-like trend point until coverage is
-reconciled.
+The source must have no duplicate year/quarter/entity-name rows, a single F&P
+market total within each period, and reported shares reconciling approximately
+to 100% per period.

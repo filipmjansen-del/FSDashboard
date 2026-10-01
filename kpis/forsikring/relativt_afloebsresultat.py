@@ -5,6 +5,8 @@ KPI_META = {
     "name": "Relativt afløbsresultat",
     "industry": "Forsikring",
     "source_type": "reported",
+    "source_code": "SA2807",
+    "official_definition": "Afløbsresultatet i forhold til de primohensættelser, det vedrører.",
     "slug": "relativt_afloebsresultat",
     "display_format": "percentage",
     "decimals": 1,
@@ -14,7 +16,7 @@ KPI_META = {
     "description": "Resultatet af afvikling af tidligere års skader i forhold til de tilhørende primohensættelser.",
     "interpretation": "Viser hvor meget de tidligere skadehensættelser har afveget fra det senere afløb.",
     "direction_explanation": "Fortegnet skal fortolkes i sammenhæng med reservemetoden og den konkrete skadebestand.",
-    "caveat": "Påvirkes af valuta, diskontering og indirekte forsikring. Værdien er rapporteret i kildedatasættet.",
+    "caveat": "Værdien er rapporteret i Finanstilsynets kildedatasæt og genberegnes ikke af Databank.",
 }
 
 

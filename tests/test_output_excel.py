@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 
 from analytics.bank_analyst import bank_entities_for_year, build_bank_analyst_view
 from analytics.insurance_market_structure import build_market_structure_table, summarize_market_structure
-from data.canonical import to_canonical_observations
+from data.access import load_insurance_market_structure_fp
 from data_loader import load_raw_data
 from output.excel import (
     bank_analyst_filename,
@@ -22,37 +22,18 @@ class OutputExcelTests(unittest.TestCase):
     def setUpClass(cls):
         cls.raw = load_raw_data(Path(__file__).parents[1] / "financial_services_long.xlsx")
 
-    def test_insurance_export_preserves_engine_tables_and_missing_values(self):
-        source_table = build_market_structure_table(to_canonical_observations(self.raw))
+    def test_insurance_export_preserves_fp_engine_tables(self):
+        source_table = build_market_structure_table(load_insurance_market_structure_fp())
         summary = summarize_market_structure(source_table)
-        selected_year = int(summary["year"].iloc[0])
-        source_table = source_table.loc[source_table["year"].eq(selected_year)].copy()
-        source_table = pd.concat(
-            [
-                source_table,
-                pd.DataFrame(
-                    [{
-                        "year": selected_year,
-                        "entity_id": "forsikring:missing",
-                        "display_name": "Manglende observation",
-                        "market_value": pd.NA,
-                        "market_share": pd.NA,
-                        "rank": pd.NA,
-                        "included_flag": False,
-                        "exclusion_reason": "missing_gross_premiums",
-                    }]
-                ),
-            ],
-            ignore_index=True,
-        )
-        workbook = load_workbook(BytesIO(insurance_market_structure_workbook(summary.head(1), source_table)), data_only=True)
+        source_table = source_table.loc[source_table["quarter"].eq(2)].copy()
+        workbook = load_workbook(BytesIO(insurance_market_structure_workbook(summary.loc[summary["quarter"].eq(2)], source_table)), data_only=True)
 
         self.assertEqual(workbook.sheetnames, ["Overblik", "Markedsandele", "Metode"])
         summary_sheet = workbook["Overblik"]
         self.assertEqual([cell.value for cell in summary_sheet[6]], [
-            "År", "Enheder med positive bruttopræmier", "Markedsstørrelse (t.DKK)", "CR1", "CR3", "CR5", "HHI", "Kendt databrud",
+            "År", "Kvartal", "Markedsaktører", "Bruttopræmieindtægter (t.DKK)", "CR1", "CR3", "CR5", "HHI",
         ])
-        self.assertEqual(summary_sheet["C7"].value, summary.iloc[0]["market_size"])
+        self.assertEqual(summary_sheet["D7"].value, summary.loc[summary["quarter"].eq(2)].iloc[0]["market_size"])
         self.assertEqual(summary_sheet["A6"].font.name, "Arial")
         self.assertEqual(summary_sheet["A6"].fill.fgColor.rgb[-6:], "412B48")
         self.assertEqual(summary_sheet["H1"].fill.fgColor.rgb[-6:], "412B48")
@@ -61,10 +42,8 @@ class OutputExcelTests(unittest.TestCase):
         self.assertEqual(summary_sheet["A7"].number_format, "0")
         shares_sheet = workbook["Markedsandele"]
         self.assertEqual([cell.value for cell in shares_sheet[4]], [
-            "År", "Selskab", "Enheds-ID", "Markedsværdi (t.DKK)", "Markedsandel", "Rang", "Indgår", "Eksklusionsårsag",
+            "År", "Kvartal", "Selskab", "Bruttopræmieindtægter (t.DKK)", "Rapporteret markedsandel", "Rang",
         ])
-        row_number = source_table.index[source_table["market_value"].isna()][0] + 5
-        self.assertIsNone(shares_sheet.cell(row=row_number, column=4).value)
         self.assertEqual(shares_sheet["D5"].number_format, '#,##0;[Red](#,##0);-')
 
     def test_bank_export_preserves_exact_analyst_comparison_and_history(self):
@@ -117,7 +96,7 @@ class OutputExcelTests(unittest.TestCase):
         self.assertGreater(workbook["Teknisk"].column_dimensions["G"].width, 100)
 
     def test_filenames_are_deterministic_and_safe(self):
-        self.assertEqual(insurance_market_structure_filename(2016, 2024), "Databank_Insurance_Market_Structure_2016-2024.xlsx")
+        self.assertEqual(insurance_market_structure_filename(2), "Databank_Insurance_Market_Structure_Q2.xlsx")
         self.assertEqual(bank_analyst_filename('A/B: Bank', 2025), "Databank_Bank_Analyst_A_B__Bank_2025.xlsx")
 
 

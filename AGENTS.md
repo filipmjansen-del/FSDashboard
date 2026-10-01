@@ -7,7 +7,7 @@ Before starting work:
 
 Permanent rules:
 
-- Work from `codex/databank-v2`; keep `main` stable.
+- Start material development from the latest `main` on a focused task branch; keep `main` stable.
 - Do not re-plan locked decisions unless new evidence materially changes them.
 - Do not scan the full repository unless necessary. Inspect only task-relevant files.
 - Make the smallest robust change.

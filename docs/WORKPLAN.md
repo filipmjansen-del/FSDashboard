@@ -255,7 +255,7 @@ Initial implementation:
 Insurance
 
 Metrics:
-- number of legal entities
+- number of market actors
 - market size
 - market shares
 - CR1
@@ -264,21 +264,20 @@ Metrics:
 - HHI
 
 Method:
-- legal entity based on `regnr`
-- same population for entity count, market shares, CR5 and HHI
-- gross premiums as initial insurance market-size metric
-- HHI scale 0-10,000
-- known data breaks explicitly flagged
+- use F&P's reported *Skadeforsikring i alt* market-actor population and market shares
+- retain this as a separate source; do not map market actors to legal-entity `regnr` identities
+- see D022 for the locked source and methodology decision
 
 Required source-of-truth table:
 - year
-- entity_id
-- display_name
+- quarter
+- period_end_month
+- entity_name
 - market_value
+- market_total
 - market_share
+- source_market_share_pct
 - rank
-- included_flag
-- exclusion_reason
 
 Definition of Done:
 At least three historical years independently validated.
@@ -360,7 +359,25 @@ A Databank analysis can be reused in consulting work without reconstructing the 
 
 ---
 
-### Phase 10 - Deployment and security
+### Phase 10 - Analytical robustness and source governance
+Status: IN PROGRESS
+
+Completed work:
+- Insurance KPI source QA
+- initial Analytical Contract decision
+- regression validation for Insurance KPIs
+
+Remaining tasks:
+- Data Source Register
+- broader implementation of the Analytical Contract
+
+Definition of Done:
+Important analytical sources, definitions, provenance and comparability are
+explicitly documented and regression validated.
+
+---
+
+### Phase 11 - Deployment and security
 Status: NOT STARTED
 
 Tasks:
@@ -374,7 +391,7 @@ Private repository and stable Streamlit deployment.
 
 ---
 
-### Phase 11 - Documentation and handover
+### Phase 12 - Documentation and handover
 Status: NOT STARTED
 
 Required documentation:

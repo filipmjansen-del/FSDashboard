@@ -3,60 +3,52 @@ import unittest
 import pandas as pd
 
 from analytics.insurance_market_structure import (
-    GROSS_PREMIUM_ATTRIBUTE,
-    build_market_structure_table,
-    summarize_market_structure,
+    build_market_structure_table, latest_available_period, same_quarter_history, summarize_market_structure,
 )
-from data.canonical import to_canonical_observations
+from data.access import load_insurance_market_structure_fp
 
 
 class InsuranceMarketStructureTests(unittest.TestCase):
-    def setUp(self):
-        self.raw = pd.DataFrame(
-            {
-                "Branche": ["Forsikring"] * 5 + ["Bank"],
-                "ÅR": [2020] * 6,
-                "Måned": [12] * 6,
-                "regnr": [1, 2, 3, 4, 5, 99],
-                "navn": ["A", "B", "C", "Missing", "Negative", "Bank"],
-                "Attribute": [GROSS_PREMIUM_ATTRIBUTE] * 5 + ["Bal_BO_ATot"],
-                "Value": [50.0, 30.0, 20.0, None, -5.0, 100.0],
-            }
-        )
+    @classmethod
+    def setUpClass(cls):
+        cls.table = build_market_structure_table(load_insurance_market_structure_fp())
+        cls.summary = summarize_market_structure(cls.table)
 
-    def test_source_table_keeps_missing_and_non_positive_observations_explicit(self):
-        table = build_market_structure_table(to_canonical_observations(self.raw))
-        self.assertEqual(table.columns.tolist(), [
-            "year", "entity_id", "display_name", "market_value", "market_share",
-            "rank", "included_flag", "exclusion_reason",
-        ])
-        self.assertEqual(table["included_flag"].sum(), 3)
-        self.assertEqual(table.loc[table["entity_id"] == "forsikring:4", "exclusion_reason"].item(), "missing_gross_premiums")
-        self.assertEqual(table.loc[table["entity_id"] == "forsikring:5", "exclusion_reason"].item(), "non_positive_gross_premiums")
+    def test_2025_q2_regression_values(self):
+        tryg = self.table.loc[(self.table.year == 2025) & (self.table.quarter == 2) & (self.table.entity_name == "Tryg"), "market_share"].item()
+        result = self.summary.loc[(self.summary.year == 2025) & (self.summary.quarter == 2)].iloc[0]
+        self.assertAlmostEqual(tryg, 0.2337, places=3)
+        self.assertAlmostEqual(result.cr5, 0.6684, places=3)
+        self.assertAlmostEqual(result.hhi, 1199.3, places=0)
+        self.assertEqual(result.entity_count, 35)
+        self.assertEqual(result.market_size, 39_782_867)
 
-    def test_market_shares_and_concentration_use_the_same_population(self):
-        table = build_market_structure_table(to_canonical_observations(self.raw))
-        summary = summarize_market_structure(table).iloc[0]
-        shares = table.loc[table["included_flag"], "market_share"]
-        self.assertAlmostEqual(shares.sum(), 1.0)
-        self.assertEqual(table.loc[table["included_flag"], "rank"].tolist(), [1, 2, 3])
-        self.assertEqual(summary["entity_count"], 3)
-        self.assertAlmostEqual(summary["market_size"], 100.0)
-        self.assertAlmostEqual(summary["cr1"], 0.5)
-        self.assertAlmostEqual(summary["cr3"], 1.0)
-        self.assertAlmostEqual(summary["cr5"], 1.0)
-        self.assertAlmostEqual(summary["hhi"], 3800.0)
+    def test_2024_q4_regression_values(self):
+        tryg = self.table.loc[(self.table.year == 2024) & (self.table.quarter == 4) & (self.table.entity_name == "Tryg"), "market_share"].item()
+        result = self.summary.loc[(self.summary.year == 2024) & (self.summary.quarter == 4)].iloc[0]
+        self.assertAlmostEqual(tryg, 0.2399, places=3)
+        self.assertAlmostEqual(result.cr5, 0.6889, places=3)
+        self.assertAlmostEqual(result.hhi, 1255.4, places=0)
+        self.assertEqual(result.entity_count, 39)
+        self.assertEqual(result.market_size, 75_895_673)
 
-    def test_only_fy_observations_are_used_when_multiple_periods_are_present(self):
-        canonical = to_canonical_observations(self.raw)
-        interim = canonical.loc[canonical["entity_id"] == "forsikring:1"].copy()
-        interim["period_type"] = "H1"
-        interim["period_end_month"] = 6
-        interim["value"] = 999.0
+    def test_reported_share_is_not_recalculated_from_gross_premiums(self):
+        source = load_insurance_market_structure_fp()
+        source.loc[(source.year == 2025) & (source.quarter == 2) & (source.entity_name == "Tryg"), "market_value_t_dkk"] = 1.0
+        table = build_market_structure_table(source)
+        share = table.loc[(table.year == 2025) & (table.quarter == 2) & (table.entity_name == "Tryg"), "market_share"].item()
+        self.assertAlmostEqual(share, 0.2337, places=3)
 
-        table = build_market_structure_table(pd.concat([canonical, interim], ignore_index=True))
+    def test_latest_period_and_same_quarter_history(self):
+        self.assertEqual(latest_available_period(self.summary), (2025, 2))
+        history = same_quarter_history(self.summary, 2)
+        self.assertTrue(history.quarter.eq(2).all())
+        self.assertEqual(history.year.max(), 2025)
 
-        self.assertAlmostEqual(table.loc[table["included_flag"], "market_value"].sum(), 100.0)
+    def test_duplicate_period_actor_rows_fail_explicitly(self):
+        duplicate = pd.concat([load_insurance_market_structure_fp(), load_insurance_market_structure_fp().head(1)], ignore_index=True)
+        with self.assertRaisesRegex(ValueError, "Duplicate F&P"):
+            build_market_structure_table(duplicate)
 
 
 if __name__ == "__main__":

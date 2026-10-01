@@ -120,25 +120,25 @@ def _apply_metric_number_formats(worksheet, frame: pd.DataFrame, *, header_row: 
 
 def insurance_market_structure_workbook(summary: pd.DataFrame, source_table: pd.DataFrame) -> bytes:
     """Export the supplied market-structure engine results without recalculation."""
-    summary_table = summary.loc[:, ["year", "entity_count", "market_size", "cr1", "cr3", "cr5", "hhi", "known_data_break"]].rename(
+    summary_table = summary.loc[:, ["year", "quarter", "entity_count", "market_size", "cr1", "cr3", "cr5", "hhi"]].rename(
         columns={
-            "year": "År", "entity_count": "Enheder med positive bruttopræmier", "market_size": "Markedsstørrelse (t.DKK)",
-            "cr1": "CR1", "cr3": "CR3", "cr5": "CR5", "hhi": "HHI", "known_data_break": "Kendt databrud",
+            "year": "År", "quarter": "Kvartal", "entity_count": "Markedsaktører", "market_size": "Bruttopræmieindtægter (t.DKK)",
+            "cr1": "CR1", "cr3": "CR3", "cr5": "CR5", "hhi": "HHI",
         }
     )
-    shares_table = source_table.loc[:, ["year", "display_name", "entity_id", "market_value", "market_share", "rank", "included_flag", "exclusion_reason"]].rename(
+    shares_table = source_table.loc[:, ["year", "quarter", "entity_name", "market_value", "market_share", "rank"]].rename(
         columns={
-            "year": "År", "display_name": "Selskab", "entity_id": "Enheds-ID", "market_value": "Markedsværdi (t.DKK)",
-            "market_share": "Markedsandel", "rank": "Rang", "included_flag": "Indgår", "exclusion_reason": "Eksklusionsårsag",
+            "year": "År", "quarter": "Kvartal", "entity_name": "Selskab", "market_value": "Bruttopræmieindtægter (t.DKK)",
+            "market_share": "Rapporteret markedsandel", "rank": "Rang",
         }
     )
-    period = f"Valgt periode: {int(summary['year'].min())}-{int(summary['year'].max())}" if not summary.empty else "Valgt periode"
+    period = "Samme kvartal på tværs af år" if not summary.empty else "Valgt periode"
     methodology = pd.DataFrame(
         [
-            ("Markedsgrundlag", "Res_BP_BeY / Bruttopræmier"), ("Enhed", "t.DKK"),
-            ("Population", "Kun juridiske enheder med observerede positive bruttopræmier."),
-            ("Koncentration", "CR1, CR3 og CR5 er kumulerede markedsandele; HHI er på skalaen 0-10.000."),
-            ("Databrud", "2025 er et kendt dækningsbrud og bør fortolkes med forsigtighed."),
+            ("Kilde", "F&P · Skadeforsikring i alt"), ("Andelsgrundlag", "Bruttopræmieindtægter"),
+            ("Markedsandele", "Rapporteret af F&P og ikke genberegnet af Databank."),
+            ("Koncentration", "CR1, CR3, CR5 og HHI beregnes af Databank; HHI er på skalaen 0-10.000."),
+            ("Kvartaler", "Værdier er kumulative YTD; historik sammenligner samme kvartal på tværs af år."),
             ("Metode", "Se docs/MARKET_STRUCTURE_METHOD.md."),
         ], columns=["Emne", "Beskrivelse"],
     )
@@ -146,10 +146,10 @@ def insurance_market_structure_workbook(summary: pd.DataFrame, source_table: pd.
     def build(workbook):
         overview = _new_sheet(workbook, "Overblik", "Insurance Market Structure")
         _write_key_values(overview, [("Periode", period.removeprefix("Valgt periode: "))])
-        _write_table(overview, summary_table, start_row=6, number_formats={"År": YEAR_FORMAT, "Enheder med positive bruttopræmier": NUMBER_FORMAT, "Markedsstørrelse (t.DKK)": NUMBER_FORMAT, "CR1": PERCENTAGE_FORMAT, "CR3": PERCENTAGE_FORMAT, "CR5": PERCENTAGE_FORMAT, "HHI": NUMBER_FORMAT}, widths={"Enheder med positive bruttopræmier": 34, "Markedsstørrelse (t.DKK)": 25, "Kendt databrud": 18})
+        _write_table(overview, summary_table, start_row=6, number_formats={"År": YEAR_FORMAT, "Kvartal": NUMBER_FORMAT, "Markedsaktører": NUMBER_FORMAT, "Bruttopræmieindtægter (t.DKK)": NUMBER_FORMAT, "CR1": PERCENTAGE_FORMAT, "CR3": PERCENTAGE_FORMAT, "CR5": PERCENTAGE_FORMAT, "HHI": NUMBER_FORMAT}, widths={"Markedsaktører": 20, "Bruttopræmieindtægter (t.DKK)": 30})
         _apply_title_band(overview, len(summary_table.columns))
         shares = _new_sheet(workbook, "Markedsandele", period)
-        _write_table(shares, shares_table, start_row=4, number_formats={"År": NUMBER_FORMAT, "Markedsværdi (t.DKK)": NUMBER_FORMAT, "Markedsandel": PERCENTAGE_FORMAT, "Rang": NUMBER_FORMAT}, widths={"Selskab": 34, "Enheds-ID": 20, "Markedsværdi (t.DKK)": 24, "Eksklusionsårsag": 30})
+        _write_table(shares, shares_table, start_row=4, number_formats={"År": YEAR_FORMAT, "Kvartal": NUMBER_FORMAT, "Bruttopræmieindtægter (t.DKK)": NUMBER_FORMAT, "Rapporteret markedsandel": PERCENTAGE_FORMAT, "Rang": NUMBER_FORMAT}, widths={"Selskab": 34, "Bruttopræmieindtægter (t.DKK)": 30, "Rapporteret markedsandel": 24})
         _apply_title_band(shares, len(shares_table.columns))
         method = _new_sheet(workbook, "Metode", "Kilde og afgrænsning")
         _write_table(method, methodology, start_row=4, widths={"Emne": 22, "Beskrivelse": 120})
@@ -221,8 +221,8 @@ def bank_analyst_workbook(comparison: pd.DataFrame, history: pd.DataFrame, overv
     return _workbook_bytes(build)
 
 
-def insurance_market_structure_filename(start_year: int, end_year: int) -> str:
-    return f"Databank_Insurance_Market_Structure_{start_year}-{end_year}.xlsx"
+def insurance_market_structure_filename(quarter: int) -> str:
+    return f"Databank_Insurance_Market_Structure_Q{quarter}.xlsx"
 
 
 def bank_analyst_filename(display_name: str, fiscal_year: int) -> str:
