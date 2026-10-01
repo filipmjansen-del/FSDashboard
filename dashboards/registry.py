@@ -10,6 +10,10 @@ INDUSTRY_PACKAGES = {
     "Tværgående pensionskasser": "tvaergaaende_pensionskasser",
 }
 
+CROSS_CUTTING_DASHBOARD_PACKAGES = {
+    "Client Intelligence": "client_intelligence",
+}
+
 
 DASHBOARD_REGISTRY = {}
 
@@ -18,47 +22,60 @@ INDUSTRY_DASHBOARD_CATALOG = {
     for industry in INDUSTRY_PACKAGES
 }
 
+CROSS_CUTTING_DASHBOARD_CATALOG = {
+    section: []
+    for section in CROSS_CUTTING_DASHBOARD_PACKAGES
+}
+
 
 def _discover_dashboards():
-    for industry, package_name in INDUSTRY_PACKAGES.items():
-        try:
-            package = importlib.import_module(
-                f"dashboards.{package_name}"
-            )
-        except ModuleNotFoundError:
-            continue
-
-        for module_info in pkgutil.iter_modules(
-            package.__path__
-        ):
-            if module_info.name.startswith("_"):
+    catalogs = (
+        (INDUSTRY_PACKAGES, INDUSTRY_DASHBOARD_CATALOG),
+        (CROSS_CUTTING_DASHBOARD_PACKAGES, CROSS_CUTTING_DASHBOARD_CATALOG),
+    )
+    for packages, catalog in catalogs:
+        for section, package_name in packages.items():
+            try:
+                package = importlib.import_module(
+                    f"dashboards.{package_name}"
+                )
+            except ModuleNotFoundError:
                 continue
 
-            module = importlib.import_module(
-                f"dashboards.{package_name}.{module_info.name}"
-            )
+            for module_info in pkgutil.iter_modules(
+                package.__path__
+            ):
+                if module_info.name.startswith("_"):
+                    continue
 
-            if not hasattr(module, "DASHBOARD_META"):
-                continue
+                module = importlib.import_module(
+                    f"dashboards.{package_name}.{module_info.name}"
+                )
 
-            if not hasattr(module, "render"):
-                continue
+                if not hasattr(module, "DASHBOARD_META"):
+                    continue
 
-            meta = dict(module.DASHBOARD_META)
+                if not hasattr(module, "render"):
+                    continue
 
-            dashboard_name = meta["name"]
+                meta = dict(module.DASHBOARD_META)
 
-            meta["render"] = module.render
+                dashboard_name = meta["name"]
 
-            DASHBOARD_REGISTRY[dashboard_name] = meta
+                meta["render"] = module.render
 
-            INDUSTRY_DASHBOARD_CATALOG[industry].append(
-                dashboard_name
-            )
+                DASHBOARD_REGISTRY[dashboard_name] = meta
 
-    for industry in INDUSTRY_DASHBOARD_CATALOG:
-        INDUSTRY_DASHBOARD_CATALOG[industry] = sorted(
-            INDUSTRY_DASHBOARD_CATALOG[industry]
+                catalog[section].append(
+                    dashboard_name
+                )
+
+    for section in INDUSTRY_DASHBOARD_CATALOG:
+        INDUSTRY_DASHBOARD_CATALOG[section] = sorted(INDUSTRY_DASHBOARD_CATALOG[section])
+    for section in CROSS_CUTTING_DASHBOARD_CATALOG:
+        CROSS_CUTTING_DASHBOARD_CATALOG[section] = sorted(
+            CROSS_CUTTING_DASHBOARD_CATALOG[section],
+            key=lambda name: DASHBOARD_REGISTRY[name].get("order", 999),
         )
 
 
